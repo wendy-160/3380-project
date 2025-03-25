@@ -27,6 +27,20 @@ app.use('/api/prescriptions', prescriptionRoutes);
 app.use("/api/appointments", appointmentRoute);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+let currentPort = PORT;
+
+const startServer = (port) => {
+  const server = app.listen(port, () => {
+    console.log(`✅ Server running on port ${port}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      currentPort = port + 1;
+      console.log(`⚠️ Port ${port} is already in use. Trying ${currentPort}...`);
+      startServer(currentPort);
+    } else {
+      console.error('❌ Server error:', err);
+    }
+  });
+};
+
+startServer(currentPort);
