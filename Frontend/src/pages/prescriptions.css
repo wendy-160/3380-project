@@ -1,0 +1,17 @@
+.prescriptions {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.prescription-form input {
+    margin: 5px;
+    padding: 10px;
+}
+
+button {
+    padding: 10px;
+    background-color: green;
+    color: white;
+    border: none;
+    cursor: pointer;
+}

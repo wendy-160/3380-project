@@ -1,0 +1,17 @@
+.medical-tests {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.order-form input {
+    margin: 5px;
+    padding: 10px;
+}
+
+button {
+    padding: 10px;
+    background-color: blue;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
