@@ -29,7 +29,7 @@ npm run dev #start client
 ```
 The app should now be running
 
-** users **
+**users**
 - Admin:
     -email: admin@example.com
     -password: Admin123
