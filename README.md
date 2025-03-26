@@ -28,6 +28,17 @@ npm install
 npm run dev #start client
 ```
 The app should now be running
+
+** users **
+- Admin:
+    -email: admin@example.com
+    -password: Admin123
+- Doctor:
+    -email: doctor@example.com
+    -password: Doctor123
+- Patient:
+    -email: john.doe@example.com
+    -password: John123
 ## Project Requirements
 
 ### 5 Must Haves
