@@ -1,5 +1,5 @@
 # MedicalClinicDB
-
+original repo: https://github.com/wendy-160/MedicalClinicDB
 ## Project Description
 **MiniWorld Description**: The database is designed to support a healthcare provider company with multiple offices across different states. The company employs general practice doctors and specialists who provide healthcare services to patients. The database will manage information on patients, doctors, appointments, medical records, medical offices, prescriptions, referral approvals, medical tests, and billing. Our program will ensure efficient coordination among various locations.
 
