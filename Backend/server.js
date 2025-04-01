@@ -31,14 +31,14 @@ let currentPort = PORT;
 
 const startServer = (port) => {
   const server = app.listen(port, () => {
-    console.log(`✅ Server running on port ${port}`);
+    console.log(`Server running on port ${port}`);
   }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
       currentPort = port + 1;
-      console.log(`⚠️ Port ${port} is already in use. Trying ${currentPort}...`);
+      console.log(`Port ${port} is already in use. Trying ${currentPort}...`);
       startServer(currentPort);
     } else {
-      console.error('❌ Server error:', err);
+      console.error('Server error:', err);
     }
   });
 };

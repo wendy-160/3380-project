@@ -20,10 +20,9 @@ const Navbar = () => {
       {user ? (
         <>
           <Link to="/dashboard">Dashboard</Link>
-          {user.role === "Admin" && <Link to="/reports">Reports</Link>}
+          {user.role == "Admin" && <Link to="/reports">Reports</Link>}
           {user.role == "Doctor" && <Link to="/prescriptions">Prescriptions</Link>} 
           {user.role =="Doctor" && <Link to="/tests">Medical Tests</Link>}
-          {user.role =="Patient" && <Link to="/appointments">Appointments</Link>}
  
           <Link to="/billing">Billing</Link>
           <button onClick={() => { logout(); window.location.href = "/"; }}>Logout</button>

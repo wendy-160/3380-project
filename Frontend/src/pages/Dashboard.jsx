@@ -1,10 +1,29 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';  
+import PatientDashboard from './PatientDashboard';
+import AdminDashboard from './AdminDashboard';
+import DoctorDashboard from './DoctorDashboard';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user } = useAuth();  
+  const { user } = useAuth(); 
+  if (!user) {
+    return <p>You need to log in to see your dashboard.</p>;
+  }
+  
+  switch(user.role) {
+    case 'Admin':
+      return <AdminDashboard />;
+    case 'Doctor':
+      return <DoctorDashboard />;
+    case 'Patient':
+      return <PatientDashboard />;
+    default:
+      return <p>Invalid role.</p>;
+  }
+};
 
+/*
   return (
     <div>
       <h2>Welcome to Your Dashboard</h2>
@@ -52,5 +71,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
+*/
 export default Dashboard;
