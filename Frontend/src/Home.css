@@ -1,0 +1,27 @@
+.home-container {
+    text-align: center;
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .home-links {
+    list-style: none;
+    padding: 0;
+    margin-top: 2rem;
+  }
+  
+  .home-links li {
+    margin: 1rem 0;
+    font-size: 1.1rem;
+  }
+  
+  .home-links a {
+    text-decoration: none;
+    color: #0077cc;
+  }
+  
+  .home-links a:hover {
+    text-decoration: underline;
+  }
+  

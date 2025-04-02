@@ -1,69 +1,83 @@
-import express from 'express';
 import bcrypt from 'bcryptjs';
 import db from '../db.js';
+import { URL } from 'url';
 
-const router = express.Router();
+export async function handleAuthRoutes(req, res) {
+  const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+  const pathname = parsedUrl.pathname;
+  const method = req.method;
 
-router.post('/register', async (req, res) => {
-  const { username, email, password, role } = req.body;
+  if (method === 'POST' && pathname === '/api/auth/register') {
+    const { username, email, password, role } = req.body;
 
-  try {
-    const [existing] = await db.query('SELECT * FROM login WHERE email = ?', [email]);
-    if (existing.length > 0) {
-      return res.status(409).json({ message: '⚠️ Email already registered' });
+    try {
+      const [existing] = await db.query('SELECT * FROM login WHERE email = ?', [email]);
+      if (existing.length > 0) {
+        return sendJson(res, 409, { message: '⚠️ Email already registered' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const sql = 'INSERT INTO login (username, email, password, role) VALUES (?, ?, ?, ?)';
+      await db.query(sql, [username, email, hashedPassword, role || 'patient']);
+
+      return sendJson(res, 201, { message: '✅ User registered successfully' });
+    } catch (err) {
+      console.error('❌ Registration error:', err.message);
+      return sendJson(res, 500, { message: 'Registration failed' });
+    }
+  }
+
+  if (method === 'POST' && pathname === '/api/auth/login') {
+    const { email, password } = req.body;
+
+    try {
+      const [rows] = await db.query('SELECT * FROM login WHERE email = ?', [email]);
+
+      if (rows.length === 0) {
+        return sendJson(res, 401, { message: 'Invalid email or password' });
+      }
+
+      const user = rows[0];
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        return sendJson(res, 401, { message: 'Invalid email or password' });
+      }
+
+      return sendJson(res, 200, {
+        message: '✅ Login successful',
+        role: user.role,
+      });
+    } catch (err) {
+      console.error('❌ Login error:', err.message);
+      return sendJson(res, 500, { message: 'Server error during login' });
+    }
+  }
+
+  if (method === 'GET' && pathname === '/api/auth/me') {
+    const email = req.headers['x-user-email'];
+
+    if (!email) {
+      return sendJson(res, 401, { message: 'Unauthorized' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+      const [rows] = await db.query('SELECT role FROM login WHERE email = ?', [email]);
+      if (rows.length === 0) {
+        return sendJson(res, 404, { message: 'User not found' });
+      }
 
-    const sql = 'INSERT INTO login (username, email, password, role) VALUES (?, ?, ?, ?)';
-    await db.query(sql, [username, email, hashedPassword, role || 'patient']);
-
-    res.status(201).json({ message: '✅ User registered successfully' });
-  } catch (err) {
-    console.error('❌ Registration error:', err.message);
-    res.status(500).json({ message: 'Registration failed' });
-  }
-});
-
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const [rows] = await db.query('SELECT * FROM login WHERE email = ?', [email]);
-
-    if (rows.length === 0) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return sendJson(res, 200, { role: rows[0].role });
+    } catch (err) {
+      console.error('❌ Me endpoint error:', err.message);
+      return sendJson(res, 500, { message: 'Server error' });
     }
-
-    const user = rows[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    res.status(200).json({
-      message: '✅ Login successful',
-      role: user.role,
-    });
-  } catch (err) {
-    console.error('❌ Login error:', err.message);
-    res.status(500).json({ message: 'Server error during login' });
   }
-});
 
-router.get('/me', async (req, res) => {
-  const token = req.cookies.token; // If you're using cookies
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
+  return sendJson(res, 404, { message: 'Auth route not found' });
+}
 
-  try {
-    const [rows] = await db.query("SELECT role FROM login WHERE email = ?", [req.email]);
-    if (rows.length === 0) return res.status(404).json({ message: "User not found" });
-
-    res.json({ role: rows[0].role });
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-export default router;
+function sendJson(res, statusCode, data) {
+  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(data));
+}
