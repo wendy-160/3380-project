@@ -11,7 +11,7 @@ export async function handleTestRoutes(req, res) {
       const [rows] = await db.query('SELECT * FROM medicaltest');
       return sendJson(res, 200, rows);
     } catch (err) {
-      console.error('❌ Error fetching tests:', err.message);
+      console.error('Error fetching tests:', err.message);
       return sendJson(res, 500, { message: 'Error fetching tests' });
     }
   }
@@ -30,9 +30,9 @@ export async function handleTestRoutes(req, res) {
         ) VALUES (?, ?, ?, ?, ?, NOW())
       `, ['General Test', test_type, patient_id, doctor_id, office_id]);
 
-      return sendJson(res, 201, { message: '✅ Medical test ordered' });
+      return sendJson(res, 201, { message: 'Medical test ordered' });
     } catch (err) {
-      console.error('❌ Error ordering test:', err.message);
+      console.error('Error ordering test:', err.message);
       return sendJson(res, 500, { message: 'Error ordering test' });
     }
   }

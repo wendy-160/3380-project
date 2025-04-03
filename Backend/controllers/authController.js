@@ -15,7 +15,7 @@ export const register = async (req, res) => {
 
       const [existing] = await db.query("SELECT * FROM login WHERE email = ?", [email]);
       if (existing.length > 0) {
-        return res.status(409).json({ message: "⚠️ Email already registered" });
+        return res.status(409).json({ message: "Email already registered" });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -23,7 +23,7 @@ export const register = async (req, res) => {
       const sql = "INSERT INTO login (username, name, email, password, role) VALUES (?, ?, ?, ?, ?)";
   
       await db.query(sql, [username, name, email, hashedPassword, role || "patient"]);
-      res.status(201).json({ message: "✅ User registered successfully" });
+      res.status(201).json({ message: "User registered successfully" });
   
     } catch (err) {
       console.error("❌ Registration error:", err); 
@@ -38,14 +38,14 @@ export const login = async (req, res) => {
 
         const [results] = await db.query("SELECT * FROM login WHERE email = ?", [email]);
         if (results.length === 0) {
-            return res.status(401).json({ message: "❌ User not found" });
+            return res.status(401).json({ message: "User not found" });
         }
 
         const user = results[0];
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
-            return res.status(401).json({ message: "❌ Invalid credentials" });
+            return res.status(401).json({ message: "Invalid credentials" });
         }
 
         const token = jwt.sign(
@@ -69,7 +69,7 @@ export const login = async (req, res) => {
 
     } catch (err) {
         console.error("Login error:", err);
-        res.status(500).json({ message: "❌ Server error during login" });
+        res.status(500).json({ message: "Server error during login" });
     }
 };
 

@@ -10,10 +10,12 @@ const MedicalTests = () => {
     useEffect(() => {
         fetch("http://localhost:5000/api/medicaltests")
             .then((res) => res.json())
-            .then((data) => setTests(data))
+            .then((data) => {
+                console.log(data);  // Check the structure of the data
+                setTests(data);
+            })
             .catch((error) => console.error("Error fetching tests:", error));
     }, []);
-
     // Function to add a new test
     const orderTest = () => {
         fetch("http://localhost:5000/api/medicaltests", {

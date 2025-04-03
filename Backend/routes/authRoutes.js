@@ -13,7 +13,7 @@ export async function handleAuthRoutes(req, res) {
     try {
       const [existing] = await db.query('SELECT * FROM login WHERE email = ?', [email]);
       if (existing.length > 0) {
-        return sendJson(res, 409, { message: '⚠️ Email already registered' });
+        return sendJson(res, 409, { message: 'Email already registered' });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -22,7 +22,7 @@ export async function handleAuthRoutes(req, res) {
 
       return sendJson(res, 201, { message: '✅ User registered successfully' });
     } catch (err) {
-      console.error('❌ Registration error:', err.message);
+      console.error('Registration error:', err.message);
       return sendJson(res, 500, { message: 'Registration failed' });
     }
   }
@@ -49,7 +49,7 @@ export async function handleAuthRoutes(req, res) {
         role: user.role,
       });
     } catch (err) {
-      console.error('❌ Login error:', err.message);
+      console.error('Login error:', err.message);
       return sendJson(res, 500, { message: 'Server error during login' });
     }
   }
@@ -69,7 +69,7 @@ export async function handleAuthRoutes(req, res) {
 
       return sendJson(res, 200, { role: rows[0].role });
     } catch (err) {
-      console.error('❌ Me endpoint error:', err.message);
+      console.error('Me endpoint error:', err.message);
       return sendJson(res, 500, { message: 'Server error' });
     }
   }

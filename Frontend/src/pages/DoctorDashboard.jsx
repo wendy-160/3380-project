@@ -251,15 +251,6 @@ const DoctorDashboard = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="urgency">Urgency Level</label>
-                  <select id="urgency" className="form-control">
-                    <option value="Normal">Normal</option>
-                    <option value="Urgent">Urgent</option>
-                    <option value="Emergency">Emergency</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
                   <label htmlFor="notes">Additional Notes</label>
                   <textarea 
                     id="notes" 

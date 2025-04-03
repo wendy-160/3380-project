@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext'; 
-import Card from '../../components/Card';
 import ModalForm from '../../components/ModalForm';
 import axios from 'axios';
 import { FiPlus} from 'react-icons/fi';
