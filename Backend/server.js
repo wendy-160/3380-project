@@ -9,6 +9,8 @@ import { handleBillingRoutes } from './routes/billingRoutes.js';
 import { handleReportRoutes } from './routes/reportRoutes.js';
 import { handlePrescriptionRoutes } from './routes/prescriptionRoutes.js';
 import { handleAppointmentRoutes } from './routes/appointmentRoute.js';
+import { handleTestRoutes } from './routes/testRoutes.js';
+
 
 dotenv.config();
 
@@ -61,6 +63,8 @@ function routeRequest(req, res, pathname, method) {
     return handlePrescriptionRoutes(req, res);
   } else if (pathname.startsWith('/api/appointments')) {
     return handleAppointmentRoutes(req, res);
+  } else if (pathname.startsWith('/api/tests')) {
+    return handleTestRoutes(req, res);
   } else {
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ message: 'Route not found' }));
