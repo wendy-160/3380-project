@@ -1,255 +1,426 @@
-.dashboard-container {
+.patient-dashboard {
+    padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
-    font: sans-serif;
-    color: #1e293b;
-}
+    min-height: 100vh;
+    background-color: #f8f9fa;
+  }
   
-.loading-container {
+  .dashboard-title {
+    font-size: 2rem;
+    color: #00146b;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #000550;
+  }
+  
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .card-icon {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+    color: #000768;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+    color: #333;
+    margin: 0;
+    font-weight: 600;
+  }
+  
+  /* Profile Section */
+  .profile-details {
+    padding: 1rem 0;
+  }
+  
+  .profile-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+  }
+  
+  .profile-info {
+    display: flex;
+    align-items: center;
+    margin: 0.75rem 0;
+    color: #666;
+    font-size: 1.1rem;
+  }
+  
+  .info-icon {
+    margin-right: 0.75rem;
+    color: #00065a;
+    min-width: 20px;
+  }
+  
+  /* Physician Section */
+  .physician-details {
+    padding: 1rem 0;
+  }
+  
+  .physician-details h3 {
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+    font-size: 1.3rem;
+  }
+  
+  .specialization {
+    color: #666;
+    font-style: italic;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .contact-info {
+    display: flex;
+    align-items: center;
+    color: #666;
+    font-size: 1.1rem;
+  }
+  
+  /* Appointments Section */
+  .schedule-appointment-btn {
+    background: #00084d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    width: 100%;
+    font-weight: 500;
+  }
+  
+  .schedule-appointment-btn:hover {
+    background: #000e8a;
+    transform: translateY(-1px);
+  }
+  
+  .schedule-appointment-btn:active {
+    transform: translateY(0);
+  }
+  
+  .appointments-list {
+    margin-top: 1rem;
+  }
+  
+  .appointment-item {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .appointment-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .appointment-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .appointment-time {
+    display: flex;
+    align-items: center;
+    color: #4a90e2;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+  
+  .time-icon {
+    margin-right: 0.75rem;
+    min-width: 20px;
+  }
+  
+  .appointment-details {
+    margin-left: 1.75rem;
+  }
+  
+  .appointment-reason {
+    color: #333;
+    margin: 0.25rem 0;
+    font-size: 1rem;
+  }
+  
+  .appointment-status {
+    color: #666;
+    font-size: 0.9rem;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    background-color: #e8f0fe;
+    margin-top: 0.5rem;
+  }
+  
+  /* Prescriptions Section */
+  .prescriptions-list {
+    margin-top: 1rem;
+  }
+  
+  .prescription-item {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .prescription-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .prescription-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .medication-name {
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+    font-size: 1.2rem;
+  }
+  
+  .dosage {
+    color: #666;
+    margin: 0.25rem 0;
+    font-weight: 500;
+  }
+  
+  .instructions {
+    color: #666;
+    font-size: 0.95rem;
+    font-style: italic;
+    line-height: 1.4;
+    margin-top: 0.5rem;
+  }
+  
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    font-size: 1.2rem;
-    color: #dbeafe;
-}
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+  }
   
-.dashboard-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: #1e293b;
-}
+  .appointment-modal {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
   
-  /* Card Styles */
-.dashboard-card {
-    background-color: #ffffff;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-  
-.card-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #1e293b;
-    position: relative;
-    padding-bottom: 0.5rem;
-    
-}
-  
-.card-title::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 2rem;
-    height: 2px;
-    background-color: #1e293b;
-}
-  
-  /* Grid Layout */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-  
-  /* Profile Section */
-.profile-info p {
-    margin-bottom: 0.5rem;
-}
-  
-.label {
-    font-weight: 500;
-    margin-right: 0.25rem;
-}
-  
-  /* Primary Care Physician */
-.pcp-info {
-    padding-left: 0.5rem;
-}
-  
-.doctor-name {
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-}
-  
-.doctor-specialty {
-    color: #64748b;
-}
-  
-  /* Section Header with Button */
-.section-header {
+  .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
-}
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+  }
   
-.new-appointment-btn {
-    display: flex;
-    align-items: center;
-    background-color: #023588;
-    color: white;
-    border: none;
-    border-radius: 0.375rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-  
-.new-appointment-btn:hover {
-    background-color: #39609e;
-}
-  
-.new-appointment-btn .icon {
-    margin-right: 0.25rem;
-}
-  
-  /* Appointments Grid */
-.appointments-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-}
-  
-.appointment-card {
-    border: 1px solid #e2e8f0;
-    border-radius: 0.375rem;
-    padding: 1rem;
-}
-  
-.appointment-card.scheduled {
-    background-color: #3b82f6;
-}
-  
-.appointment-card.completed {
-    background-color: #f8fafc;
-}
-  
-.appointment-card.cancelled {
-    background-color: #fee2e2;
-}
-  
-.appointment-card.pending {
-    background-color: #fef3c7;
-}
-  
-.appointment-card p {
-    margin-bottom: 0.5rem;
-}
-  
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    text-transform: uppercase;
-}
-  
-.status-badge.scheduled {
-    background-color: #023588;
-    color: white;
-}
-  
-.status-badge.completed {
-    background-color: #0c865e;
-    color: white;
-}
-  
-.status-badge.cancelled {
-    background-color: #c43c3c;
-    color: white;
-}
-  
-.status-badge.pending {
-    background-color: #e0a43c;
-    color: white;
-}
-  
-.cancel-btn {
-    background-color: #d43b3b;
-    color: white;
-    border: none;
-    border-radius: 0.25rem;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    transition: background-color 0.2s;
-}
-  
-.cancel-btn:hover {
-    background-color: #d63e3e;
-}
-  
-  /* Prescriptions */
-.prescription-list {
-    list-style: none;
-    padding: 0;
+  .modal-header h2 {
     margin: 0;
-}
+    color: #2c3e50;
+    font-size: 1.5rem;
+  }
   
-.prescription-item {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #e2e8f0;
+  .close-modal-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-}
+    justify-content: center;
+  }
   
-.prescription-item:last-child {
-    border-bottom: none;
-}
+  .close-modal-btn:hover {
+    color: #333;
+    background-color: #f5f5f5;
+  }
   
-.medication-name {
+  .appointment-form .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .appointment-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
     font-weight: 500;
-    font-size: 1.1rem;
-    margin-bottom: 0.25rem;
-}
+  }
   
-.medication-dosage {
-    color: #64748b;
-}
+  .appointment-form .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+  }
   
-.refills-badge {
-    font-size: 0.75rem;
-    background-color: #dbeafe;
-    color: var(--primary-dark);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-}
+  .appointment-form .form-control:focus {
+    outline: none;
+    border-color: #08004e;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+  }
   
-.no-data {
-    color: #64748b;
-    text-align: center;
-    padding: 1.5rem 0;
-}
+  .appointment-form select.form-control {
+    background-color: white;
+    cursor: pointer;
+  }
+  
+  .appointment-form textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .cancel-btn {
+    background: #f5f5f5;
+    color: #666;
+    border: 1px solid #ddd;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    min-width: 100px;
+  }
+  
+  .cancel-btn:hover {
+    background: #eee;
+    border-color: #ccc;
+  }
+  
+  .submit-btn {
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    min-width: 100px;
+    font-weight: 500;
+  }
+  
+  .submit-btn:hover {
+    background: #2c3e50;
+    transform: translateY(-1px);
+  }
+  
+  .submit-btn:active {
+    transform: translateY(0);
+  }
   
   /* Responsive Design */
-@media (max-width: 768px) {
+  @media (max-width: 768px) {
+    .patient-dashboard {
+      padding: 1rem;
+    }
+  
     .dashboard-grid {
       grid-template-columns: 1fr;
-}
-    
-.appointments-grid {
-      grid-template-columns: 1fr;
-}
-    
-.section-header {
-      flex-direction: column;
-      align-items: flex-start;
-}
-    
-.new-appointment-btn {
-      margin-top: 0.75rem;
+      gap: 1rem;
     }
-}
+  
+    .dashboard-card {
+      padding: 1rem;
+    }
+  
+    .appointment-modal {
+      width: 95%;
+      padding: 1.5rem;
+    }
+  
+    .form-actions {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  
+    .cancel-btn,
+    .submit-btn {
+      width: 100%;
+    }
+  }
+  
+  /* Loading States */
+  .loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+  
+  /* Error States */
+  .error-message {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }

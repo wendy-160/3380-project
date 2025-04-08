@@ -1,0 +1,265 @@
+.payment-status.partially-paid {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+  
+  .payment-status.insurance-pending {
+    background-color: #e2e3e5;
+    color: #383d41;
+  }
+  
+  .payment-status.cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  /* Payment Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+  }
+  
+  .payment-modal {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .modal-header h2 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.5rem;
+  }
+  
+  .close-modal-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .close-modal-btn:hover {
+    color: #333;
+    background-color: #f5f5f5;
+  }
+  
+  .bill-summary {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .bill-summary h3 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+  }
+  
+  .bill-id {
+    color: #666;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+  }
+  
+  .total-amount {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0.5rem 0;
+  }
+  
+  .remaining-amount {
+    color: #dc3545;
+    font-weight: 500;
+    margin: 0.5rem 0;
+  }
+  
+  .payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+  }
+  
+  select.form-control {
+    background-color: white;
+    cursor: pointer;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .cancel-btn {
+    background: #f5f5f5;
+    color: #666;
+    border: 1px solid #ddd;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    min-width: 100px;
+  }
+  
+  .cancel-btn:hover {
+    background: #eee;
+    border-color: #ccc;
+  }
+  
+  .submit-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #000149;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    min-width: 100px;
+  }
+  
+  .submit-btn:hover {
+    background: #1b1c6e;
+    transform: translateY(-1px);
+  }
+  
+  /* Loading State */
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    color: #666;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .billing-page {
+      padding: 1rem;
+    }
+  
+    .bills-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  
+    .payment-modal {
+      width: 95%;
+      padding: 1.5rem;
+    }
+  
+    .form-actions {
+      flex-direction: column;
+    }
+  
+    .cancel-btn,
+    .submit-btn {
+      width: 100%;
+      min-width: auto;
+    }
+  
+    .payment-history {
+      padding: 1rem;
+    }
+  }
+  
+  /* Empty State */
+  .no-bills {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+  }
+  
+  .no-bills-icon {
+    font-size: 3rem;
+    color: #ddd;
+    margin-bottom: 1rem;
+  }
+  
+  /* Print Styles */
+  @media print {
+    .billing-page {
+      padding: 0;
+      background: white;
+    }
+  
+    .pay-now-btn,
+    .modal-overlay,
+    .form-actions {
+      display: none;
+    }
+  
+    .bill-card {
+      break-inside: avoid;
+      box-shadow: none;
+      border: 1px solid #ddd;
+    }
+  
+    .payment-history {
+      box-shadow: none;
+    }
+  }

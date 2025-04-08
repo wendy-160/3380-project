@@ -22,7 +22,7 @@
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 2rem;
-    color: #0f172a;
+    color: #010041;
   }
   
   /* Grid Layout */
@@ -384,4 +384,69 @@
     .appointment-time {
       width: 80px;
     }
+  }
+  .view-records-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #4a90e2;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+  
+  .view-records-btn:hover {
+    background: #357abd;
+    transform: translateY(-1px);
+  }
+  
+  .medical-records-modal {
+    background: white;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  .medical-records-modal .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+  }
+  
+  .medical-records-modal .modal-body {
+    padding: 0; /* Remove padding since MedicalRecords component has its own padding */
+  }
+  
+  /* Adjust the appointment item to accommodate the new button */
+  .appointment-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+  }
+  
+  .appointment-time {
+    min-width: 120px;
+  }
+  
+  .appointment-details {
+    flex-grow: 1;
+    margin: 0 1rem;
+  }
+  
+  /* Make sure the medical records section takes full width in the modal */
+  .medical-records-modal .medical-records-section {
+    margin-top: 0;
+    box-shadow: none;
+    border-radius: 0;
   }

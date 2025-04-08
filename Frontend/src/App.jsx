@@ -6,7 +6,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from './pages/Dashboard.jsx';
 import Reports from './pages/Reports.jsx';  
-import Billing from './pages/Billing.jsx';
+import PatientBilling from './pages/PatientBilling.jsx';
+import AdminBilling from './pages/AdminBilling.jsx'
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import './App.css';
 import Appointments from './pages/Appointment.jsx';
@@ -23,8 +24,9 @@ const Navbar = () => {
           {user.role == "Admin" && <Link to="/reports">Reports</Link>}
           {user.role == "Doctor" && <Link to="/prescriptions">Prescriptions</Link>} 
           {user.role =="Doctor" && <Link to="/tests">Medical Tests</Link>}
+          {user.role == "Patient" && <Link to="/PatientBilling">Billing</Link>}
+          {user.role == "Admin" && <Link to="/AdminBilling">Billing</Link>}
  
-          <Link to="/billing">Billing</Link>
           <button onClick={() => { logout(); window.location.href = "/"; }}>Logout</button>
         </>
       ) : (
@@ -66,7 +68,8 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reports" element={<AdminRoute element={<Reports />} />} /> 
-          <Route path="/billing" element={<Billing/>}/> 
+          <Route path="/PatientBilling" element={<PatientBilling/>}/> 
+          <Route path="/AdminBilling" element={<AdminBilling/>}/> 
           <Route path="/appointments" element={<PatientRoute element={<Appointments/>}/>}/>
         </Routes>
       </div>

@@ -7,7 +7,7 @@ const db = await mysql.createPool({
   host: 'localhost',
   user: 'root', 
   password: '1722AutumnLeaves!', // put in your own MySQL password
-  database: 'medicalclinicdb',
+  database: 'medicalclinicdb',  //new db
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
