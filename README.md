@@ -79,9 +79,8 @@ The app should now be running
     - Doctors can archive old prescriptions
 - **Triggers**.
   - Add a SQL trigger so a doctor cannot be double booked
-  - Add a trigger that will auto-update the medical record when a test is added
-  - Add a trigger for updating billing when a prescription is added
-  - Add a trigger that will auto-update the patient's medical record when a prescription is added
+  - Add a trigger that will auto-update the medical record when a test or prescription is added
+  - Add a trigger for updating billing when a prescription or medical test is added
 
 - **Data queries**.
   - Get patient appointment history
