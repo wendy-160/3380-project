@@ -147,7 +147,7 @@ const PrescriptionForm = () => {
   };
 
   return (
-    <div className="container">
+    <div className="prescription-container">
       <h1>New Prescription</h1>
       
       {message && (

@@ -8,6 +8,9 @@ import Dashboard from './pages/Dashboard.jsx';
 import Reports from './pages/Reports.jsx';  
 import PatientBilling from './pages/PatientBilling.jsx';
 import AdminBilling from './pages/AdminBilling.jsx'
+import About from './components/AboutUs.jsx';
+import Locations from './components/Locations.jsx';
+import Home from './Home.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import './App.css';
 import Appointments from './pages/Appointment.jsx';
@@ -17,23 +20,28 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <Link to="/">Home</Link>
-      {user ? (
-        <>
+      <div className="navbar-left">
+        <Link to="/" className="web-app-name">UH ClinicHub</Link>
+        <Link to="/about-us">About Us</Link>
+        <Link to="/locations">Locations</Link>
+        {user && (
+          <>
           <Link to="/dashboard">Dashboard</Link>
-          {user.role == "Admin" && <Link to="/reports">Reports</Link>}
-          {user.role == "Doctor" && <Link to="/prescriptions">Prescriptions</Link>} 
-          {user.role =="Doctor" && <Link to="/tests">Medical Tests</Link>}
-          {user.role == "Patient" && <Link to="/PatientBilling">Billing</Link>}
-          {user.role == "Admin" && <Link to="/AdminBilling">Billing</Link>}
- 
-          <button onClick={() => { logout(); window.location.href = "/"; }}>Logout</button>
-        </>
-      ) : (
-        <>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
-        </>
+          {user.role === "Admin" && <Link to="/reports">Reports</Link>}
+          {user.role === "Doctor" && <Link to="/prescriptions">Prescriptions</Link>}
+          {user.role === "Doctor" && <Link to="/tests">Medical Tests</Link>}
+          {user.role === "Patient" && <Link to="/PatientBilling">Billing</Link>}
+          {user.role === "Admin" && <Link to="/AdminBilling">Billing</Link>}
+          <button onClick={() => { logout(); window.location.href = "/"; }} className="nav-button">Logout</button>
+          </>
+        )}
+      </div>
+
+      {!user && (
+        <div className="navbar-right">
+          <Link to="/login" className="nav-button">Login</Link>
+          <Link to="/register" className="nav-button">Register</Link>
+        </div>
       )}
     </nav>
   );
@@ -58,10 +66,12 @@ export default function App() {
   return (
     <AuthProvider>
       <div>
-        <h1>Medical Clinic App</h1>
         <Navbar />
+        
         <Routes>
-          <Route path="/" element={<h2>Welcome to the Clinic Homepage</h2>} />
+          <Route path="/" element={<Home />} />
+          <Route path="/about-us" element={<About/>} />
+          <Route path="/locations" element={<Locations/>}/>
           <Route path="/tests" element={<DoctorRoute element={<MedicalTests />} />} />
           <Route path="/prescriptions" element={<DoctorRoute element={<Prescriptions />} />} />
           <Route path="/login" element={<Login />} />
@@ -72,6 +82,7 @@ export default function App() {
           <Route path="/AdminBilling" element={<AdminBilling/>}/> 
           <Route path="/appointments" element={<PatientRoute element={<Appointments/>}/>}/>
         </Routes>
+        
       </div>
     </AuthProvider>
   );

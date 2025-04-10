@@ -20,7 +20,7 @@ export async function handleAuthRoutes(req, res) {
       const sql = 'INSERT INTO login (username, email, password, role) VALUES (?, ?, ?, ?)';
       await db.query(sql, [username, email, hashedPassword, role || 'patient']);
 
-      return sendJson(res, 201, { message: '✅ User registered successfully' });
+      return sendJson(res, 201, { message: ' User registered successfully' });
     } catch (err) {
       console.error('Registration error:', err.message);
       return sendJson(res, 500, { message: 'Registration failed' });
@@ -45,7 +45,7 @@ export async function handleAuthRoutes(req, res) {
       }
 
       return sendJson(res, 200, {
-        message: '✅ Login successful',
+        message: 'Login successful',
         role: user.role,
       });
     } catch (err) {
