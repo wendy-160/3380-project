@@ -2,42 +2,36 @@ import React, { useState, useEffect } from 'react';
 import './prescriptions.css';
 
 const PrescriptionForm = () => {
-  // State for form data
   const [formData, setFormData] = useState({
     patientID: '',
     appointmentID: '',
-    doctorID: '1', // Assuming logged in doctor's ID
+    doctorID: '1',
     medicationName: '',
     dosage: '',
     frequency: '',
-    startDate: new Date().toISOString().split('T')[0], // Today's date as default
+    startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     notes: '',
     status: 'Active'
   });
 
-  // State for patients and appointments data
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Fetch patients and appointments on component mount
   useEffect(() => {
     fetchPatients();
     fetchAppointments();
   }, []);
 
-  // Filter appointments when patient changes
   useEffect(() => {
     if (formData.patientID) {
       const patientAppts = appointments.filter(
         appointment => appointment.PatientID.toString() === formData.patientID
       );
       setFilteredAppointments(patientAppts);
-      
-      // Clear selected appointment if not valid for this patient
       if (formData.appointmentID && !patientAppts.find(a => a.AppointmentID.toString() === formData.appointmentID)) {
         setFormData(prev => ({ ...prev, appointmentID: '' }));
       }
@@ -47,42 +41,36 @@ const PrescriptionForm = () => {
     }
   }, [formData.patientID, appointments]);
 
-  // Fetch patients from API
   const fetchPatients = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/patients');
-      if (!response.ok) throw new Error('Failed to fetch patients');
-      
-      const data = await response.json();
+      const res = await fetch('http://localhost:5000/api/patients');
+      if (!res.ok) throw new Error('Failed to fetch patients');
+      const data = await res.json();
       setPatients(data);
     } catch (error) {
       console.error('Error fetching patients:', error);
-      setMessage('Failed to load patients data');
+      setMessage('Error loading patients');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch appointments from API
   const fetchAppointments = async () => {
     try {
       setIsLoading(true);
-      const doctorId = formData.doctorID;
-      const response = await fetch(`/api/appointments?doctorId=${doctorId}`);
-      if (!response.ok) throw new Error('Failed to fetch appointments');
-      
-      const data = await response.json();
+      const res = await fetch(`http://localhost:5000/api/appointments?doctorId=${formData.doctorID}`);
+      if (!res.ok) throw new Error('Failed to fetch appointments');
+      const data = await res.json();
       setAppointments(data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
-      setMessage('Failed to load appointments data');
+      setMessage('Error loading appointments');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle input change
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData(prevData => ({
@@ -91,7 +79,6 @@ const PrescriptionForm = () => {
     }));
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
@@ -103,26 +90,24 @@ const PrescriptionForm = () => {
     }).format(date);
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage('');
-    
+
     try {
-      const response = await fetch('/api/prescriptions', {
+      const response = await fetch('http://localhost:5000/api/prescriptions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
-      
+
       const result = await response.json();
-      
+
       if (response.ok) {
         setMessage('Prescription saved successfully!');
-        // Reset form fields except doctor ID
         setFormData({
           patientID: '',
           appointmentID: '',
@@ -149,13 +134,13 @@ const PrescriptionForm = () => {
   return (
     <div className="prescription-container">
       <h1>New Prescription</h1>
-      
+
       {message && (
         <div className={`alert ${message.includes('Error') ? 'alert-error' : 'alert-success'}`}>
           {message}
         </div>
       )}
-      
+
       <div className="patient-info">
         <div className="patient-header">
           <h3>Patient Information</h3>
@@ -163,10 +148,10 @@ const PrescriptionForm = () => {
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="patientID">Patient</label>
-            <select 
-              id="patientID" 
-              value={formData.patientID} 
-              onChange={handleChange} 
+            <select
+              id="patientID"
+              value={formData.patientID}
+              onChange={handleChange}
               required
               disabled={isLoading}
             >
@@ -180,9 +165,9 @@ const PrescriptionForm = () => {
           </div>
           <div className="form-group">
             <label htmlFor="appointmentID">Appointment</label>
-            <select 
-              id="appointmentID" 
-              value={formData.appointmentID} 
+            <select
+              id="appointmentID"
+              value={formData.appointmentID}
               onChange={handleChange}
               disabled={!formData.patientID || isLoading}
             >
@@ -196,81 +181,81 @@ const PrescriptionForm = () => {
           </div>
         </div>
       </div>
-      
+
       <form id="prescriptionForm" onSubmit={handleSubmit}>
         <input type="hidden" id="doctorID" value={formData.doctorID} />
-        
+
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="medicationName">Medication Name</label>
-            <input 
-              type="text" 
-              id="medicationName" 
+            <input
+              type="text"
+              id="medicationName"
               value={formData.medicationName}
               onChange={handleChange}
-              required 
+              required
               disabled={isLoading}
             />
           </div>
         </div>
-        
+
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="dosage">Dosage</label>
-            <input 
-              type="text" 
-              id="dosage" 
+            <input
+              type="text"
+              id="dosage"
               value={formData.dosage}
               onChange={handleChange}
-              required 
-              placeholder="e.g., 10mg" 
+              required
+              placeholder="e.g., 10mg"
               disabled={isLoading}
             />
           </div>
           <div className="form-group">
             <label htmlFor="frequency">Frequency</label>
-            <input 
-              type="text" 
-              id="frequency" 
+            <input
+              type="text"
+              id="frequency"
               value={formData.frequency}
               onChange={handleChange}
-              required 
-              placeholder="e.g., Twice daily with meals" 
+              required
+              placeholder="e.g., Twice daily"
               disabled={isLoading}
             />
           </div>
         </div>
-        
+
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="startDate">Start Date</label>
-            <input 
-              type="date" 
-              id="startDate" 
+            <input
+              type="date"
+              id="startDate"
               value={formData.startDate}
               onChange={handleChange}
-              required 
+              required
               disabled={isLoading}
             />
           </div>
           <div className="form-group">
             <label htmlFor="endDate">End Date</label>
-            <input 
-              type="date" 
-              id="endDate" 
+            <input
+              type="date"
+              id="endDate"
               value={formData.endDate}
               onChange={handleChange}
               disabled={isLoading}
-              min={formData.startDate} // Ensure end date is after start date
+              min={formData.startDate}
             />
           </div>
         </div>
-        
+
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="status">Prescription Status</label>
-            <select 
-              id="status" 
+            <label htmlFor="status">Status</label>
+            <select
+              id="status"
               value={formData.status}
               onChange={handleChange}
               required
@@ -281,22 +266,21 @@ const PrescriptionForm = () => {
             </select>
           </div>
         </div>
-        
+
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="notes">Notes & Instructions</label>
-            <textarea 
-              id="notes" 
+            <label htmlFor="notes">Notes</label>
+            <textarea
+              id="notes"
               value={formData.notes}
               onChange={handleChange}
-              placeholder="Enter any special instructions or notes for the patient"
               disabled={isLoading}
-            ></textarea>
+              placeholder="Instructions for the patient"
+            />
           </div>
         </div>
-        
-        <div className="form-row" style={{ justifyContent: 'flex-end', marginTop: '20px' }}>
-          <button type="button" className="btn btn-secondary" onClick={() => window.history.back()} disabled={isLoading}>Cancel</button>
+
+        <div className="form-row" style={{ justifyContent: 'flex-end' }}>
           <button type="submit" className="btn" disabled={isLoading}>
             {isLoading ? 'Saving...' : 'Save Prescription'}
           </button>
