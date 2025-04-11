@@ -9,6 +9,7 @@ const PatientBilling = () => {
   const [loading, setLoading] = useState(true);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [error, setError] = useState(null);
   const currentPatientID = JSON.parse(localStorage.getItem('user'))?.PatientID;
 
   useEffect(() => {
@@ -19,15 +20,22 @@ const PatientBilling = () => {
 
   const fetchBillings = async () => {
     try {
+      setError(null);
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/billings/patient/${currentPatientID}`, {
+      const response = await fetch(`/api/billing/patient/${currentPatientID}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch billings: ${response.status}`);
+      }
+      
       const data = await response.json();
       setBills(data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching billings:', error);
+      setError('Failed to load billing information. Please try again later.');
       setLoading(false);
     }
   };
@@ -35,34 +43,40 @@ const PatientBilling = () => {
   const handleMakePayment = async (e) => {
     e.preventDefault();
     
-    const paymentData = {
-      BillingID: selectedBill.BillingID,
-      Amount: parseFloat(paymentAmount),
-      PaymentMethod: paymentMethod,
-      PaymentDate: new Date().toISOString(),
-      PaymentStatus: selectedBill.Amount === parseFloat(paymentAmount) ? 'Paid' : 'Partially Paid'
-    };
-
+    if (!paymentMethod || parseFloat(paymentAmount) <= 0) {
+      setError('Please fill in all required fields with valid values');
+      return;
+    }
+    
     try {
+      setError(null);
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/billings/${selectedBill.BillingID}/payment`, {
+      const response = await fetch(`/api/billing/${selectedBill.BillID}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(paymentData)
+        body: JSON.stringify({
+          status: selectedBill.Amount === parseFloat(paymentAmount) ? 'Paid' : 'Partially Paid',
+          amount: parseFloat(paymentAmount),
+          paymentMethod: paymentMethod,
+          paymentDate: new Date().toISOString()
+        })
       });
 
-      if (response.ok) {
-        setIsPaymentModalOpen(false);
-        setSelectedBill(null);
-        setPaymentAmount('');
-        setPaymentMethod('');
-        fetchBillings();
+      if (!response.ok) {
+        throw new Error(`Payment failed: ${response.status}`);
       }
+      
+      setIsPaymentModalOpen(false);
+      setSelectedBill(null);
+      setPaymentAmount('');
+      setPaymentMethod('');
+      fetchBillings();
     } catch (error) {
       console.error('Error processing payment:', error);
+      setError('Payment processing failed. Please try again later.');
     }
   };
 
@@ -91,90 +105,113 @@ const PatientBilling = () => {
   return (
     <div className="billing-page">
       <h1 className="page-title">Billing & Payments</h1>
-
-      {/* Outstanding Bills Section */}
-      <div className="billing-section">
-        <h2 className="section-title">
-          <FiAlertCircle className="section-icon" />
-          Outstanding Bills
-        </h2>
-        <div className="bills-grid">
-          {bills
-            .filter(bill => ['Pending', 'Partially Paid', 'Insurance Pending', 'Overdue'].includes(bill.PaymentStatus))
-            .map(bill => (
-              <div key={bill.BillingID} className={`bill-card ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
-                <div className="bill-header">
-                  <div>
-                    <h3>{getBillSource(bill)}</h3>
-                    <span className="bill-type">{bill.Description || 'Medical Service'}</span>
+      
+      {error && (
+        <div className="error-message">
+          <FiAlertCircle /> {error}
+        </div>
+      )}
+      
+      {loading ? (
+        <div className="loading-spinner">
+          <p>Loading billing information...</p>
+        </div>
+      ) : (
+        <>
+          {/* Outstanding Bills Section */}
+          <div className="billing-section">
+            <h2 className="section-title">
+              <FiAlertCircle className="section-icon" />
+              Outstanding Bills
+            </h2>
+            <div className="bills-grid">
+              {bills.filter(bill => ['Pending', 'Partially Paid', 'Insurance Pending', 'Overdue'].includes(bill.PaymentStatus)).length === 0 ? (
+                <div className="no-bills">
+                  <div className="no-bills-icon">
+                    <FiCheck />
                   </div>
-                  <span className={`status-badge ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
-                    {bill.PaymentStatus}
-                  </span>
+                  <p>You have no outstanding bills</p>
                 </div>
-                <div className="bill-details">
-                  <p className="bill-amount">{formatCurrency(bill.Amount)}</p>
-                  <p className="bill-date">Billing Date: {formatDate(bill.BillingDate)}</p>
-                  {bill.PaymentStatus !== 'Insurance Pending' && (
-                    <button 
-                      className="pay-now-btn"
-                      onClick={() => {
-                        setSelectedBill(bill);
-                        setPaymentAmount(bill.Amount.toString());
-                        setIsPaymentModalOpen(true);
-                      }}
-                    >
-                      <FiCreditCard /> Pay Now
-                    </button>
-                  )}
-                </div>
-              </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Payment History Section */}
-      <div className="billing-section">
-        <h2 className="section-title">
-          <FiClock className="section-icon" />
-          Payment History
-        </h2>
-        <div className="payment-history">
-          <table className="payment-table">
-            <thead>
-              <tr>
-                <th>Billing Date</th>
-                <th>Service</th>
-                <th>Amount</th>
-                <th>Payment Date</th>
-                <th>Payment Method</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bills
-                .filter(bill => bill.PaymentStatus !== 'Pending')
-                .sort((a, b) => new Date(b.PaymentDate || b.BillingDate) - new Date(a.PaymentDate || a.BillingDate))
-                .map(bill => (
-                  <tr key={bill.BillingID}>
-                    <td>{formatDate(bill.BillingDate)}</td>
-                    <td>{getBillSource(bill)}</td>
-                    <td className="amount-cell">{formatCurrency(bill.Amount)}</td>
-                    <td>{bill.PaymentDate ? formatDate(bill.PaymentDate) : '-'}</td>
-                    <td>{bill.PaymentMethod || '-'}</td>
-                    <td>
-                      <span className={`payment-status ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
-                        {bill.PaymentStatus}
-                      </span>
-                    </td>
+              ) : (
+                bills
+                  .filter(bill => ['Pending', 'Partially Paid', 'Insurance Pending', 'Overdue'].includes(bill.PaymentStatus))
+                  .map(bill => (
+                    <div key={bill.BillingID} className={`bill-card ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
+                      <div className="bill-header">
+                        <div>
+                          <h3>{getBillSource(bill)}</h3>
+                          <span className="bill-type">{bill.Description || 'Medical Service'}</span>
+                        </div>
+                        <span className={`status-badge ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
+                          {bill.PaymentStatus}
+                        </span>
+                      </div>
+                      <div className="bill-details">
+                        <p className="bill-amount">{formatCurrency(bill.Amount)}</p>
+                        <p className="bill-date">Billing Date: {formatDate(bill.BillingDate)}</p>
+                        {bill.PaymentStatus !== 'Insurance Pending' && (
+                          <button 
+                            className="pay-now-btn"
+                            onClick={() => {
+                              setSelectedBill(bill);
+                              setPaymentAmount(bill.Amount.toString());
+                              setIsPaymentModalOpen(true);
+                            }}
+                          >
+                            <FiCreditCard /> Pay Now
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                ))
+              )}
+            </div>
+          </div>
+          
+          {/* Payment History Section */}
+          <div className="billing-section">
+            <h2 className="section-title">
+              <FiClock className="section-icon" />
+              Payment History
+            </h2>
+            <div className="payment-history">
+              <table className="payment-table">
+                <thead>
+                  <tr>
+                    <th>Billing Date</th>
+                    <th>Service</th>
+                    <th>Amount</th>
+                    <th>Payment Date</th>
+                    <th>Payment Method</th>
+                    <th>Status</th>
                   </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Payment Modal */}
+                </thead>
+                <tbody>
+                  {bills
+                    .filter(bill => bill.PaymentStatus !== 'Pending')
+                    .sort((a, b) => new Date(b.PaymentDate || b.BillingDate) - new Date(a.PaymentDate || a.BillingDate))
+                    .map(bill => (
+                      <tr key={bill.BillingID}>
+                        <td>{formatDate(bill.BillingDate)}</td>
+                        <td>{getBillSource(bill)}</td>
+                        <td className="amount-cell">{formatCurrency(bill.Amount)}</td>
+                        <td>{bill.PaymentDate ? formatDate(bill.PaymentDate) : '-'}</td>
+                        <td>{bill.PaymentMethod || '-'}</td>
+                        <td>
+                          <span className={`payment-status ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
+                            {bill.PaymentStatus}
+                          </span>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+      
+      {/* Payment Modal with error handling */}
       {isPaymentModalOpen && selectedBill && (
         <div className="modal-overlay">
           <div className="payment-modal">
@@ -249,6 +286,12 @@ const PatientBilling = () => {
                 </button>
               </div>
             </form>
+            
+            {error && (
+              <div className="modal-error">
+                <FiAlertCircle /> {error}
+              </div>
+            )}
           </div>
         </div>
       )}
