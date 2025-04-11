@@ -6,6 +6,27 @@ export async function handleAppointmentRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
+  const matchDoctorDateAppointments = pathname.match(/^\/api\/appointments\/doctor\/(\d+)\/date\/([\d-]+)$/);
+  if (method === 'GET' && matchDoctorDateAppointments) {
+    const doctorID = matchDoctorDateAppointments[1];
+    const date = matchDoctorDateAppointments[2];
+    try {
+      const [rows] = await db.execute(`
+        SELECT a.AppointmentID, a.DateTime, a.Reason, a.status,
+               p.FirstName AS PatientName, p.LastName AS PatientLastName
+        FROM appointment a
+        JOIN patient p ON a.PatientID = p.PatientID
+        WHERE a.DoctorID = ? AND DATE(a.DateTime) = ?
+        ORDER BY a.DateTime ASC
+      `, [doctorID, date]);
+
+      return sendJson(res, 200, rows);
+    } catch (err) {
+      console.error('❌ Error fetching doctor daily appointments:', err);
+      return sendJson(res, 500, { message: 'Error fetching doctor appointments' });
+    }
+  }
+
   const matchAvailableRoute = pathname.match(/^\/api\/appointments\/available\/(\d+)\/([\d-]+)$/);
   if (method === 'GET' && matchAvailableRoute) {
     const doctorID = matchAvailableRoute[1];
@@ -29,11 +50,11 @@ export async function handleAppointmentRoutes(req, res) {
         [doctorID, date]
       );
       const bookedTimes = new Set(booked.map(row => new Date(row.DateTime).toISOString()));
-
       const available = slots.filter(slot => !bookedTimes.has(new Date(slot).toISOString()));
+
       return sendJson(res, 200, available);
     } catch (err) {
-      console.error('Error checking available time slots:', err.message);
+      console.error('❌ Error checking available time slots:', err.message);
       return sendJson(res, 500, { message: 'Error checking availability' });
     }
   }
@@ -49,22 +70,24 @@ export async function handleAppointmentRoutes(req, res) {
       `, [patientID]);
       return sendJson(res, 200, rows);
     } catch (err) {
-      console.error("Error fetching upcoming appointments:", err);
+      console.error("❌ Error fetching upcoming appointments:", err);
       return sendJson(res, 500, { message: "Error fetching upcoming appointments" });
     }
   }
 
-  const createRoute = method === 'POST' && pathname === '/api/appointments';
-  if (createRoute) {
+  if (method === 'POST' && pathname === '/api/appointments') {
     try {
       const { PatientID, DoctorID, DateTime, Reason, status } = req.body;
+      const OfficeID = 1;
+
       const [result] = await db.execute(`
-        INSERT INTO appointment (PatientID, DoctorID, DateTime, Reason, Status)
-        VALUES (?, ?, ?, ?, ?)
-      `, [PatientID, DoctorID, DateTime, Reason, status]);
+        INSERT INTO appointment (PatientID, DoctorID, OfficeID, DateTime, Reason, Status)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `, [PatientID, DoctorID, OfficeID, DateTime, Reason, status]);
+
       return sendJson(res, 201, { AppointmentID: result.insertId });
     } catch (err) {
-      console.error("Create appointment error:", err);
+      console.error("❌ Create appointment error:", err);
       return sendJson(res, 500, { message: "Could not create appointment" });
     }
   }

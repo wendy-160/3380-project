@@ -69,11 +69,12 @@ const PatientDashboard = () => {
   const handleCreateAppointment = async () => {
     const selectedTime = document.getElementById("time").value;
     const reason = document.getElementById("reason").value;
-
+  
     if (!selectedTime || !reason) return alert("Time and reason required.");
-
+  
     try {
       const token = localStorage.getItem('token');
+  
       const response = await fetch('/api/appointments', {
         method: 'POST',
         headers: {
@@ -83,24 +84,32 @@ const PatientDashboard = () => {
         body: JSON.stringify({
           PatientID: currentPatientID,
           DoctorID: primaryPhysician?.DoctorID,
+          OfficeID: 1,
           DateTime: selectedTime,
           Reason: reason,
           status: 'Scheduled'
         })
       });
-
-      if (response.ok) {
-        setIsAppointmentModalOpen(false);
-        const updatedAppointments = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const appointmentsData = await updatedAppointments.json();
-        setUpcomingAppointments(appointmentsData);
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Unknown error");
       }
+  
+      setIsAppointmentModalOpen(false);
+      const updatedAppointments = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const appointmentsData = await updatedAppointments.json();
+      setUpcomingAppointments(appointmentsData);
     } catch (error) {
-      console.error('Error creating appointment:', error);
+      console.error('Failed to schedule:', error);
+      alert("Failed to schedule appointment");
     }
   };
+  
+  
+  
 
   const formatDateTime = (dt) =>
     new Date(dt).toLocaleString([], { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
