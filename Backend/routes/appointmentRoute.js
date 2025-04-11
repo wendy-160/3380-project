@@ -6,6 +6,27 @@ export async function handleAppointmentRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
+  const matchDateRoute = pathname.match(/^\/api\/appointments\/doctor\/(\d+)\/date\/([\d-]+)$/);
+  if (method === 'GET' && matchDateRoute) {
+    const doctorID = matchDateRoute[1];
+    const date = matchDateRoute[2];
+    try {
+      const query = `
+        SELECT a.AppointmentID, a.DateTime, a.Reason,
+               p.FirstName AS PatientName, p.LastName AS PatientLastName
+        FROM appointment a
+        JOIN patient p ON a.PatientID = p.PatientID
+        WHERE a.DoctorID = ? AND DATE(a.DateTime) = ?
+        ORDER BY a.DateTime ASC;
+      `;
+      const [appointments] = await db.execute(query, [doctorID, date]);
+      return sendJson(res, 200, appointments);
+    } catch (err) {
+      console.error('Error fetching doctor daily appointments:', err.message);
+      return sendJson(res, 500, { message: 'Error fetching appointments by date' });
+    }
+  }
+
   if (method === 'GET' && pathname === '/api/appointments' && parsedUrl.searchParams.has('doctorId')) {
     const doctorID = parsedUrl.searchParams.get('doctorId');
     try {

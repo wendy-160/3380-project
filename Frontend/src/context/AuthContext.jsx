@@ -2,7 +2,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const useAuth = () => {
   return useContext(AuthContext);
@@ -10,47 +10,52 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
-  // Load user from localStorage or API
   useEffect(() => {
-    const storedRole = localStorage.getItem("userRole");
-    if (storedRole) {
-      setUser({ role: storedRole });
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     } else {
       axios
         .get("http://localhost:5000/api/auth/me", { withCredentials: true })
-        .then((res) => setUser(res.data))
+        .then((res) => {
+          const loadedUser = {
+            Role: res.data.role.charAt(0).toUpperCase() + res.data.role.slice(1).toLowerCase(),
+          };
+          localStorage.setItem("user", JSON.stringify(loadedUser));
+          setUser(loadedUser);
+        })
         .catch(() => setUser(null));
     }
   }, []);
 
-
-  // Login function
   const login = async (credentials) => {
     try {
       const res = await axios.post("http://localhost:5000/api/auth/login", credentials, {
         withCredentials: true,
       });
-      console.log("Login Response:", res.data);
 
-      const { role, token } = res.data;
+      const { role, email, token, DoctorID, PatientID } = res.data;
 
-      if (!role) {
-        throw new Error("Invalid login response: Role is missing");
-      }
+      const normalizedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 
-      localStorage.setItem("userRole", role);
+      const userData = {
+        Role: normalizedRole,
+        Email: email,
+        DoctorID: DoctorID || null,
+        PatientID: PatientID || null
+      };
+
+      localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("authToken", token);
-
-      setUser({ role });
+      setUser(userData);
     } catch (error) {
       console.error("Login failed", error);
       throw error;
     }
   };
 
-  // Logout function
   const logout = async () => {
     try {
       await axios.post("http://localhost:5000/api/auth/logout", {}, { withCredentials: true });
@@ -58,8 +63,9 @@ export const AuthProvider = ({ children }) => {
       console.error("Logout failed", error);
     }
     setUser(null);
-    localStorage.removeItem("userRole"); // Clear localStorage
-    window.location.reload(); // Refresh to update UI
+    localStorage.removeItem("user");
+    localStorage.removeItem("authToken");
+    window.location.reload();
   };
 
   return (
@@ -68,5 +74,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export default AuthContext;

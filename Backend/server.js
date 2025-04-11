@@ -11,6 +11,8 @@ import { handlePrescriptionRoutes } from './routes/prescriptionRoutes.js';
 import { handleAppointmentRoutes } from './routes/appointmentRoute.js';
 import { handleTestRoutes } from './routes/testRoutes.js';
 import { handlePatientRoutes } from './routes/patientRoutes.js';
+import { handleDoctorRoutes } from './routes/doctorRoutes.js';
+import { handleReferralRoutes } from './routes/referralRoutes.js';
 
 
 dotenv.config();
@@ -54,6 +56,14 @@ const server = http.createServer(async (req, res) => {
 });
 
 function routeRequest(req, res, pathname, method) {
+  console.log(`Incoming request: ${method} ${pathname}`);
+
+  if ((pathname === '/' || pathname === '') && method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: 'Medical Clinic API is running!' }));
+    return;
+  }
+  
   if (pathname.startsWith('/api/auth')) {
     return handleAuthRoutes(req, res);
   } else if (pathname.startsWith('/api/billing')) {
@@ -68,8 +78,16 @@ function routeRequest(req, res, pathname, method) {
     return handleTestRoutes(req, res);
   } else if (pathname.startsWith('/api/patients')) {
     return handlePatientRoutes(req, res);
-  }
-    else {
+  } else if (
+    pathname.startsWith('/api/doctors') ||
+    pathname.startsWith('/api/patients/assigned')
+  ) {
+    return handleDoctorRoutes(req, res);
+  } else if (pathname.startsWith('/api/referrals')) {
+    return handleReferralRoutes(req, res);
+  }  if (pathname.startsWith('/api/referrals')) {
+  return handleReferralRoutes(req, res);
+} else {
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ message: 'Route not found' }));
   }
