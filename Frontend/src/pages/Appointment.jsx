@@ -5,9 +5,9 @@ const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);  // Ensure this is properly defined
-  const [editingAppointmentID, setEditingAppointmentID] = useState(null); // Define this
-  const [newAppointment, setNewAppointment] = useState({  // Define this to avoid undefined errors
+  const [isEditing, setIsEditing] = useState(false); 
+  const [editingAppointmentID, setEditingAppointmentID] = useState(null); 
+  const [newAppointment, setNewAppointment] = useState({  
     doctorID: '',
     dateTime: '',
     reason: '',
@@ -48,8 +48,8 @@ const Appointments = () => {
   const handleEditAppointment = async () => {
     try {
       const res = await axios.put(`http://localhost:5000/api/appointments/${editingAppointmentID}`, {
-        ...newAppointment, // Include updated doctorID, dateTime, reason, status
-        patientID, // Pass patientID to verify ownership
+        ...newAppointment,
+        patientID, 
       });
       setAppointments((prevAppointments) =>
         prevAppointments.map((appointment) =>
@@ -64,7 +64,7 @@ const Appointments = () => {
   const handleDeleteAppointment = async (appointmentID) => {
     try {
       await axios.delete(`http://localhost:5000/api/appointments/${appointmentID}`, {
-        data: { patientID }, // Send patientID in request body for validation
+        data: { patientID },
       });
       setAppointments((prevAppointments) =>
         prevAppointments.filter((appointment) => appointment.AppointmentID !== appointmentID)

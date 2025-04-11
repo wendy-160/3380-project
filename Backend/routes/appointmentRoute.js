@@ -6,131 +6,66 @@ export async function handleAppointmentRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
-  const matchDateRoute = pathname.match(/^\/api\/appointments\/doctor\/(\d+)\/date\/([\d-]+)$/);
-  if (method === 'GET' && matchDateRoute) {
-    const doctorID = matchDateRoute[1];
-    const date = matchDateRoute[2];
+  const matchAvailableRoute = pathname.match(/^\/api\/appointments\/available\/(\d+)\/([\d-]+)$/);
+  if (method === 'GET' && matchAvailableRoute) {
+    const doctorID = matchAvailableRoute[1];
+    const date = matchAvailableRoute[2];
+
     try {
-      const query = `
-        SELECT a.AppointmentID, a.DateTime, a.Reason,
-               p.FirstName AS PatientName, p.LastName AS PatientLastName
-        FROM appointment a
-        JOIN patient p ON a.PatientID = p.PatientID
-        WHERE a.DoctorID = ? AND DATE(a.DateTime) = ?
-        ORDER BY a.DateTime ASC;
-      `;
-      const [appointments] = await db.execute(query, [doctorID, date]);
-      return sendJson(res, 200, appointments);
+      const startHour = 9;
+      const endHour = 17;
+      const slotDuration = 30;
+      const slots = [];
+
+      for (let hour = startHour; hour < endHour; hour++) {
+        for (let min = 0; min < 60; min += slotDuration) {
+          const time = `${date}T${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}:00`;
+          slots.push(time);
+        }
+      }
+
+      const [booked] = await db.execute(
+        `SELECT DateTime FROM appointment WHERE DoctorID = ? AND DATE(DateTime) = ?`,
+        [doctorID, date]
+      );
+      const bookedTimes = new Set(booked.map(row => new Date(row.DateTime).toISOString()));
+
+      const available = slots.filter(slot => !bookedTimes.has(new Date(slot).toISOString()));
+      return sendJson(res, 200, available);
     } catch (err) {
-      console.error('Error fetching doctor daily appointments:', err.message);
-      return sendJson(res, 500, { message: 'Error fetching appointments by date' });
+      console.error('Error checking available time slots:', err.message);
+      return sendJson(res, 500, { message: 'Error checking availability' });
     }
   }
 
-  if (method === 'GET' && pathname === '/api/appointments' && parsedUrl.searchParams.has('doctorId')) {
-    const doctorID = parsedUrl.searchParams.get('doctorId');
+  const matchUpcomingAppointments = pathname.match(/^\/api\/appointments\/patient\/(\d+)\/upcoming$/);
+  if (method === 'GET' && matchUpcomingAppointments) {
+    const patientID = matchUpcomingAppointments[1];
     try {
-      const query = `
-        SELECT a.AppointmentID, a.PatientID, a.DoctorID, a.DateTime AS AppointmentDate, a.Reason, a.Status,
-               p.FirstName, p.LastName
-        FROM appointment a
-        JOIN patient p ON a.PatientID = p.PatientID
-        WHERE a.DoctorID = ?
-        ORDER BY a.DateTime DESC;
-      `;
-      const [appointments] = await db.execute(query, [doctorID]);
-      return sendJson(res, 200, appointments);
+      const [rows] = await db.execute(`
+        SELECT * FROM appointment
+        WHERE PatientID = ? AND DateTime >= NOW()
+        ORDER BY DateTime ASC
+      `, [patientID]);
+      return sendJson(res, 200, rows);
     } catch (err) {
-      console.error('Error fetching doctor appointments:', err.message);
-      return sendJson(res, 500, { message: 'Error fetching appointments' });
+      console.error("Error fetching upcoming appointments:", err);
+      return sendJson(res, 500, { message: "Error fetching upcoming appointments" });
     }
   }
 
-  const patientIDMatch = pathname.match(/^\/api\/appointments\/(\d+)$/);
-  if (method === 'GET' && patientIDMatch) {
-    const patientID = patientIDMatch[1];
+  const createRoute = method === 'POST' && pathname === '/api/appointments';
+  if (createRoute) {
     try {
-      const query = `
-        SELECT a.AppointmentID, a.DateTime, a.Reason, a.Status,
-               p.FirstName AS PatientName, d.FirstName AS DoctorName
-        FROM appointment a
-        JOIN patient p ON a.PatientID = p.PatientID
-        JOIN doctor d ON a.DoctorID = d.DoctorId
-        WHERE a.PatientID = ?
-        ORDER BY a.DateTime DESC;
-      `;
-      const [appointments] = await db.execute(query, [patientID]);
-      return sendJson(res, 200, appointments);
-    } catch (err) {
-      console.error(err);
-      return sendJson(res, 500, { message: 'Error fetching appointments.' });
-    }
-  }
-
-  if (method === 'POST' && pathname === '/api/appointments') {
-    const { patientID, doctorID, dateTime, reason, status } = req.body;
-    if (!patientID || !doctorID || !dateTime || !reason || !status) {
-      return sendJson(res, 400, { message: 'Missing required fields' });
-    }
-
-    try {
-      const query = `
+      const { PatientID, DoctorID, DateTime, Reason, status } = req.body;
+      const [result] = await db.execute(`
         INSERT INTO appointment (PatientID, DoctorID, DateTime, Reason, Status)
-        VALUES (?, ?, ?, ?, ?);
-      `;
-      const [result] = await db.execute(query, [patientID, doctorID, dateTime, reason, status]);
-      return sendJson(res, 201, {
-        AppointmentID: result.insertId,
-        PatientID: patientID,
-        DoctorID: doctorID,
-        DateTime: dateTime,
-        Reason: reason,
-        Status: status
-      });
+        VALUES (?, ?, ?, ?, ?)
+      `, [PatientID, DoctorID, DateTime, Reason, status]);
+      return sendJson(res, 201, { AppointmentID: result.insertId });
     } catch (err) {
-      console.error(err);
-      return sendJson(res, 500, { message: 'Error adding appointment.' });
-    }
-  }
-
-  const updateMatch = pathname.match(/^\/api\/appointments\/(\d+)$/);
-  if (method === 'PUT' && updateMatch) {
-    const appointmentID = updateMatch[1];
-    const { patientID, doctorID, dateTime, reason, status } = req.body;
-    try {
-      const query = `
-        UPDATE appointment
-        SET DoctorID = ?, DateTime = ?, Reason = ?, Status = ?
-        WHERE AppointmentID = ? AND PatientID = ?;
-      `;
-      const [result] = await db.execute(query, [doctorID, dateTime, reason, status, appointmentID, patientID]);
-      if (result.affectedRows === 0) {
-        return sendJson(res, 404, { message: 'Appointment not found or unauthorized.' });
-      }
-      return sendJson(res, 200, { message: 'Appointment updated successfully.' });
-    } catch (err) {
-      console.error(err);
-      return sendJson(res, 500, { message: 'Error updating appointment.' });
-    }
-  }
-
-  const deleteMatch = pathname.match(/^\/api\/appointments\/(\d+)$/);
-  if (method === 'DELETE' && deleteMatch) {
-    const appointmentID = deleteMatch[1];
-    const { patientID } = req.body;
-    try {
-      const query = `
-        DELETE FROM appointment
-        WHERE AppointmentID = ? AND PatientID = ?;
-      `;
-      const [result] = await db.execute(query, [appointmentID, patientID]);
-      if (result.affectedRows === 0) {
-        return sendJson(res, 404, { message: 'Appointment not found or unauthorized.' });
-      }
-      return sendJson(res, 200, { message: 'Appointment deleted successfully.' });
-    } catch (err) {
-      console.error(err);
-      return sendJson(res, 500, { message: 'Error deleting appointment.' });
+      console.error("Create appointment error:", err);
+      return sendJson(res, 500, { message: "Could not create appointment" });
     }
   }
 

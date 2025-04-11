@@ -23,7 +23,6 @@ const AdminBilling = () => {
       const token = localStorage.getItem('token');
       let url = '/api/admin/billings';
       
-      // Add query parameters for filtering
       const queryParams = new URLSearchParams();
       if (filters.status) queryParams.append('status', filters.status);
       if (filters.startDate) queryParams.append('startDate', filters.startDate);
@@ -79,7 +78,6 @@ const AdminBilling = () => {
   };
 
   const handleExportData = () => {
-    // Create CSV content
     const headers = ['Billing ID', 'Patient Name', 'Service Type', 'Amount', 'Status', 'Billing Date', 'Payment Date'];
     const csvContent = [
       headers.join(','),
@@ -94,7 +92,6 @@ const AdminBilling = () => {
       ].join(','))
     ].join('\n');
 
-    // Create and trigger download
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');

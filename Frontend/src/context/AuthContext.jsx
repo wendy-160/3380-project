@@ -37,7 +37,6 @@ export const AuthProvider = ({ children }) => {
       });
 
       const { role, email, token, DoctorID, PatientID } = res.data;
-
       const normalizedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 
       const userData = {

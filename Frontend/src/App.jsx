@@ -7,7 +7,7 @@ import Register from "./pages/Register";
 import Dashboard from './pages/Dashboard.jsx';
 import Reports from './pages/Reports.jsx';  
 import PatientBilling from './pages/PatientBilling.jsx';
-import AdminBilling from './pages/AdminBilling.jsx'
+import AdminBilling from './pages/AdminBilling.jsx';
 import About from './components/AboutUs.jsx';
 import Locations from './components/Locations.jsx';
 import Home from './Home.jsx';
@@ -26,13 +26,13 @@ const Navbar = () => {
         <Link to="/locations">Locations</Link>
         {user && (
           <>
-          <Link to="/dashboard">Dashboard</Link>
-          {user.role === "Admin" && <Link to="/reports">Reports</Link>}
-          {user.role === "Doctor" && <Link to="/prescriptions">Prescriptions</Link>}
-          {user.role === "Doctor" && <Link to="/tests">Medical Tests</Link>}
-          {user.role === "Patient" && <Link to="/PatientBilling">Billing</Link>}
-          {user.role === "Admin" && <Link to="/AdminBilling">Billing</Link>}
-          <button onClick={() => { logout(); window.location.href = "/"; }} className="nav-button">Logout</button>
+            <Link to="/dashboard">Dashboard</Link>
+            {user.Role === "Admin" && <Link to="/reports">Reports</Link>}
+            {user.Role === "Doctor" && <Link to="/prescriptions">Prescriptions</Link>}
+            {user.Role === "Doctor" && <Link to="/tests">Medical Tests</Link>}
+            {user.Role === "Patient" && <Link to="/PatientBilling">Billing</Link>}
+            {user.Role === "Admin" && <Link to="/AdminBilling">Billing</Link>}
+            <button onClick={() => { logout(); window.location.href = "/"; }} className="nav-button">Logout</button>
           </>
         )}
       </div>
@@ -47,19 +47,19 @@ const Navbar = () => {
   );
 };
 
-
 const AdminRoute = ({ element }) => {
   const { user } = useAuth();
-  return user && user.role === "Admin" ? element : <Navigate to="/dashboard" />;
+  return user && user.Role === "Admin" ? element : <Navigate to="/dashboard" />;
 };
+
 const DoctorRoute = ({ element }) => {
   const { user } = useAuth();
-  return user && user.role === "Doctor" ? element : <Navigate to="/dashboard" />;
+  return user && user.Role === "Doctor" ? element : <Navigate to="/dashboard" />;
 };
 
 const PatientRoute = ({ element }) => {
   const { user } = useAuth();
-  return user && user.role === "Patient" ? element : <Navigate to="/dashboard" />;
+  return user && user.Role === "Patient" ? element : <Navigate to="/dashboard" />;
 };
 
 export default function App() {
@@ -67,22 +67,21 @@ export default function App() {
     <AuthProvider>
       <div>
         <Navbar />
-        
+
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/about-us" element={<About/>} />
-          <Route path="/locations" element={<Locations/>}/>
+          <Route path="/about-us" element={<About />} />
+          <Route path="/locations" element={<Locations />} />
           <Route path="/tests" element={<DoctorRoute element={<MedicalTests />} />} />
           <Route path="/prescriptions" element={<DoctorRoute element={<Prescriptions />} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/reports" element={<AdminRoute element={<Reports />} />} /> 
-          <Route path="/PatientBilling" element={<PatientBilling/>}/> 
-          <Route path="/AdminBilling" element={<AdminBilling/>}/> 
-          <Route path="/appointments" element={<PatientRoute element={<Appointments/>}/>}/>
+          <Route path="/reports" element={<AdminRoute element={<Reports />} />} />
+          <Route path="/PatientBilling" element={<PatientRoute element={<PatientBilling />} />} />
+          <Route path="/AdminBilling" element={<AdminRoute element={<AdminBilling />} />} />
+          <Route path="/appointments" element={<PatientRoute element={<Appointments />} />} />
         </Routes>
-        
       </div>
     </AuthProvider>
   );

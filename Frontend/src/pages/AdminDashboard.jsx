@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext'; // Assuming you have an auth context to manage user sessions
+import { useAuth } from '../context/AuthContext'; 
 import axios from 'axios';
-import './AdminDashboard.css'; // Add your styles here
+import './AdminDashboard.css'; 
 
 const AdminDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Fetch appointments and users when the component mounts
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {

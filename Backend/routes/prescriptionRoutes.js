@@ -6,20 +6,17 @@ export async function handlePrescriptionRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
-  if (method === 'GET' && pathname === '/api/prescriptions') {
+  const matchActive = pathname.match(/^\/api\/prescriptions\/patient\/(\d+)\/active$/);
+  if (method === 'GET' && matchActive) {
+    const patientID = matchActive[1];
     try {
       const [rows] = await db.query(`
-        SELECT 
-          p.PrescriptionID, p.PatientID, p.DoctorID, p.AppointmentID,
-          p.MedicationMame, p.Dosage, p.Frequency,
-          p.StartDate, p.EndDate, p.Notes, p.status,
-          CONCAT(pt.FirstName, ' ', pt.LastName) AS PatientName
-        FROM prescription p
-        JOIN patient pt ON p.PatientID = pt.PatientID
-      `);
+        SELECT * FROM prescription
+        WHERE PatientID = ? AND status = 'Active'
+      `, [patientID]);
       return sendJson(res, 200, rows);
     } catch (err) {
-      console.error('Error fetching prescriptions:', err.message);
+      console.error('Error fetching active prescriptions:', err.message);
       return sendJson(res, 500, { message: 'Error fetching prescriptions' });
     }
   }
@@ -42,7 +39,7 @@ export async function handlePrescriptionRoutes(req, res) {
       const [result] = await db.query(`
         INSERT INTO prescription (
           PatientID, DoctorID, AppointmentID,
-          MedicationMame, Dosage, Frequency,
+          MedicationName, Dosage, Frequency,
           StartDate, EndDate, Notes, status
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
@@ -57,8 +54,7 @@ export async function handlePrescriptionRoutes(req, res) {
         notes,
         status
       ]);
-
-      return sendJson(res, 201, { message: 'Prescription created', PrescriptionID: result.insertId });
+      return sendJson(res, 201, { PrescriptionID: result.insertId });
     } catch (err) {
       console.error('Error creating prescription:', err.message);
       return sendJson(res, 500, { message: 'Error creating prescription' });

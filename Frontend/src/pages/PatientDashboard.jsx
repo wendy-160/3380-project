@@ -16,37 +16,32 @@ const PatientDashboard = () => {
     const fetchPatientData = async () => {
       try {
         const token = localStorage.getItem('token');
-        
-        // Fetch patient profile
-        const profileResponse = await fetch(`/api/patients/${currentPatientID}`, {
-          headers: { Authorization: `Bearer ${token}` }
+
+        const profileRes = await fetch(`/api/patients/${currentPatientID}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const profileData = await profileResponse.json();
+        const profileData = await profileRes.json();
         setProfile(profileData);
 
-        // Fetch primary physician
-        const physicianResponse = await fetch(`/api/patients/${currentPatientID}/primary-physician`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const doctorRes = await fetch(`/api/patients/${currentPatientID}/primary-physician`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const physicianData = await physicianResponse.json();
-        setPrimaryPhysician(physicianData);
+        if (doctorRes.ok) {
+          const doctorData = await doctorRes.json();
+          setPrimaryPhysician(doctorData);
+        }
 
-        // Fetch upcoming appointments
-        const appointmentsResponse = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const appointmentRes = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const appointmentsData = await appointmentsResponse.json();
-        setUpcomingAppointments(appointmentsData);
+        setUpcomingAppointments(await appointmentRes.json());
 
-        // Fetch prescriptions
-        const prescriptionsResponse = await fetch(`/api/prescriptions/patient/${currentPatientID}/active`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const prescriptionRes = await fetch(`/api/prescriptions/patient/${currentPatientID}/active`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const prescriptionsData = await prescriptionsResponse.json();
-        setPrescriptions(prescriptionsData);
-
-      } catch (error) {
-        console.error('Error fetching patient data:', error);
+        setPrescriptions(await prescriptionRes.json());
+      } catch (err) {
+        console.error("Error fetching patient data:", err);
       }
     };
 
@@ -54,22 +49,29 @@ const PatientDashboard = () => {
   }, [currentPatientID]);
 
   const handleDateSelection = async (date) => {
+    setSelectedDate(date);
+    if (!primaryPhysician?.DoctorID) {
+      console.warn("Primary physician not available");
+      return;
+    }
     try {
       const token = localStorage.getItem('token');
-      setSelectedDate(date);
-      
-      // Fetch available time slots for the selected date
-      const response = await fetch(`/api/appointments/available/${primaryPhysician.DoctorID}/${date}`, {
+      const res = await fetch(`/api/appointments/available/${primaryPhysician.DoctorID}/${date}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const timeSlots = await response.json();
-      setAvailableTimeSlots(timeSlots);
+      const data = await res.json();
+      setAvailableTimeSlots(data);
     } catch (error) {
-      console.error('Error fetching available time slots:', error);
+      console.error("Error fetching time slots:", error);
     }
   };
 
-  const handleCreateAppointment = async (appointmentData) => {
+  const handleCreateAppointment = async () => {
+    const selectedTime = document.getElementById("time").value;
+    const reason = document.getElementById("reason").value;
+
+    if (!selectedTime || !reason) return alert("Time and reason required.");
+
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('/api/appointments', {
@@ -79,17 +81,16 @@ const PatientDashboard = () => {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          ...appointmentData,
           PatientID: currentPatientID,
-          DoctorID: primaryPhysician.DoctorID,
-          ScheduledVia: 'WebPortal',
+          DoctorID: primaryPhysician?.DoctorID,
+          DateTime: selectedTime,
+          Reason: reason,
           status: 'Scheduled'
         })
       });
 
       if (response.ok) {
         setIsAppointmentModalOpen(false);
-        // Refresh appointments list
         const updatedAppointments = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -101,181 +102,100 @@ const PatientDashboard = () => {
     }
   };
 
-  const formatDateTime = (dateTimeString) => {
-    return new Date(dateTimeString).toLocaleString([], {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const formatDateTime = (dt) =>
+    new Date(dt).toLocaleString([], { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="patient-dashboard">
       <h1 className="dashboard-title">Patient Dashboard</h1>
 
       <div className="dashboard-grid">
-        {/* Profile Section */}
+        {/* Profile */}
         <div className="dashboard-card profile-section">
-          <div className="card-header">
-            <FiUser className="card-icon" />
-            <h2 className="card-title">My Profile</h2>
-          </div>
+          <div className="card-header"><FiUser className="card-icon" /><h2>My Profile</h2></div>
           {profile && (
             <div className="profile-details">
-              <p className="profile-name">{profile.FirstName} {profile.LastName}</p>
-              <p className="profile-info">
-                <FiPhone className="info-icon" />
-                {profile.PhoneNumber}
-              </p>
-              <p className="profile-info">
-                <FiMail className="info-icon" />
-                {profile.Email}
-              </p>
+              <p>{profile.FirstName} {profile.LastName}</p>
+              <p><FiPhone /> {profile.PhoneNumber}</p>
+              <p><FiMail /> {profile.Email}</p>
             </div>
           )}
         </div>
 
-        {/* Primary Physician Section */}
+        {/* Primary Doctor */}
         <div className="dashboard-card physician-section">
-          <div className="card-header">
-            <FiUserPlus className="card-icon" />
-            <h2 className="card-title">My Primary Physician</h2>
-          </div>
-          {primaryPhysician && (
-            <div className="physician-details">
+          <div className="card-header"><FiUserPlus className="card-icon" /><h2>My Primary Physician</h2></div>
+          {primaryPhysician ? (
+            <div>
               <h3>Dr. {primaryPhysician.FirstName} {primaryPhysician.LastName}</h3>
-              <p className="specialization">{primaryPhysician.Specialization}</p>
-              <p className="contact-info">
-                <FiPhone className="info-icon" />
-                {primaryPhysician.PhoneNumber}
-              </p>
+              <p>{primaryPhysician.Specialization}</p>
+              <p><FiPhone /> {primaryPhysician.PhoneNumber}</p>
             </div>
+          ) : (
+            <p>Primary physician not assigned</p>
           )}
         </div>
 
-        {/* Appointments Section */}
+        {/* Appointments */}
         <div className="dashboard-card appointments-section">
-          <div className="card-header">
-            <FiCalendar className="card-icon" />
-            <h2 className="card-title">My Appointments</h2>
-          </div>
-          <button 
-            className="schedule-appointment-btn"
-            onClick={() => setIsAppointmentModalOpen(true)}
-          >
-            Schedule New Appointment
-          </button>
+          <div className="card-header"><FiCalendar className="card-icon" /><h2>Appointments</h2></div>
+          <button className="schedule-appointment-btn" onClick={() => setIsAppointmentModalOpen(true)}>Schedule New Appointment</button>
           <div className="appointments-list">
-            {upcomingAppointments.map(appointment => (
-              <div key={appointment.AppointmentID} className="appointment-item">
-                <div className="appointment-time">
-                  <FiClock className="time-icon" />
-                  <span>{formatDateTime(appointment.DateTime)}</span>
-                </div>
-                <div className="appointment-details">
-                  <p className="appointment-reason">{appointment.Reason}</p>
-                  <p className="appointment-status">{appointment.status}</p>
-                </div>
+            {upcomingAppointments.map(appt => (
+              <div key={appt.AppointmentID} className="appointment-item">
+                <div><FiClock /> {formatDateTime(appt.DateTime)}</div>
+                <div>{appt.Reason} - {appt.status}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Prescriptions Section */}
+        {/* Prescriptions */}
         <div className="dashboard-card prescriptions-section">
-          <div className="card-header">
-            <h2 className="card-title">Current Prescriptions</h2>
-          </div>
-          <div className="prescriptions-list">
-            {prescriptions.map(prescription => (
-              <div key={prescription.PrescriptionID} className="prescription-item">
-                <h3 className="medication-name">{prescription.MedicationName}</h3>
-                <p className="dosage">{prescription.Dosage}</p>
-                <p className="instructions">{prescription.Instructions}</p>
-              </div>
-            ))}
-          </div>
+          <div className="card-header"><h2>Prescriptions</h2></div>
+          {prescriptions.map(p => (
+            <div key={p.PrescriptionID}>
+              <h3>{p.MedicationName}</h3>
+              <p>{p.Dosage} - {p.Instructions}</p>
+            </div>
+          ))}
         </div>
       </div>
-      
-      {/* Appointment Scheduling Modal */}
+
+      {/* Modal */}
       {isAppointmentModalOpen && (
         <div className="modal-overlay">
           <div className="appointment-modal">
             <div className="modal-header">
               <h2>Schedule Appointment</h2>
-              <button 
-                className="close-modal-btn"
-                onClick={() => setIsAppointmentModalOpen(false)}
-              >
-                <FiX />
-              </button>
+              <button onClick={() => setIsAppointmentModalOpen(false)}><FiX /></button>
             </div>
             <div className="modal-body">
-              <form className="appointment-form">
-                <div className="form-group">
-                  <label htmlFor="date">Select Date</label>
-                  <input
-                    type="date"
-                    id="date"
-                    className="form-control"
-                    min={new Date().toISOString().split('T')[0]}
-                    onChange={(e) => handleDateSelection(e.target.value)}
-                  />
-                </div>
-
+              <form onSubmit={(e) => { e.preventDefault(); handleCreateAppointment(); }}>
+                <label>Date</label>
+                <input
+                  type="date"
+                  id="date"
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => handleDateSelection(e.target.value)}
+                  disabled={!primaryPhysician}
+                />
                 {selectedDate && (
-                  <div className="form-group">
-                    <label htmlFor="time">Available Time Slots</label>
-                    <select id="time" className="form-control">
+                  <>
+                    <label>Time</label>
+                    <select id="time">
                       <option value="">Select a time</option>
-                      {availableTimeSlots.map((slot, index) => (
-                        <option key={index} value={slot}>
-                          {new Date(slot).toLocaleTimeString([], { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
+                      {availableTimeSlots.map((slot, idx) => (
+                        <option key={idx} value={slot}>
+                          {new Date(slot).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </option>
                       ))}
                     </select>
-                  </div>
+                  </>
                 )}
-
-                <div className="form-group">
-                  <label htmlFor="reason">Reason for Visit</label>
-                  <textarea 
-                    id="reason" 
-                    className="form-control" 
-                    rows="3"
-                    placeholder="Please describe the reason for your visit"
-                  ></textarea>
-                </div>
-
-                <div className="form-actions">
-                  <button 
-                    type="button" 
-                    className="cancel-btn"
-                    onClick={() => setIsAppointmentModalOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="submit-btn"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const formData = {
-                        DateTime: document.getElementById('time').value,
-                        Reason: document.getElementById('reason').value,
-                      };
-                      handleCreateAppointment(formData);
-                    }}
-                  >
-                    Schedule Appointment
-                  </button>
-                </div>
+                <label>Reason</label>
+                <textarea id="reason" rows="3" placeholder="Describe reason for your visit" />
+                <button type="submit">Schedule</button>
               </form>
             </div>
           </div>
