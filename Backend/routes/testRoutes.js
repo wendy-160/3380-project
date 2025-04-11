@@ -37,6 +37,16 @@ export async function handleTestRoutes(req, res) {
     }
   }
 
+  if (method === 'GET' && pathname === '/api/test-connection') {
+    try {
+      const [rows] = await db.query('SELECT 1');
+      return sendJson(res, 200, { message: '✅ Database connection successful' });
+    } catch (err) {
+      console.error('Database connection error:', err.message);
+      return sendJson(res, 500, { message: '❌ Database connection failed', error: err.message });
+    }
+  }
+
   return sendJson(res, 404, { message: 'Test route not found' });
 }
 
