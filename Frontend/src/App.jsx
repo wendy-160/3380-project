@@ -12,6 +12,7 @@ import About from './components/AboutUs.jsx';
 import Locations from './components/Locations.jsx';
 import MedicalRecordPage from './pages/MedicalRecord.jsx';
 import ClinicManagement from './pages/ClinicManagement.jsx';
+import DoctorClinicAssignment from './pages/DocOffice.jsx';
 import Home from './Home.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import './App.css';
@@ -36,6 +37,7 @@ const Navbar = () => {
             {user.Role === "Admin" && <Link to="/AdminBilling">Billing</Link>}
             {user.Role === "Doctor" && <Link to="/MedicalRecord">MedicalRecord</Link>}
             {user.Role === "Admin" && <Link to="/clinic-management">Clinic Management</Link>}
+            {user.Role === "Admin" && <Link to="/doctor-office">Doctor-Clinic</Link>}
             <button onClick={() => { logout(); window.location.href = "/"; }} className="nav-button">Logout</button>
           </>
         )}
@@ -84,6 +86,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reports" element={<AdminRoute element={<Reports />} />} />
           <Route path="/clinic-management" element={<AdminRoute element={<ClinicManagement/>} />} />
+          <Route path="/doctor-office" element={<AdminRoute element={<DoctorClinicAssignment />} />} />
           <Route path="/PatientBilling" element={<PatientRoute element={<PatientBilling />} />} />
           <Route path="/AdminBilling" element={<AdminRoute element={<AdminBilling />} />} />
           <Route path="/appointments" element={<PatientRoute element={<Appointments />} />} />

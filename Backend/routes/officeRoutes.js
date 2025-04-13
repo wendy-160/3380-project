@@ -1,12 +1,4 @@
-// routes/office.js
-import { 
-    getAllOffices, 
-    getOfficesByState, 
-    getOfficeById, 
-    updateOffice, 
-    createOffice, 
-    deleteOffice 
-} from '../controllers/officeController.js';
+import { getAllOffices, getOfficesByState, getOfficeById, updateOffice, createOffice, deleteOffice } from '../controllers/officeController.js';
 
 export async function handleOfficeRoutes(req, res){
     const url = req.url;

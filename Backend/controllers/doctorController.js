@@ -1,8 +1,21 @@
 import db from '../db.js';
 
+export async function getAllDoctors(req, res) {
+  try {
+    const [rows] = await db.query('SELECT * FROM doctor');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(rows));
+  } catch (err) {
+    console.error('Error fetching all doctors:', err);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: err.message }));
+  }
+}
+
+
 export async function getSpecialists(req, res) {
   try {
-    const [rows] = await db.query(`SELECT * FROM doctor WHERE Specialization != 'General'`);
+    const [rows] = await db.query(`SELECT * FROM doctor WHERE Specialization != 'Primary Care Physician'`);
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(rows));
   } catch (err) {

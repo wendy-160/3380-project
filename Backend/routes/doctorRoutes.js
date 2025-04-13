@@ -1,12 +1,16 @@
-import { getSpecialists, getAssignedPatients, getPrimaryPhysician } from '../controllers/doctorController.js';
+import { getAllDoctors, getSpecialists, getAssignedPatients, getPrimaryPhysician } from '../controllers/doctorController.js';
 
 export function handleDoctorRoutes(req, res) {
   const url = req.url;
   const method = req.method;
 
+  if (url === '/api/doctors' && method === 'GET') {
+    return getAllDoctors(req, res);
+  }
   if (url === '/api/doctors/specialists' && method === 'GET') {
     return getSpecialists(req, res);
   }
+  
 
   // Existing route for assigned patients
   const assignedMatch = url.match(/^\/api\/patients\/assigned\/(\d+)$/);
