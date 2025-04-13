@@ -27,7 +27,7 @@ export async function handlePatientRoutes(req, res) {
       res.end(JSON.stringify(rows[0]));
       return;
     } catch (err) {
-      console.error('❌ Error fetching primary physician:', err);
+      console.error('Error fetching primary physician:', err);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ message: 'Error fetching primary physician' }));
       return;
@@ -55,7 +55,7 @@ export async function handlePatientRoutes(req, res) {
       res.end(JSON.stringify(rows[0]));
       return;
     } catch (err) {
-      console.error('❌ Error fetching patient by ID:', err);
+      console.error('Error fetching patient by ID:', err);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ message: 'Error fetching patient data' }));
       return;
@@ -77,7 +77,7 @@ export async function handlePatientRoutes(req, res) {
       res.end(JSON.stringify(rows));
       return;
     } catch (err) {
-      console.error('❌ Error fetching doctor patients:', err);
+      console.error('Error fetching doctor patients:', err);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ message: 'Error fetching patients' }));
       return;

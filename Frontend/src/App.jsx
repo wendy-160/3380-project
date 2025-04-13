@@ -10,6 +10,8 @@ import PatientBilling from './pages/PatientBilling.jsx';
 import AdminBilling from './pages/AdminBilling.jsx';
 import About from './components/AboutUs.jsx';
 import Locations from './components/Locations.jsx';
+import MedicalRecordPage from './pages/MedicalRecord.jsx';
+import ClinicManagement from './pages/ClinicManagement.jsx';
 import Home from './Home.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import './App.css';
@@ -32,6 +34,8 @@ const Navbar = () => {
             {user.Role === "Doctor" && <Link to="/tests">Medical Tests</Link>}
             {user.Role === "Patient" && <Link to="/PatientBilling">Billing</Link>}
             {user.Role === "Admin" && <Link to="/AdminBilling">Billing</Link>}
+            {user.Role === "Doctor" && <Link to="/MedicalRecord">MedicalRecord</Link>}
+            {user.Role === "Admin" && <Link to="/clinic-management">Clinic Management</Link>}
             <button onClick={() => { logout(); window.location.href = "/"; }} className="nav-button">Logout</button>
           </>
         )}
@@ -72,12 +76,14 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about-us" element={<About />} />
           <Route path="/locations" element={<Locations />} />
+          <Route path="/MedicalRecord" element={<MedicalRecordPage/>} />
           <Route path="/tests" element={<DoctorRoute element={<MedicalTests />} />} />
           <Route path="/prescriptions" element={<DoctorRoute element={<Prescriptions />} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reports" element={<AdminRoute element={<Reports />} />} />
+          <Route path="/clinic-management" element={<AdminRoute element={<ClinicManagement/>} />} />
           <Route path="/PatientBilling" element={<PatientRoute element={<PatientBilling />} />} />
           <Route path="/AdminBilling" element={<AdminRoute element={<AdminBilling />} />} />
           <Route path="/appointments" element={<PatientRoute element={<Appointments />} />} />

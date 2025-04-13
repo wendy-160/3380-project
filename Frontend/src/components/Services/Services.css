@@ -1,0 +1,51 @@
+.services-section {
+    padding: 80px 0;
+    background-color: #f9faff;
+}
+
+.services-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.services-heading {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.services-heading h2 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #333;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 15px;
+}
+
+.primary-grid, .obgyn-grid, .derm-grid {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    padding: 25px 30px;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.primary-grid:hover, .obgyn-grid:hover, .derm-grid:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.primary-grid h3, .obgyn-grid h3, .derm-grid h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    padding-left: 10px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+

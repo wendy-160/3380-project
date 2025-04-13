@@ -22,7 +22,7 @@ export async function handleAppointmentRoutes(req, res) {
 
       return sendJson(res, 200, rows);
     } catch (err) {
-      console.error('❌ Error fetching doctor daily appointments:', err);
+      console.error('Error fetching doctor daily appointments:', err);
       return sendJson(res, 500, { message: 'Error fetching doctor appointments' });
     }
   }
@@ -54,7 +54,7 @@ export async function handleAppointmentRoutes(req, res) {
 
       return sendJson(res, 200, available);
     } catch (err) {
-      console.error('❌ Error checking available time slots:', err.message);
+      console.error('Error checking available time slots:', err.message);
       return sendJson(res, 500, { message: 'Error checking availability' });
     }
   }
@@ -70,7 +70,7 @@ export async function handleAppointmentRoutes(req, res) {
       `, [patientID]);
       return sendJson(res, 200, rows);
     } catch (err) {
-      console.error("❌ Error fetching upcoming appointments:", err);
+      console.error("Error fetching upcoming appointments:", err);
       return sendJson(res, 500, { message: "Error fetching upcoming appointments" });
     }
   }
@@ -87,7 +87,7 @@ export async function handleAppointmentRoutes(req, res) {
 
       return sendJson(res, 201, { AppointmentID: result.insertId });
     } catch (err) {
-      console.error("❌ Create appointment error:", err);
+      console.error("Create appointment error:", err);
       return sendJson(res, 500, { message: "Could not create appointment" });
     }
   }

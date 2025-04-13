@@ -1,0 +1,130 @@
+.languages-card {
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    margin: 60px auto;
+    max-width: 1200px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.languages-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.languages {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    width: 100%;
+}
+
+.languages-left {
+    flex-basis: 45%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.languages-right {
+    flex-basis: 55%;
+}
+
+.doc {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+
+.languages h2 {
+    font-weight: 700;
+    font-size: 18px;
+    color: #212EA0;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+    position: relative;
+    display: inline-block;
+}
+
+.languages h2:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 40px;
+    height: 3px;
+    background-color: #212EA0;
+}
+
+.languages p {
+    color: #444;
+    margin-bottom: 20px;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.language-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.language-tag {
+    background-color: #f0f2ff;
+    color: #212EA0;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+
+@media (max-width: 992px) {
+    .languages-card {
+        padding: 30px;
+        margin: 40px auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .languages {
+        flex-direction: column;
+        text-align: center;
+        gap: 25px;
+    }
+
+    .languages-right {
+        padding-top: 10px;
+    }
+    
+    .languages h2:after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .language-list {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .languages-card {
+        padding: 25px;
+        margin: 30px auto;
+    }
+    
+    .languages p {
+        font-size: 16px;
+    }
+    
+    .language-tag {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}

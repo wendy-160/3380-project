@@ -1,0 +1,93 @@
+.mission-section {
+    padding: 80px 0;
+    background-color: #f9faff;
+    position: relative;
+    overflow: hidden;
+}
+
+.mission-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 30px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.mission-subtitle {
+    color: #212EA0;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    display: inline-block;
+    position: relative;
+}
+
+.mission-statement {
+    font-size: 17px;
+    line-height: 1.6;
+    color: #333;
+    font-weight: 400;
+    margin: 0 auto;
+    position: relative;
+}
+
+.mission-statement strong {
+    color: #212EA0;
+    font-weight: 600;
+}
+
+@media (max-width: 992px) {
+    .mission-section {
+        padding: 60px 0;
+    }
+    
+    .mission-statement {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 768px) {
+    .mission-section {
+        padding: 50px 0;
+    }
+    
+    .mission-subtitle {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+    
+    .mission-statement {
+        font-size: 20px;
+    }
+    
+    .mission-subtitle:before,
+    .mission-subtitle:after {
+        width: 20px;
+    }
+    
+    .mission-subtitle:before {
+        left: -30px;
+    }
+    
+    .mission-subtitle:after {
+        right: -30px;
+    }
+}
+
+@media (max-width: 576px) {
+    .mission-section {
+        padding: 40px 0;
+    }
+    
+    .mission-statement {
+        font-size: 18px;
+    }
+    
+    .mission-subtitle:before,
+    .mission-subtitle:after {
+        display: none;
+    }
+}
