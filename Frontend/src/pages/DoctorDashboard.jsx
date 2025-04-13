@@ -21,22 +21,21 @@ const DoctorDashboard = () => {
     const fetchDoctorData = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token');
         const today = new Date().toISOString().split('T')[0];
 
-        const appointmentsResponse = await axios.get(`http://localhost:5000/api/appointments/doctor/${currentDoctorID}/date/${today}`);
-        setTodaysAppointments(Array.isArray(appointmentsResponse.data) ? appointmentsResponse.data : []);
+        const appointmentsRes = await axios.get(`http://localhost:5000/api/appointments/doctor/${currentDoctorID}/date/${today}`);
+        setTodaysAppointments(Array.isArray(appointmentsRes.data) ? appointmentsRes.data : []);
 
-        const referralsResponse = await axios.get(`http://localhost:5000/api/referrals/pending/doctor/${currentDoctorID}`);
-        setPendingReferrals(Array.isArray(referralsResponse.data) ? referralsResponse.data : []);
+        const referralsRes = await axios.get(`http://localhost:5000/api/referrals/pending/doctor/${currentDoctorID}`);
+        setPendingReferrals(Array.isArray(referralsRes.data) ? referralsRes.data : []);
 
-        const specialistsResponse = await axios.get('http://localhost:5000/api/doctors/specialists');
-        setSpecialists(Array.isArray(specialistsResponse.data) ? specialistsResponse.data : []);
+        const specialistsRes = await axios.get('http://localhost:5000/api/doctors/specialists');
+        setSpecialists(Array.isArray(specialistsRes.data) ? specialistsRes.data : []);
 
-        const patientsResponse = await axios.get(`http://localhost:5000/api/patients/doctor/${currentDoctorID}`);
-        setPatients(Array.isArray(patientsResponse.data) ? patientsResponse.data : []);
-      } catch (error) {
-        console.error('Error fetching doctor data:', error);
+        const patientsRes = await axios.get(`http://localhost:5000/api/patients/doctor/${currentDoctorID}`);
+        setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
+      } catch (err) {
+        console.error('Error fetching doctor data:', err);
       } finally {
         setIsLoading(false);
       }
@@ -48,46 +47,66 @@ const DoctorDashboard = () => {
   const handleCreateReferral = () => setIsReferralModalOpen(true);
 
   const handleSaveReferral = async () => {
+    if (!selectedPatient || !selectedSpecialist || !referralReason) {
+      alert('Please complete all required fields.');
+      return;
+    }
+
+    if (parseInt(selectedSpecialist) === currentDoctorID) {
+      alert('You cannot refer a patient to yourself.');
+      return;
+    }
+
+    const referralData = {
+      PatientID: parseInt(selectedPatient),
+      SpecialistID: parseInt(selectedSpecialist),
+      Reason: referralReason,
+      Notes: referralNotes,
+      ReferredBy: currentDoctorID
+    };
+
     try {
-      const referralData = {
-        PatientID: selectedPatient,
-        SpecialistID: selectedSpecialist,
-        Reason: referralReason,
-        Notes: referralNotes,
-        ReferredBy: currentDoctorID,
-      };
-      await axios.post('http://localhost:5000/api/referrals', referralData);
+      const response = await axios.post('http://localhost:5000/api/referrals', referralData, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+
       setIsReferralModalOpen(false);
       setSelectedPatient('');
       setSelectedSpecialist('');
       setReferralReason('');
       setReferralNotes('');
+
+      if (response.data.updatedPendingReferrals) {
+        setPendingReferrals(response.data.updatedPendingReferrals);
+      }
+
+      alert('Referral created successfully!');
     } catch (error) {
       console.error('Error creating referral:', error);
+      alert('Failed to create referral.');
     }
   };
 
   const handleApproveReferral = async (referralID) => {
     try {
       await axios.put(`http://localhost:5000/api/referrals/${referralID}/approve`);
-      setPendingReferrals(pendingReferrals.filter(ref => ref.ReferralID !== referralID));
-    } catch (error) {
-      console.error('Error approving referral:', error);
+      setPendingReferrals(prev => prev.filter(ref => ref.ReferralId !== referralID));
+    } catch (err) {
+      console.error('Error approving referral:', err);
     }
   };
 
   const handleRejectReferral = async (referralID) => {
     try {
       await axios.put(`http://localhost:5000/api/referrals/${referralID}/reject`);
-      setPendingReferrals(pendingReferrals.filter(ref => ref.ReferralID !== referralID));
-    } catch (error) {
-      console.error('Error rejecting referral:', error);
+      setPendingReferrals(prev => prev.filter(ref => ref.ReferralId !== referralID));
+    } catch (err) {
+      console.error('Error rejecting referral:', err);
     }
   };
 
-  const formatTime = (dateTimeString) => {
-    return new Date(dateTimeString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
+  const formatTime = (dt) =>
+    new Date(dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="doctor-dashboard">
@@ -102,23 +121,21 @@ const DoctorDashboard = () => {
 
           {todaysAppointments.length > 0 ? (
             <div className="appointments-list">
-              {todaysAppointments.map((appointment) => (
-                <div key={appointment.AppointmentID} className="appointment-item">
+              {todaysAppointments.map(appt => (
+                <div key={appt.AppointmentID} className="appointment-item">
                   <div className="appointment-time">
                     <FiClock className="time-icon" />
-                    <span>{formatTime(appointment.DateTime)}</span>
+                    <span>{formatTime(appt.DateTime)}</span>
                   </div>
                   <div className="appointment-details">
-                    <h3 className="patient-name">{appointment.PatientName}</h3>
-                    <p className="appointment-reason">{appointment.Reason}</p>
+                    <h3 className="patient-name">{appt.PatientName} {appt.PatientLastName}</h3>
+                    <p className="appointment-reason">{appt.Reason}</p>
                   </div>
                   <FiChevronRight className="chevron-icon" />
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="no-data">No appointments scheduled for today.</p>
-          )}
+          ) : <p className="no-data">No appointments scheduled for today.</p>}
         </div>
 
         <div className="dashboard-card referrals-section">
@@ -129,31 +146,21 @@ const DoctorDashboard = () => {
 
           {pendingReferrals.length > 0 ? (
             <div className="referrals-list">
-              {pendingReferrals.map((referral) => (
-                <div key={referral.ReferralID} className="referral-item">
+              {pendingReferrals.map(ref => (
+                <div key={ref.ReferralId} className="referral-item">
                   <div className="referral-details">
-                    <h3 className="patient-name">{referral.PatientName}</h3>
-                    <p className="referral-info">
-                      <span className="label">To:</span> Dr. {referral.SpecialistName} ({referral.Specialty})
-                    </p>
-                    <p className="referral-reason">
-                      <span className="label">Reason:</span> {referral.Reason}
-                    </p>
+                    <h3 className="patient-name">{ref.PatientName}</h3>
+                    <p className="referral-info"><span className="label">To:</span> Dr. {ref.SpecialistName} ({ref.Specialty})</p>
+                    <p className="referral-reason"><span className="label">Reason:</span> {ref.Reason}</p>
                   </div>
                   <div className="referral-actions">
-                    <button className="approve-btn" onClick={() => handleApproveReferral(referral.ReferralID)}>
-                      <FiCheck className="action-icon" />
-                    </button>
-                    <button className="reject-btn" onClick={() => handleRejectReferral(referral.ReferralID)}>
-                      <FiX className="action-icon" />
-                    </button>
+                    <button className="approve-btn" onClick={() => handleApproveReferral(ref.ReferralId)}><FiCheck /></button>
+                    <button className="reject-btn" onClick={() => handleRejectReferral(ref.ReferralId)}><FiX /></button>
                   </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="no-data">No pending referrals to approve.</p>
-          )}
+          ) : <p className="no-data">No pending referrals to approve.</p>}
         </div>
       </div>
 
@@ -162,7 +169,6 @@ const DoctorDashboard = () => {
           <FiUserPlus className="card-icon" />
           <h2 className="card-title">Create Referral to Specialist</h2>
         </div>
-
         <div className="referral-intro">
           <p>Create a new specialist referral for one of your patients.</p>
           <button className="create-referral-btn" onClick={handleCreateReferral}>
@@ -186,14 +192,13 @@ const DoctorDashboard = () => {
                   <label htmlFor="patient">Patient</label>
                   <select
                     id="patient"
-                    className="form-control"
                     value={selectedPatient}
                     onChange={(e) => setSelectedPatient(e.target.value)}
                   >
                     <option value="">Select a patient</option>
-                    {patients.map((patient) => (
-                      <option key={patient.PatientID} value={patient.PatientID}>
-                        {patient.FirstName} {patient.LastName}
+                    {patients.map(p => (
+                      <option key={p.PatientID} value={p.PatientID}>
+                        {p.FirstName} {p.LastName}
                       </option>
                     ))}
                   </select>
@@ -203,14 +208,13 @@ const DoctorDashboard = () => {
                   <label htmlFor="specialist">Specialist</label>
                   <select
                     id="specialist"
-                    className="form-control"
                     value={selectedSpecialist}
                     onChange={(e) => setSelectedSpecialist(e.target.value)}
                   >
                     <option value="">Select a specialist</option>
-                    {specialists.map((specialist) => (
-                      <option key={specialist.DoctorID} value={specialist.DoctorID}>
-                        Dr. {specialist.FirstName} {specialist.LastName} - {specialist.Specialization}
+                    {specialists.map(s => (
+                      <option key={s.DoctorID} value={s.DoctorID}>
+                        Dr. {s.FirstName} {s.LastName} - {s.Specialization}
                       </option>
                     ))}
                   </select>
@@ -220,31 +224,27 @@ const DoctorDashboard = () => {
                   <label htmlFor="reason">Reason for Referral</label>
                   <textarea
                     id="reason"
-                    className="form-control"
-                    rows="4"
-                    placeholder="Describe the reason for this referral"
                     value={referralReason}
                     onChange={(e) => setReferralReason(e.target.value)}
-                  ></textarea>
+                    rows="4"
+                  />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="notes">Additional Notes</label>
                   <textarea
                     id="notes"
-                    className="form-control"
-                    rows="3"
-                    placeholder="Any additional information for the specialist"
                     value={referralNotes}
                     onChange={(e) => setReferralNotes(e.target.value)}
-                  ></textarea>
+                    rows="3"
+                  />
                 </div>
 
                 <div className="form-actions">
-                  <button type="button" className="cancel-btn" onClick={() => setIsReferralModalOpen(false)}>
+                  <button type="button" onClick={() => setIsReferralModalOpen(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="submit-btn" onClick={(e) => {
+                  <button type="submit" onClick={(e) => {
                     e.preventDefault();
                     handleSaveReferral();
                   }}>
