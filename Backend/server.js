@@ -13,7 +13,7 @@ import { handleTestRoutes } from './routes/testRoutes.js';
 import { handlePatientRoutes } from './routes/patientRoutes.js';
 import { handleDoctorRoutes } from './routes/doctorRoutes.js';
 import { handleReferralRoutes } from './routes/referralRoutes.js';
-import { handleOfficeRoutes } from './routes/officeRoutes.js'
+import { handleOfficeRoutes } from './routes/officeRoutes.js';
 import { handleDoctorOfficeRoutes } from './routes/doctorClinicRoutes.js';
 
 dotenv.config();
@@ -65,7 +65,13 @@ function routeRequest(req, res, pathname, method) {
     return;
   }
   
-  if (pathname.startsWith('/api/auth')) {
+  // Add admin routes handling
+  if (pathname.startsWith('/api/admin') || 
+      pathname === '/api/users' || 
+      pathname.match(/^\/api\/users\/\d+$/) ||
+      pathname === '/api/users/role') {
+    return handleAdminRoutes(req, res);
+  } else if (pathname.startsWith('/api/auth')) {
     return handleAuthRoutes(req, res);
   } else if (pathname.startsWith('/api/billing')) {
     return handleBillingRoutes(req, res);
@@ -79,7 +85,7 @@ function routeRequest(req, res, pathname, method) {
     return handleTestRoutes(req, res);
   } else if (pathname.startsWith('/api/offices')) {
     return handleOfficeRoutes(req,res);
-  }  else if (
+  } else if (
     pathname.startsWith('/api/doctors') ||
     pathname.startsWith('/api/patients/assigned') ||
     pathname.match(/^\/api\/patients\/\d+\/primary-physician$/)
@@ -91,7 +97,7 @@ function routeRequest(req, res, pathname, method) {
     return handleReferralRoutes(req, res);
   } else if (pathname.startsWith('/api/doctor-offices')) {
     return handleDoctorOfficeRoutes(req,res);
-  }else {
+  } else {
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ message: 'Route not found' }));
   }
