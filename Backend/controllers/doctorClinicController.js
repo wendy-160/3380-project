@@ -80,25 +80,39 @@ export async function createDoctorOffice(req, res) {
     const doctorIdInt = parseInt(DoctorID, 10);
     const officeIdInt = parseInt(OfficeID, 10);
 
-    await db.query(
-      `DELETE FROM doctor_office WHERE DoctorID = ?`,
-      [doctorIdInt]
-    );
+    const [existing] = await db.query(`
+      SELECT * FROM doctor_office
+      WHERE DoctorID = ? AND OfficeID = ?
+    `, [doctorIdInt, officeIdInt]);
 
-    const [result] = await db.query(
-      `INSERT INTO doctor_office (DoctorID, OfficeID, WorkDays, WorkHours)
-       VALUES (?, ?, ?, ?)`,
-      [doctorIdInt, officeIdInt, WorkDays || null, WorkHours || null]
-    );
+    if (existing.length > 0) {
+      console.log('🟡 Doctor already assigned to this office');
+
+      await db.query(`
+        UPDATE doctor_office
+        SET WorkDays = ?, WorkHours = ?
+        WHERE DoctorID = ? AND OfficeID = ?
+      `, [WorkDays || null, WorkHours || null, doctorIdInt, officeIdInt]);
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ message: 'Assignment updated' }));
+    }
+
+    // ✅ Insert new assignment
+    const [result] = await db.query(`
+      INSERT INTO doctor_office (DoctorID, OfficeID, WorkDays, WorkHours)
+      VALUES (?, ?, ?, ?)
+    `, [doctorIdInt, officeIdInt, WorkDays || null, WorkHours || null]);
 
     res.writeHead(201, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: 'Doctor moved to new office', id: result.insertId }));
+    res.end(JSON.stringify({ message: 'Doctor assigned to office', id: result.insertId }));
   } catch (err) {
     console.error('❌ Error in createDoctorOffice:', err);
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: err.message }));
   }
 }
+
 
 
 
