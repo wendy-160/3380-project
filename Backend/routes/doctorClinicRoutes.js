@@ -33,7 +33,6 @@ export function handleDoctorOfficeRoutes(req, res) {
     return getDoctorOfficesByDoctor(req, res);
   }
 
-  // Handle the direct pattern used by the frontend for DELETE and UPDATE
   const directMatch = pathname.match(/^\/api\/doctor-offices\/(\d+)\/(\d+)$/);
   if (directMatch) {
     console.log(`Matched direct path pattern with IDs: ${directMatch[1]}, ${directMatch[2]}`);

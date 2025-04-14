@@ -4,7 +4,6 @@ export async function getAllDoctorOffices(req, res) {
   try {
     console.log('Executing getAllDoctorOffices function');
     
-    // Check if the doctor_office table exists
     const [tables] = await db.query('SHOW TABLES LIKE "doctor_office"');
     if (tables.length === 0) {
       console.log('doctor_office table does not exist');
@@ -12,7 +11,6 @@ export async function getAllDoctorOffices(req, res) {
       return res.end(JSON.stringify([]));
     }
     
-    // Query the database
     const [rows] = await db.query(`
       SELECT * FROM doctor_office
     `);
@@ -69,104 +67,41 @@ export async function getDoctorOfficesByDoctor(req, res) {
 }
 
 export async function createDoctorOffice(req, res) {
-  console.log('createDoctorOffice function called');
-  console.log('Headers:', req.headers);
-  
-  // Initialize an empty body
-  let body = '';
-  
-  // Collect request data chunks
-  req.on('data', chunk => {
-    body += chunk.toString();
-    console.log('Received chunk:', chunk.toString());
-  });
-  
-  // Process the complete data when the request ends
-  req.on('end', async () => {
-    try {
-      console.log('Request ended, processing data');
-      console.log('Full request body:', body);
-      
-      if (!body || body.trim() === '') {
-        console.error('Empty request body');
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ error: 'Empty request body' }));
-      }
-      
-      // Parse the JSON body
-      let parsedData;
-      try {
-        parsedData = JSON.parse(body);
-        console.log('Successfully parsed JSON:', parsedData);
-      } catch (parseError) {
-        console.error('Error parsing JSON:', parseError);
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ error: 'Invalid JSON format' }));
-      }
-      
-      const { DoctorID, OfficeID, WorkDays, WorkHours } = parsedData;
-      console.log('Extracted data:', { DoctorID, OfficeID, WorkDays, WorkHours });
-      
-      // Validate required fields
-      if (!DoctorID || !OfficeID) {
-        console.error('Missing required fields');
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ error: 'DoctorID and OfficeID are required' }));
-      }
-      
-      // Ensure IDs are integers
-      const doctorIdInt = parseInt(DoctorID, 10);
-      const officeIdInt = parseInt(OfficeID, 10);
-      
-      if (isNaN(doctorIdInt) || isNaN(officeIdInt)) {
-        console.error('Invalid ID format');
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ error: 'DoctorID and OfficeID must be valid integers' }));
-      }
-      
-      console.log('Attempting database insertion...');
-      try {
-        // Insert into database
-        const [result] = await db.query(`
-          INSERT INTO doctor_office (DoctorID, OfficeID, WorkDays, WorkHours)
-          VALUES (?, ?, ?, ?)
-        `, [doctorIdInt, officeIdInt, WorkDays || null, WorkHours || null]);
-        
-        console.log('Database insertion successful:', result);
-        
-        res.writeHead(201, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-          message: 'Doctor-office assignment created successfully',
-          id: result.insertId
-        }));
-      } catch (dbError) {
-        console.error('Database error:', dbError);
-        
-        // Check for duplicate entry error
-        if (dbError.code === 'ER_DUP_ENTRY') {
-          res.writeHead(409, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ 
-            error: 'This doctor is already assigned to this clinic' 
-          }));
-        } else {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: dbError.message }));
-        }
-      }
-    } catch (err) {
-      console.error('Error in end handler:', err);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Server error: ' + err.message }));
+  try {
+    const { DoctorID, OfficeID, WorkDays, WorkHours } = req.body;
+
+    console.log('createDoctorOffice function received:', req.body);
+
+    if (!DoctorID || !OfficeID) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'DoctorID and OfficeID are required' }));
     }
-  });
-  
-  // Handle request errors
-  req.on('error', (err) => {
-    console.error('Request error:', err);
+
+    const doctorIdInt = parseInt(DoctorID, 10);
+    const officeIdInt = parseInt(OfficeID, 10);
+
+    await db.query(
+      `DELETE FROM doctor_office WHERE DoctorID = ?`,
+      [doctorIdInt]
+    );
+
+    const [result] = await db.query(
+      `INSERT INTO doctor_office (DoctorID, OfficeID, WorkDays, WorkHours)
+       VALUES (?, ?, ?, ?)`,
+      [doctorIdInt, officeIdInt, WorkDays || null, WorkHours || null]
+    );
+
+    res.writeHead(201, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: 'Doctor moved to new office', id: result.insertId }));
+  } catch (err) {
+    console.error('❌ Error in createDoctorOffice:', err);
     res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Request error: ' + err.message }));
-  });
+    res.end(JSON.stringify({ error: err.message }));
+  }
 }
+
+
+
 
 
 export async function updateDoctorOffice(req, res) {
@@ -174,7 +109,6 @@ export async function updateDoctorOffice(req, res) {
     const doctorId = req.params.doctorId;
     const officeId = req.params.officeId;
     
-    // Get the request body
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();
@@ -184,7 +118,6 @@ export async function updateDoctorOffice(req, res) {
       try {
         const { WorkDays, WorkHours } = JSON.parse(body);
         
-        // Update in database
         await db.query(`
           UPDATE doctor_office
           SET WorkDays = ?, WorkHours = ?
@@ -213,7 +146,6 @@ export async function deleteDoctorOffice(req, res) {
     const doctorId = req.params.doctorId;
     const officeId = req.params.officeId;
     
-    // Delete from database
     await db.query(`
       DELETE FROM doctor_office
       WHERE DoctorID = ? AND OfficeID = ?

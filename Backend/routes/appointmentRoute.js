@@ -6,13 +6,31 @@ export async function handleAppointmentRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
+  if (method === 'GET' && pathname === '/api/appointments') {
+    try {
+      const [rows] = await db.execute(`
+        SELECT a.AppointmentID, a.PatientID, a.DoctorID, a.OfficeID, a.DateTime, a.Reason, a.Status,
+               p.FirstName AS PatientFirstName, p.LastName AS PatientLastName,
+               d.FirstName AS DoctorFirstName, d.LastName AS DoctorLastName
+        FROM appointment a
+        JOIN patient p ON a.PatientID = p.PatientID
+        JOIN doctor d ON a.DoctorID = d.DoctorID
+        ORDER BY a.DateTime DESC
+      `);
+      return sendJson(res, 200, rows);
+    } catch (err) {
+      console.error('Error fetching all appointments:', err);
+      return sendJson(res, 500, { message: 'Error fetching appointments' });
+    }
+  }
+
   const matchDoctorDateAppointments = pathname.match(/^\/api\/appointments\/doctor\/(\d+)\/date\/([\d-]+)$/);
   if (method === 'GET' && matchDoctorDateAppointments) {
     const doctorID = matchDoctorDateAppointments[1];
     const date = matchDoctorDateAppointments[2];
     try {
       const [rows] = await db.execute(`
-        SELECT a.AppointmentID, a.DateTime, a.Reason, a.status,
+        SELECT a.AppointmentID, a.DateTime, a.Reason, a.Status,
                p.FirstName AS PatientName, p.LastName AS PatientLastName
         FROM appointment a
         JOIN patient p ON a.PatientID = p.PatientID
