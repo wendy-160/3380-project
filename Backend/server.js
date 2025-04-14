@@ -15,7 +15,7 @@ import { handleDoctorRoutes } from './routes/doctorRoutes.js';
 import { handleReferralRoutes } from './routes/referralRoutes.js';
 import { handleOfficeRoutes } from './routes/officeRoutes.js';
 import { handleDoctorOfficeRoutes } from './routes/doctorClinicRoutes.js';
-import { handleAdminRoutes } from './routes/adminRoutes.js'; 
+import { handleAdminRoutes } from './routes/adminRoutes.js';
 
 dotenv.config();
 
@@ -112,6 +112,13 @@ function routeRequest(req, res, pathname, method) {
   } else if (pathname.startsWith('/api/doctor-offices')) {
     console.log('🔁 Routing to doctorOfficeRoutes');
     return handleDoctorOfficeRoutes(req, res);
+  } else if (
+    pathname.startsWith('/api/admin') || 
+    pathname === '/api/users' || 
+    pathname.match(/^\/api\/users\/\d+$/) ||
+    pathname === '/api/users/role'
+  ) {
+    return handleAdminRoutes(req, res);
   } else {
     console.warn('❌ Route not found:', pathname);
     res.writeHead(404, { 'Content-Type': 'application/json' });
