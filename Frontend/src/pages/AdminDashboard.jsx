@@ -8,7 +8,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [editUserId, setEditUserId] = useState(null);
+  const [editingUserId, setEditingUserId] = useState(null);
   const [editedUser, setEditedUser] = useState({ FirstName: '', LastName: '' });
 
   useEffect(() => {
@@ -30,24 +30,31 @@ const AdminDashboard = () => {
   const handleDelete = async (user) => {
     try {
       await axios.delete(`http://localhost:5000/api/admin/users/${user.role}/${user.ID}`);
-      setUsers(prev => prev.filter(u => u.ID !== user.ID));
+      setUsers(prev => prev.filter(u => u.CompositeID !== user.CompositeID));
     } catch (err) {
       console.error('Failed to delete user:', err);
     }
   };
 
-  const handleEdit = (user) => {
-    setEditUserId(user.ID);
+  const startEditing = (user) => {
+    setEditingUserId(user.CompositeID);
     setEditedUser({ FirstName: user.FirstName, LastName: user.LastName });
+  };
+
+  const cancelEdit = () => {
+    setEditingUserId(null);
+    setEditedUser({ FirstName: '', LastName: '' });
   };
 
   const handleSave = async (user) => {
     try {
       await axios.put(`http://localhost:5000/api/admin/users/${user.role}/${user.ID}`, editedUser);
       setUsers(prev =>
-        prev.map(u => u.ID === user.ID ? { ...u, ...editedUser } : u)
+        prev.map(u =>
+          u.CompositeID === user.CompositeID ? { ...u, ...editedUser } : u
+        )
       );
-      setEditUserId(null);
+      cancelEdit();
     } catch (err) {
       console.error('Failed to save user changes:', err);
     }
@@ -126,37 +133,43 @@ const AdminDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map(user => (
-              <tr key={user.ID}>
-                <td>{user.ID}</td>
-                <td>
-                  {editUserId === user.ID ? (
-                    <input
-                      value={editedUser.FirstName}
-                      onChange={(e) => setEditedUser({ ...editedUser, FirstName: e.target.value })}
-                    />
-                  ) : user.FirstName}
-                </td>
-                <td>
-                  {editUserId === user.ID ? (
-                    <input
-                      value={editedUser.LastName}
-                      onChange={(e) => setEditedUser({ ...editedUser, LastName: e.target.value })}
-                    />
-                  ) : user.LastName}
-                </td>
-                <td>{user.Email}</td>
-                <td>{user.role}</td>
-                <td>
-                  {editUserId === user.ID ? (
-                    <button onClick={() => handleSave(user)}>Save</button>
-                  ) : (
-                    <button onClick={() => handleEdit(user)}>Edit</button>
-                  )}
-                  <button onClick={() => handleDelete(user)}>Delete</button>
-                </td>
-              </tr>
-            ))}
+            {filteredUsers.map(user => {
+              const isEditing = editingUserId === user.CompositeID;
+              return (
+                <tr key={user.CompositeID}>
+                  <td>{user.ID}</td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        value={editedUser.FirstName}
+                        onChange={(e) => setEditedUser({ ...editedUser, FirstName: e.target.value })}
+                      />
+                    ) : user.FirstName}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        value={editedUser.LastName}
+                        onChange={(e) => setEditedUser({ ...editedUser, LastName: e.target.value })}
+                      />
+                    ) : user.LastName}
+                  </td>
+                  <td>{user.Email}</td>
+                  <td>{user.role}</td>
+                  <td>
+                    {isEditing ? (
+                      <>
+                        <button onClick={() => handleSave(user)}>Save</button>
+                        <button onClick={cancelEdit}>Cancel</button>
+                      </>
+                    ) : (
+                      <button onClick={() => startEditing(user)}>Edit</button>
+                    )}
+                    <button onClick={() => handleDelete(user)}>Delete</button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
