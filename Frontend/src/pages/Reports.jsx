@@ -11,11 +11,17 @@ const Reports = () => {
   const [selectedDoctor, setSelectedDoctor] = useState('');
   const [doctors, setDoctors] = useState([]);
 
+  const [offices, setOffices] = useState([]);
+  const [selectedOffice, setSelectedOffice] = useState('');
+  const [aggregation, setAggregation] = useState('Monthly');
+
   const isAdmin = user?.Role === 'Admin';
 
   useEffect(() => {
-    if (!isAdmin) return;
-    loadDoctors();
+    if (isAdmin) {
+      loadDoctors();
+      loadOffices();
+    }
   }, [isAdmin]);
 
   const loadDoctors = async () => {
@@ -27,15 +33,22 @@ const Reports = () => {
     }
   };
 
+  const loadOffices = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/offices');
+      setOffices(response.data);
+    } catch (error) {
+      console.error('Error loading offices:', error);
+    }
+  };
+
   const generateReport = async () => {
     if (!reportType) return;
-
     setLoading(true);
     setReportData(null);
 
     try {
       let response;
-
       if (reportType === 'doctor_performance') {
         if (!selectedDoctor) {
           alert('Please select a doctor');
@@ -43,8 +56,16 @@ const Reports = () => {
           return;
         }
         response = await axios.get(`http://localhost:5000/api/reports/doctor/${selectedDoctor}`);
-        setReportData(response.data);
+      } else if (reportType === 'clinic_utilization') {
+        response = await axios.get(`http://localhost:5000/api/reports/clinic-utilization`, {
+          params: {
+            aggregation: aggregation,
+            officeId: selectedOffice || 'all'
+          }
+        });
       }
+
+      setReportData(response.data);
     } catch (err) {
       console.error('Error generating report:', err);
     }
@@ -67,6 +88,12 @@ const Reports = () => {
             >
               Doctor Performance Report
             </button>
+            <button
+              className={reportType === 'clinic_utilization' ? 'active' : ''}
+              onClick={() => setReportType('clinic_utilization')}
+            >
+              Clinic Utilization Report
+            </button>
           </div>
 
           {reportType === 'doctor_performance' && (
@@ -85,7 +112,33 @@ const Reports = () => {
                   ))}
                 </select>
               </label>
+              <button onClick={generateReport} disabled={loading}>
+                {loading ? 'Generating...' : 'Generate Report'}
+              </button>
+            </div>
+          )}
 
+          {reportType === 'clinic_utilization' && (
+            <div className="report-filters">
+              <label>
+                Aggregation:
+                <select value={aggregation} onChange={(e) => setAggregation(e.target.value)}>
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                </select>
+              </label>
+              <label>
+                Select Office:
+                <select value={selectedOffice} onChange={(e) => setSelectedOffice(e.target.value)}>
+                  <option value="">-- All Offices --</option>
+                  {offices.map((office) => (
+                    <option key={office.OfficeID} value={office.OfficeID}>
+                      {office.OfficeName}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <button onClick={generateReport} disabled={loading}>
                 {loading ? 'Generating...' : 'Generate Report'}
               </button>
@@ -96,7 +149,14 @@ const Reports = () => {
             {loading ? (
               <p>Loading report...</p>
             ) : reportData ? (
-              <DoctorPerformanceReport data={reportData} />
+              <>
+                {reportType === 'doctor_performance' && (
+                  <DoctorPerformanceReport data={reportData} />
+                )}
+                {reportType === 'clinic_utilization' && (
+                  <ClinicUtilizationReport data={reportData} aggregation={aggregation} />
+                )}
+              </>
             ) : (
               reportType && <p>Select filters and click "Generate Report".</p>
             )}
@@ -107,34 +167,56 @@ const Reports = () => {
   );
 };
 
-const DoctorPerformanceReport = ({ data }) => {
-  return (
-    <div className="doctor-performance-report">
-      <h2>Doctor Performance Summary</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Doctor ID</th>
-            <th>Total Appointments</th>
-            <th>Completed Appointments</th>
-            <th>Total Referrals</th>
-            <th>Prescriptions Written</th>
-            <th>Tests Ordered</th>
+const DoctorPerformanceReport = ({ data }) => (
+  <div className="doctor-performance-report">
+    <h2>Doctor Performance Summary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Doctor ID</th>
+          <th>Total Appointments</th>
+          <th>Completed Appointments</th>
+          <th>Total Referrals</th>
+          <th>Prescriptions Written</th>
+          <th>Tests Ordered</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{data.doctorId}</td>
+          <td>{data.TotalAppointments}</td>
+          <td>{data.CompletedAppointments}</td>
+          <td>{data.TotalReferrals}</td>
+          <td>{data.Prescriptions}</td>
+          <td>{data.TestsOrdered}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+);
+
+const ClinicUtilizationReport = ({ data, aggregation }) => (
+  <div className="clinic-utilization-report">
+    <h2>Clinic Utilization Report ({aggregation})</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Office</th>
+          <th>Date</th>
+          <th>Appointment Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((row, index) => (
+          <tr key={index}>
+            <td>{row.OfficeName}</td>
+            <td>{row.Date}</td>
+            <td>{row.AppointmentCount}</td>
           </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{data.doctorId}</td>
-            <td>{data.TotalAppointments}</td>
-            <td>{data.CompletedAppointments}</td>
-            <td>{data.TotalReferrals}</td>
-            <td>{data.Prescriptions}</td>
-            <td>{data.TestsOrdered}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-};
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 
 export default Reports;
