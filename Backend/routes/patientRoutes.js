@@ -6,6 +6,21 @@ export async function handlePatientRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
+  const sendJson = (statusCode, data) => {
+    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(data));
+  };
+
+  if (method === 'GET' && pathname === '/api/patients') {
+    try {
+      const [rows] = await db.query('SELECT * FROM patient');
+      return sendJson(200, rows);
+    } catch (err) {
+      console.error('Error fetching all patients:', err);
+      return sendJson(500, { message: 'Error fetching patients' });
+    }
+  }
+
   const matchPrimaryDoctor = pathname.match(/^\/api\/patients\/(\d+)\/primary-physician$/);
   if (method === 'GET' && matchPrimaryDoctor) {
     const patientId = matchPrimaryDoctor[1];
@@ -18,19 +33,13 @@ export async function handlePatientRoutes(req, res) {
       `, [patientId]);
 
       if (rows.length === 0) {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'Primary physician not assigned' }));
-        return;
+        return sendJson(404, { message: 'Primary physician not assigned' });
       }
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(rows[0]));
-      return;
+      return sendJson(200, rows[0]);
     } catch (err) {
       console.error('Error fetching primary physician:', err);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: 'Error fetching primary physician' }));
-      return;
+      return sendJson(500, { message: 'Error fetching primary physician' });
     }
   }
 
@@ -46,19 +55,13 @@ export async function handlePatientRoutes(req, res) {
       `, [patientId]);
 
       if (rows.length === 0) {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'Patient not found' }));
-        return;
+        return sendJson(404, { message: 'Patient not found' });
       }
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(rows[0]));
-      return;
+      return sendJson(200, rows[0]);
     } catch (err) {
       console.error('Error fetching patient by ID:', err);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: 'Error fetching patient data' }));
-      return;
+      return sendJson(500, { message: 'Error fetching patient data' });
     }
   }
 
@@ -73,17 +76,12 @@ export async function handlePatientRoutes(req, res) {
         WHERE a.DoctorID = ?
       `, [doctorId]);
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(rows));
-      return;
+      return sendJson(200, rows);
     } catch (err) {
       console.error('Error fetching doctor patients:', err);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: 'Error fetching patients' }));
-      return;
+      return sendJson(500, { message: 'Error fetching patients' });
     }
   }
 
-  res.writeHead(404, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ message: 'Patient route not found' }));
+  return sendJson(404, { message: 'Patient route not found' });
 }

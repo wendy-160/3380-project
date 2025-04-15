@@ -5,7 +5,19 @@ const PrescriptionForm = () => {
   const [formData, setFormData] = useState({
     patientID: '',
     appointmentID: '',
-    doctorID: '1',
+    doctorID: (() => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser);
+          return parsed.DoctorID?.toString() || '';
+        } catch (err) {
+          console.error('Error parsing localStorage user:', err);
+          return '';
+        }
+      }
+      return '';
+    })(),
     medicationName: '',
     dosage: '',
     frequency: '',
@@ -23,71 +35,64 @@ const PrescriptionForm = () => {
 
   useEffect(() => {
     fetchPatients();
-    fetchAppointments();
+    if (formData.doctorID) {
+      fetchAppointments(formData.doctorID);
+    }
   }, []);
 
   useEffect(() => {
-    if (formData.patientID) {
-      const patientAppts = appointments.filter(
-        appointment => appointment.PatientID.toString() === formData.patientID
-      );
-      setFilteredAppointments(patientAppts);
-      if (formData.appointmentID && !patientAppts.find(a => a.AppointmentID.toString() === formData.appointmentID)) {
-        setFormData(prev => ({ ...prev, appointmentID: '' }));
-      }
-    } else {
-      setFilteredAppointments([]);
+    const filtered = appointments.filter(
+      appt => appt.PatientID.toString() === formData.patientID
+    );
+    setFilteredAppointments(filtered);
+    if (
+      formData.appointmentID &&
+      !filtered.find(a => a.AppointmentID.toString() === formData.appointmentID)
+    ) {
       setFormData(prev => ({ ...prev, appointmentID: '' }));
     }
   }, [formData.patientID, appointments]);
 
   const fetchPatients = async () => {
     try {
-      setIsLoading(true);
       const res = await fetch('http://localhost:5000/api/patients');
-      if (!res.ok) throw new Error('Failed to fetch patients');
+      if (!res.ok) throw new Error('Invalid response');
       const data = await res.json();
-      setPatients(data);
-    } catch (error) {
-      console.error('Error fetching patients:', error);
+      setPatients(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error fetching patients:', err);
       setMessage('Error loading patients');
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = async (doctorID) => {
     try {
-      setIsLoading(true);
-      const res = await fetch(`http://localhost:5000/api/appointments?doctorId=${formData.doctorID}`);
-      if (!res.ok) throw new Error('Failed to fetch appointments');
+      const res = await fetch(`http://localhost:5000/api/appointments?doctorId=${doctorID}`);
+      if (!res.ok) throw new Error('Invalid response');
       const data = await res.json();
-      setAppointments(data);
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
+      setAppointments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
       setMessage('Error loading appointments');
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData(prevData => ({
-      ...prevData,
-      [id]: value
-    }));
+    setFormData(prev => ({ ...prev, [id]: value }));
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
+    return isNaN(date)
+      ? ''
+      : new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(date);
   };
 
   const handleSubmit = async (e) => {
@@ -95,23 +100,25 @@ const PrescriptionForm = () => {
     setIsLoading(true);
     setMessage('');
 
+    const payload = {
+      ...formData,
+      doctorID: parseInt(formData.doctorID) || null
+    };
+
     try {
-      const response = await fetch('http://localhost:5000/api/prescriptions', {
+      const res = await fetch('http://localhost:5000/api/prescriptions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
+      const result = await res.json();
+      if (res.ok) {
         setMessage('Prescription saved successfully!');
-        setFormData({
+        setFormData(prev => ({
+          ...prev,
           patientID: '',
           appointmentID: '',
-          doctorID: formData.doctorID,
           medicationName: '',
           dosage: '',
           frequency: '',
@@ -119,13 +126,13 @@ const PrescriptionForm = () => {
           endDate: '',
           notes: '',
           status: 'Active'
-        });
+        }));
       } else {
         setMessage(`Error: ${result.message || 'Failed to save prescription'}`);
       }
-    } catch (error) {
-      setMessage('Error submitting form. Please try again.');
-      console.error('Error:', error);
+    } catch (err) {
+      console.error('Submit error:', err);
+      setMessage('Error submitting prescription');
     } finally {
       setIsLoading(false);
     }
@@ -134,7 +141,6 @@ const PrescriptionForm = () => {
   return (
     <div className="prescription-container">
       <h1>New Prescription</h1>
-
       {message && (
         <div className={`alert ${message.includes('Error') ? 'alert-error' : 'alert-success'}`}>
           {message}
@@ -142,9 +148,6 @@ const PrescriptionForm = () => {
       )}
 
       <div className="patient-info">
-        <div className="patient-header">
-          <h3>Patient Information</h3>
-        </div>
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="patientID">Patient</label>
@@ -153,12 +156,11 @@ const PrescriptionForm = () => {
               value={formData.patientID}
               onChange={handleChange}
               required
-              disabled={isLoading}
             >
               <option value="">Select Patient</option>
-              {patients.map(patient => (
-                <option key={patient.PatientID} value={patient.PatientID}>
-                  {patient.FullName}
+              {patients.map(p => (
+                <option key={p.PatientID} value={p.PatientID}>
+                  {p.FirstName} {p.LastName}
                 </option>
               ))}
             </select>
@@ -169,12 +171,12 @@ const PrescriptionForm = () => {
               id="appointmentID"
               value={formData.appointmentID}
               onChange={handleChange}
-              disabled={!formData.patientID || isLoading}
+              disabled={!formData.patientID}
             >
               <option value="">Select Appointment</option>
-              {filteredAppointments.map(appointment => (
-                <option key={appointment.AppointmentID} value={appointment.AppointmentID}>
-                  {formatDate(appointment.AppointmentDate)}
+              {filteredAppointments.map(a => (
+                <option key={a.AppointmentID} value={a.AppointmentID}>
+                  {formatDate(a.DateTime || a.AppointmentDate)}
                 </option>
               ))}
             </select>
@@ -182,9 +184,7 @@ const PrescriptionForm = () => {
         </div>
       </div>
 
-      <form id="prescriptionForm" onSubmit={handleSubmit}>
-        <input type="hidden" id="doctorID" value={formData.doctorID} />
-
+      <form onSubmit={handleSubmit}>
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="medicationName">Medication Name</label>
@@ -194,7 +194,6 @@ const PrescriptionForm = () => {
               value={formData.medicationName}
               onChange={handleChange}
               required
-              disabled={isLoading}
             />
           </div>
         </div>
@@ -208,8 +207,6 @@ const PrescriptionForm = () => {
               value={formData.dosage}
               onChange={handleChange}
               required
-              placeholder="e.g., 10mg"
-              disabled={isLoading}
             />
           </div>
           <div className="form-group">
@@ -220,8 +217,6 @@ const PrescriptionForm = () => {
               value={formData.frequency}
               onChange={handleChange}
               required
-              placeholder="e.g., Twice daily"
-              disabled={isLoading}
             />
           </div>
         </div>
@@ -235,7 +230,6 @@ const PrescriptionForm = () => {
               value={formData.startDate}
               onChange={handleChange}
               required
-              disabled={isLoading}
             />
           </div>
           <div className="form-group">
@@ -245,7 +239,6 @@ const PrescriptionForm = () => {
               id="endDate"
               value={formData.endDate}
               onChange={handleChange}
-              disabled={isLoading}
               min={formData.startDate}
             />
           </div>
@@ -259,7 +252,6 @@ const PrescriptionForm = () => {
               value={formData.status}
               onChange={handleChange}
               required
-              disabled={isLoading}
             >
               <option value="Active">Active</option>
               <option value="Completed">Completed</option>
@@ -274,8 +266,7 @@ const PrescriptionForm = () => {
               id="notes"
               value={formData.notes}
               onChange={handleChange}
-              disabled={isLoading}
-              placeholder="Instructions for the patient"
+              placeholder="Optional instructions"
             />
           </div>
         </div>
