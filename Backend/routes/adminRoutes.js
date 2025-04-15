@@ -36,17 +36,14 @@ export async function handleAdminRoutes(req, res) {
         query += ` AND b.PaymentStatus = ?`;
         params.push(status);
       }
-
       if (startDate) {
         query += ` AND b.BillingDate >= ?`;
         params.push(startDate);
       }
-
       if (endDate) {
         query += ` AND b.BillingDate <= ?`;
         params.push(endDate);
       }
-
       if (search) {
         query += ` AND (p.FirstName LIKE ? OR p.LastName LIKE ? OR p.PatientID LIKE ?)`;
         params.push(`%${search}%`, `%${search}%`, `%${search}%`);
@@ -66,53 +63,155 @@ export async function handleAdminRoutes(req, res) {
 
   if (method === 'PUT' && pathname.match(/^\/api\/admin\/billings\/\d+$/)) {
     const billId = pathname.split('/').pop();
+    let rawBody = '';
 
-    try {
-      const bodyChunks = [];
-      req.on('data', chunk => bodyChunks.push(chunk));
-      req.on('end', async () => {
-        const body = JSON.parse(Buffer.concat(bodyChunks).toString());
-        const { PaymentStatus, PaymentMethod, PaymentDate, Notes } = body;
+    req.on('data', chunk => rawBody += chunk);
+    req.on('end', async () => {
+      let body;
+      try {
+        body = JSON.parse(rawBody);
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ message: 'Invalid JSON' }));
+      }
 
+      const { PaymentStatus, PaymentMethod, PaymentDate, Notes } = body;
+      try {
         const [result] = await db.query(`
           UPDATE billing
           SET PaymentStatus = ?, PaymentMethod = ?, PaymentDate = ?, Notes = ?
           WHERE BillingID = ?
-        `, [PaymentStatus, PaymentMethod, PaymentDate || null, Notes, billId]);
+        `, [PaymentStatus, PaymentMethod, PaymentDate || null, Notes || null, billId]);
+
+        if (result.affectedRows === 0) {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ message: 'Billing record not found' }));
+        }
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ message: 'Billing record updated successfully' }));
-      });
-    } catch (err) {
-      console.error('❌ Error updating billing record:', err);
-      res.writeHead(500);
-      return res.end(JSON.stringify({ message: 'Failed to update billing record' }));
-    }
+      } catch (err) {
+        console.error('❌ SQL error during billing update:', err);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ message: 'Failed to update billing record' }));
+      }
+    });
     return;
+  }
+
+  if (method === 'POST' && pathname === '/api/admin/billings') {
+    let rawBody = '';
+    req.on('data', chunk => rawBody += chunk);
+    req.on('end', async () => {
+      let body;
+      try {
+        body = JSON.parse(rawBody);
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ message: 'Invalid JSON' }));
+      }
+
+      const {
+        PatientID, AppointmentID, PrescriptionID, TestID,
+        Amount, PaymentStatus, BillingDate,
+        PaymentMethod, PaymentDate, Notes
+      } = body;
+
+      try {
+        const [result] = await db.query(`
+          INSERT INTO billing 
+          (PatientID, AppointmentID, PrescriptionID, TestID, Amount, PaymentStatus, BillingDate, PaymentMethod, PaymentDate, Notes)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+          PatientID,
+          AppointmentID || null,
+          PrescriptionID || null,
+          TestID || null,
+          Amount,
+          PaymentStatus,
+          BillingDate,
+          PaymentMethod || null,
+          PaymentDate || null,
+          Notes || null
+        ]);
+
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ message: 'Billing record created', BillingID: result.insertId }));
+      } catch (err) {
+        console.error('❌ Error creating billing record:', err);
+        res.writeHead(500);
+        return res.end(JSON.stringify({ message: 'Failed to create billing record' }));
+      }
+    });
+    return;
+  }
+
+  if (method === 'GET' && pathname === '/api/admin/patients') {
+    try {
+      const [rows] = await db.query(`
+        SELECT PatientID, FirstName, LastName FROM patient
+      `);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(rows));
+    } catch (err) {
+      console.error('❌ Error fetching patients:', err);
+      res.writeHead(500);
+      return res.end(JSON.stringify({ message: 'Failed to fetch patients' }));
+    }
+  }
+
+  if (method === 'GET' && pathname === '/api/admin/appointments') {
+    try {
+      const [rows] = await db.query(`
+        SELECT AppointmentID, DateTime AS AppointmentDate FROM appointment
+      `);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(rows));
+    } catch (err) {
+      console.error('❌ Error fetching appointments:', err);
+      res.writeHead(500);
+      return res.end(JSON.stringify({ message: 'Failed to fetch appointments' }));
+    }
+  }
+
+  if (method === 'GET' && pathname === '/api/admin/prescriptions') {
+    try {
+      const [rows] = await db.query(`
+        SELECT PrescriptionID, MedicationName AS MedicineName FROM prescription
+      `);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(rows));
+    } catch (err) {
+      console.error('❌ Error fetching prescriptions:', err);
+      res.writeHead(500);
+      return res.end(JSON.stringify({ message: 'Failed to fetch prescriptions' }));
+    }
+  }
+
+  if (method === 'GET' && pathname === '/api/admin/tests') {
+    try {
+      const [rows] = await db.query(`
+        SELECT TestID, TestName FROM medicaltest
+      `);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(rows));
+    } catch (err) {
+      console.error('❌ Error fetching tests:', err);
+      res.writeHead(500);
+      return res.end(JSON.stringify({ message: 'Failed to fetch tests' }));
+    }
   }
 
   if (method === 'GET' && pathname === '/api/admin/users') {
     try {
       const [doctors] = await db.query(`
-        SELECT 
-          d.DoctorID AS ID,
-          CONCAT('doctor-', d.DoctorID) AS CompositeID,
-          d.FirstName,
-          d.LastName,
-          l.email AS Email,
-          'doctor' AS role
+        SELECT d.DoctorID AS ID, CONCAT('doctor-', d.DoctorID) AS CompositeID, d.FirstName, d.LastName, l.email AS Email, 'doctor' AS role
         FROM doctor d
         JOIN login l ON d.UserID = l.UserID
       `);
 
       const [patients] = await db.query(`
-        SELECT 
-          p.PatientID AS ID,
-          CONCAT('patient-', p.PatientID) AS CompositeID,
-          p.FirstName,
-          p.LastName,
-          l.email AS Email,
-          'patient' AS role
+        SELECT p.PatientID AS ID, CONCAT('patient-', p.PatientID) AS CompositeID, p.FirstName, p.LastName, l.email AS Email, 'patient' AS role
         FROM patient p
         JOIN login l ON p.UserID = l.UserID
       `);
@@ -130,15 +229,9 @@ export async function handleAdminRoutes(req, res) {
   if (method === 'GET' && pathname === '/api/admin/appointments/past') {
     try {
       const [appointments] = await db.query(`
-        SELECT 
-          a.AppointmentID,
-          a.DateTime,
-          a.Reason,
-          a.Status,
-          p.FirstName AS PatientFirstName,
-          p.LastName AS PatientLastName,
-          d.FirstName AS DoctorFirstName,
-          d.LastName AS DoctorLastName
+        SELECT a.AppointmentID, a.DateTime, a.Reason, a.Status,
+               p.FirstName AS PatientFirstName, p.LastName AS PatientLastName,
+               d.FirstName AS DoctorFirstName, d.LastName AS DoctorLastName
         FROM appointment a
         JOIN patient p ON a.PatientID = p.PatientID
         JOIN doctor d ON a.DoctorID = d.DoctorID
