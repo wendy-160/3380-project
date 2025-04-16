@@ -10,6 +10,9 @@ const PatientDashboard = () => {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
+  const [doctorOffices, setDoctorOffices] = useState([]);
+  const [filteredOffices, setFilteredOffices] = useState([]);
+
   const currentPatientID = JSON.parse(localStorage.getItem('user'))?.PatientID;
 
   useEffect(() => {
@@ -29,8 +32,16 @@ const PatientDashboard = () => {
         if (doctorRes.ok) {
           const doctorData = await doctorRes.json();
           setPrimaryPhysician(doctorData);
-        }
 
+          const officesRes = await fetch(`/api/doctors/${doctorData.DoctorID}/offices`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (officesRes.ok) {
+            const officeData = await officesRes.json();
+            setDoctorOffices(officeData);
+          }
+        }
+        
         const appointmentRes = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -54,6 +65,12 @@ const PatientDashboard = () => {
       console.warn("Primary physician not available");
       return;
     }
+    const selectedDay = new Date(date).toLocaleDateString('en-US', { weekday: 'short' }); // e.g. 'Mon'
+    const filtered = doctorOffices.filter(office =>
+      office.WorkDays?.split(',').map(day => day.trim()).includes(selectedDay)
+    );
+    setFilteredOffices(filtered);
+    
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`/api/appointments/available/${primaryPhysician.DoctorID}/${date}`, {
@@ -84,7 +101,7 @@ const PatientDashboard = () => {
         body: JSON.stringify({
           PatientID: currentPatientID,
           DoctorID: primaryPhysician?.DoctorID,
-          OfficeID: 1,
+          OfficeID: document.getElementById("office").value,
           DateTime: selectedTime,
           Reason: reason,
           status: 'Scheduled'
@@ -197,6 +214,15 @@ const PatientDashboard = () => {
                       {availableTimeSlots.map((slot, idx) => (
                         <option key={idx} value={slot}>
                           {new Date(slot).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </option>
+                      ))}
+                    </select>
+                    <label>Clinic</label>
+                    <select id="office">
+                      <option value="">Choose a clinic</option>
+                      {filteredOffices.map((office) => (
+                        <option key={office.OfficeID} value={office.OfficeID}>
+                          {office.OfficeName} - {office.Address}
                         </option>
                       ))}
                     </select>

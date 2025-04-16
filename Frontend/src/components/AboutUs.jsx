@@ -67,7 +67,7 @@ const About = () => {
                             <div className="contact-item">
                                 <div>
                                     <h3>Email</h3>
-                                    <p>UHClinicHub@gmaile.com</p>
+                                    <p>UHClinicHub@gmail.com</p>
                                 </div>
                             </div>
                             <div className="contact-item">

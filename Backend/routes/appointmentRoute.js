@@ -95,8 +95,7 @@ export async function handleAppointmentRoutes(req, res) {
 
   if (method === 'POST' && pathname === '/api/appointments') {
     try {
-      const { PatientID, DoctorID, DateTime, Reason, status } = req.body;
-      const OfficeID = 1;
+      const { PatientID, DoctorID, OfficeID, DateTime, Reason, status } = req.body;
 
       const [result] = await db.execute(`
         INSERT INTO appointment (PatientID, DoctorID, OfficeID, DateTime, Reason, Status)

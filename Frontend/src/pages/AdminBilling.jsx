@@ -232,7 +232,6 @@ const AdminBilling = () => {
       {/* Filters Section */}
       <div className="filters-section">
         <div className="search-box">
-          <FiSearch className="search-icon" />
           <input
             type="text"
             placeholder="Search by patient name or ID..."

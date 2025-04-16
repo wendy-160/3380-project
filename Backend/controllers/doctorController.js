@@ -7,7 +7,7 @@ export async function getAllDoctors(req, res) {
       FROM doctor
     `);
 
-    console.log('📤 Sending doctor list:', rows);
+    console.log('Sending doctor list:', rows);
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(rows));
@@ -73,6 +73,29 @@ export async function getPrimaryPhysician(req, res, patientId) {
     res.end(JSON.stringify(rows[0]));
   } catch (error) {
     console.error('Error fetching primary physician:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: 'Internal server error', error: error.message }));
+  }
+}
+export async function getDoctorOffices(req, res, doctorId) {
+  try {
+    const [rows] = await db.query(`
+      SELECT o.OfficeID, o.OfficeName, o.Address, o.City, o.State, o.ZipCode,
+             dof.WorkDays, dof.WorkHours
+      FROM doctor_office dof
+      JOIN office o ON dof.OfficeID = o.OfficeID
+      WHERE dof.DoctorID = ?
+    `, [doctorId]);
+
+    if (rows.length === 0) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ message: 'No offices found for this doctor' }));
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(rows));
+  } catch (error) {
+    console.error('Error fetching doctor offices:', error);
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ message: 'Internal server error', error: error.message }));
   }
