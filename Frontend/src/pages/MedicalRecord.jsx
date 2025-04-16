@@ -4,6 +4,8 @@ import './MedicalRecord.css'
 const MedicalRecordsPage = () => {
   // State for patient search
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchDOB, setSearchDOB] = useState('');
+  const [searchPhone, setSearchPhone] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   
@@ -22,7 +24,7 @@ const MedicalRecordsPage = () => {
     setIsSearching(true);
   
     try {
-      const res = await fetch(`/api/patients/search?query=${encodeURIComponent(searchTerm)}`);
+      const res = await fetch(`/api/patients/search?name=${encodeURIComponent(searchTerm)}&dob=${encodeURIComponent(searchDOB)}&phone=${encodeURIComponent(searchPhone)}`);
       const data = await res.json();
       setSearchResults(data);
     } catch (err) {
@@ -97,9 +99,24 @@ const MedicalRecordsPage = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by patient ID..."
+                placeholder="Search by patient name..."
                 className="search-input"
               />
+              <input
+                type="text"
+                value={searchPhone}
+                onChange={(e) => setSearchPhone(e.target.value)}
+                placeholder="Phone Number"
+                className="search-input"
+              />
+              <input
+                type="date"
+                value={searchDOB}
+                onChange={(e) => setSearchDOB(e.target.value)}
+                placeholder="Date of Birth"
+                className="search-input"
+              />
+              
             </div>
             <button type="submit" className="search-button">
               Search
