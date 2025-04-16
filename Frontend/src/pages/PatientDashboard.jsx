@@ -169,8 +169,11 @@ const PatientDashboard = () => {
           <div className="appointments-list">
             {upcomingAppointments.map(appt => (
               <div key={appt.AppointmentID} className="appointment-item">
-                <div><FiClock /> {formatDateTime(appt.DateTime)}</div>
-                <div>{appt.Reason} - {appt.status}</div>
+                <div className="appointment-time">{formatDateTime(appt.DateTime)} </div>
+                <div className="appointment-reason">{appt.Reason} - {appt.status}</div>
+                <div className="clinic-info">
+                  <strong>Clinic:</strong> {appt.OfficeName}
+                </div>
               </div>
             ))}
           </div>

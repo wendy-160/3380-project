@@ -133,9 +133,11 @@
   .appointments-list {
     margin-top: 1rem;
   }
-  
+  .appointment-reason {
+    padding: 2vh;
+  }
   .appointment-item {
-    border: 1px solid #eee;
+    border: 1px solid #ebe9ff;
     border-radius: 8px;
     padding: 1rem;
     margin-bottom: 1rem;
@@ -149,15 +151,11 @@
   .appointment-item:last-child {
     margin-bottom: 0;
   }
-  
   .appointment-time {
-    display: flex;
-    align-items: center;
-    color: #4a90e2;
-    margin-bottom: 0.75rem;
-    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
     font-weight: 500;
   }
+
   
   .time-icon {
     margin-right: 0.75rem;
@@ -288,14 +286,18 @@
   .appointment-form .form-group {
     margin-bottom: 1.5rem;
   }
-  
+
   .appointment-form label {
     display: block;
     margin-bottom: 0.5rem;
     color: #333;
     font-weight: 500;
   }
-  
+  .clinic-info {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 4px;
+  }
   .appointment-form .form-control {
     width: 100%;
     padding: 0.75rem;

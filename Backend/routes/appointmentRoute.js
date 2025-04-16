@@ -82,9 +82,11 @@ export async function handleAppointmentRoutes(req, res) {
     const patientID = matchUpcomingAppointments[1];
     try {
       const [rows] = await db.execute(`
-        SELECT * FROM appointment
-        WHERE PatientID = ? AND DateTime >= NOW()
-        ORDER BY DateTime ASC
+        SELECT a.*, o.OfficeName
+        FROM appointment a
+        JOIN office o ON a.OfficeID = o.OfficeID
+        WHERE a.PatientID = ? AND a.DateTime >= NOW()
+        ORDER BY a.DateTime ASC
       `, [patientID]);
       return sendJson(res, 200, rows);
     } catch (err) {
