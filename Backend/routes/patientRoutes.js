@@ -56,6 +56,7 @@ export async function handlePatientRoutes(req, res) {
 
       if (rows.length === 0) {
         return sendJson(404, { message: 'Patient not found' });
+
       }
 
       return sendJson(200, rows[0]);
@@ -77,11 +78,14 @@ export async function handlePatientRoutes(req, res) {
       `, [doctorId]);
 
       return sendJson(200, rows);
+
     } catch (err) {
       console.error('Error fetching doctor patients:', err);
       return sendJson(500, { message: 'Error fetching patients' });
+
     }
   }
 
   return sendJson(404, { message: 'Patient route not found' });
+
 }
