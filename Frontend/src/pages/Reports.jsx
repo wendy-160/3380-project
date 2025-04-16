@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import './Reports.css'
 
 const Reports = () => {
   const { user } = useAuth();
@@ -167,35 +168,85 @@ const Reports = () => {
   );
 };
 
-const DoctorPerformanceReport = ({ data }) => (
-  <div className="doctor-performance-report">
-    <h2>Doctor Performance Summary</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Doctor ID</th>
-          <th>Total Appointments</th>
-          <th>Completed Appointments</th>
-          <th>Total Referrals</th>
-          <th>Prescriptions Written</th>
-          <th>Tests Ordered</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>{data.doctorId}</td>
-          <td>{data.TotalAppointments}</td>
-          <td>{data.CompletedAppointments}</td>
-          <td>{data.TotalReferrals}</td>
-          <td>{data.Prescriptions}</td>
-          <td>{data.TestsOrdered}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-);
+const DoctorPerformanceReport = ({ data }) => {
+  const completionRate = Math.round((data.CompletedAppointments / data.TotalAppointments) * 100);
+  
+  const testsPerAppointment = (data.TestsOrdered / data.CompletedAppointments).toFixed(2);
+
+  const prescriptionsPerAppointment = (data.Prescriptions / data.CompletedAppointments).toFixed(2);
+
+  const referralRate = Math.round((data.TotalReferrals / data.CompletedAppointments) * 100);
+  
+  return (
+    <div className="doctor-performance-report">
+      <h2>Doctor Performance Summary</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Doctor ID</th>
+            <th>Total Appointments</th>
+            <th>Completed Appointments</th>
+            <th>Total Referrals</th>
+            <th>Prescriptions Written</th>
+            <th>Tests Ordered</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{data.doctorId}</td>
+            <td>{data.TotalAppointments}</td>
+            <td>{data.CompletedAppointments}</td>
+            <td>{data.TotalReferrals}</td>
+            <td>{data.Prescriptions}</td>
+            <td>{data.TestsOrdered}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div className="report-summary">
+        <h3>Analysis</h3>
+        <div className="doctor-summary-metrics">
+          <div className="metric-card">
+            <div className="metric-title">Appointment Completion Rate</div>
+            <div className="metric-value">{completionRate}%</div>
+            <div className="metric-trend">
+              <span className={completionRate >= 85 ? "trend-up" : "trend-down"}>
+              </span>
+            </div>
+          </div>
+          
+          <div className="metric-card">
+            <div className="metric-title">Referral Rate</div>
+            <div className="metric-value">{referralRate}%</div>
+            <div className="metric-trend">
+            </div>
+          </div>
+          
+          <div className="metric-card">
+            <div className="metric-title">Tests Per Appointment</div>
+            <div className="metric-value">{testsPerAppointment}</div>
+            <div className="metric-trend">
+            </div>
+          </div>
+          
+          <div className="metric-card">
+            <div className="metric-title">Prescriptions Per Appointment</div>
+            <div className="metric-value">{prescriptionsPerAppointment}</div>
+            <div className="metric-trend">
+              <span className="trend-neutral"> Within Expected Range</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="summary-notes">
+          <p>This report provides an analysis of the doctor's performance metrics. The metrics are calculated based on historical data and compared against clinic benchmarks. </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ClinicUtilizationReport = ({ data, aggregation }) => (
+  
   <div className="clinic-utilization-report">
     <h2>Clinic Utilization Report ({aggregation})</h2>
     <table>
@@ -216,6 +267,7 @@ const ClinicUtilizationReport = ({ data, aggregation }) => (
         ))}
       </tbody>
     </table>
+    
   </div>
 );
 

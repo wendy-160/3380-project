@@ -1,0 +1,103 @@
+.about-container {
+    font-family: sans-serif;
+    color: #0c264b;
+    line-height: 1.6;
+    
+}
+.section {
+    padding: 80px 0;
+    background-color: #f9faff;
+    position: relative;
+    overflow: hidden;
+}
+.section h1{
+    color: #212EA0;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    display: inline-block;
+    position: relative;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.vision-section h2{
+    color: #212EA0;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    display: inline-block;
+    position: relative;
+}
+
+.contact-section h2{
+    color: #212EA0;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    display: inline-block;
+    position: relative;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 32px;
+    margin-top: 40px;
+    
+}
+.value-card {
+    border-radius: 8px;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.value-card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #161d72;
+}
+.value-card p {
+    color: #0a1d38;
+}
+.value-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.contact-content {
+
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+}
+.contact-info {
+    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 1rem 0;
+    gap: 2rem;
+
+}
+
+.contact-item h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #000142;
+}
+.contact-item p {
+    color: #000142;
+    margin: 0;
+}

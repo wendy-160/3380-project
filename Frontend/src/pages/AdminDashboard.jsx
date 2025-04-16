@@ -77,7 +77,7 @@ const AdminDashboard = () => {
     <div className="admin-dashboard">
       <h1>Admin Dashboard</h1>
 
-      <div className="section">
+      <div className="dasboard-section">
         <h2>Past Appointments</h2>
         <label>Status Filter: </label>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -111,7 +111,7 @@ const AdminDashboard = () => {
         </table>
       </div>
 
-      <div className="section">
+      <div className="users-section">
         <h2>Users</h2>
         <label>Role Filter: </label>
         <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>

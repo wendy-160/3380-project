@@ -4,6 +4,20 @@ import db from '../db.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
+const STATE_MAP = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+  CO: "Colorado", CT: "Connecticut", DE: "Delaware", FL: "Florida", GA: "Georgia",
+  HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
+  KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
+  MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi",
+  MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire",
+  NJ: "New Jersey", NM: "New Mexico", NY: "New York", NC: "North Carolina",
+  ND: "North Dakota", OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania",
+  RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota", TN: "Tennessee",
+  TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia", WA: "Washington",
+  WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming"
+};
+
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
@@ -28,19 +42,43 @@ async function register(req, res) {
     if (role.toLowerCase() === "patient" && patientInfo) {
       const {
         FirstName, LastName, DOB, Gender,
-        PhoneNumber, Address, City, State, Zipcode, PrimaryDoctorID
+        PhoneNumber, Address, City, State, Zipcode
       } = patientInfo;
 
-      await db.query(
+      const [patientResult] = await db.query(
         `INSERT INTO patient (
           UserID, FirstName, LastName, DOB, Gender,
-          PhoneNumber, Address, City, State, Zipcode, PrimaryDoctorID
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          PhoneNumber, Address, City, State, Zipcode
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           userID, FirstName, LastName, DOB, Gender,
-          PhoneNumber, Address, City, State, Zipcode, PrimaryDoctorID || null
+          PhoneNumber, Address, City, State, Zipcode
         ]
+      ); 
+      const patientID = patientResult.insertId;
+      const [doctorMatch] = await db.query(
+        `SELECT d.DoctorID
+         FROM doctor d
+         JOIN doctor_office dof ON d.DoctorID = dof.DoctorID
+         JOIN office o ON dof.OfficeID = o.OfficeID
+         WHERE d.Specialization = 'Primary Care Physician' AND o.State = ?
+         ORDER BY RAND() LIMIT 1`,
+         [STATE_MAP[State] || State]
       );
+      if (doctorMatch.length > 0) {
+        const assignedDoctorID = doctorMatch[0].DoctorID;
+        console.log("Assigning doctor:", assignedDoctorID, "to patient:", patientID);
+        // Insert into patient_doctor_assignment
+        await db.query(
+          `INSERT INTO patient_doctor_assignment (
+            PatientID, DoctorID, AssignmentDate, PrimaryPhysicianFlag
+          ) VALUES (?, ?, NOW(), 1)`,
+          [patientID, assignedDoctorID]
+        );
+        console.log("Doctor assigned successfully.");
+      } else {
+        console.warn("No matching primary care doctor found in state:", State);
+      }     
     }
 
     return sendJson(res, 201, {

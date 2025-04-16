@@ -16,6 +16,7 @@ import { handleReferralRoutes } from './routes/referralRoutes.js';
 import { handleOfficeRoutes } from './routes/officeRoutes.js';
 import { handleDoctorOfficeRoutes } from './routes/doctorClinicRoutes.js';
 import { handleAdminRoutes } from './routes/adminRoutes.js';
+import { handleMedicalRecordRoutes } from './routes/medicalRecordRoutes.js';
 
 dotenv.config();
 
@@ -96,6 +97,9 @@ function routeRequest(req, res, pathname, method) {
   } else if (pathname.startsWith('/api/offices')) {
     console.log('🔁 Routing to officeRoutes');
     return handleOfficeRoutes(req, res);
+  } else if (pathname.startsWith('/api/medical-records')){
+    console.log('🔁 Routing to medicalRecordRoutes');
+    return handleMedicalRecordRoutes(req, res);
   } else if (
     pathname.startsWith('/api/doctors') ||
     pathname.startsWith('/api/patients/assigned') ||
