@@ -17,7 +17,7 @@ const Login = () => {
     setError(null);
   
     try {
-      await login({ email, password }); // Use the `login` function from AuthContext
+      await login({ email, password }); // login function from AuthContext
       navigate("/dashboard"); 
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);

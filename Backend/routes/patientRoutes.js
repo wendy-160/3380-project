@@ -6,7 +6,7 @@ export async function handlePatientRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
-  const sendJson = (statusCode, data) => {
+  const sendJson = (res, statusCode, data) => {
     res.writeHead(statusCode, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(data));
   };
@@ -14,10 +14,10 @@ export async function handlePatientRoutes(req, res) {
   if (method === 'GET' && pathname === '/api/patients') {
     try {
       const [rows] = await db.query('SELECT * FROM patient');
-      return sendJson(200, rows);
+      return sendJson(res, 200, rows);
     } catch (err) {
       console.error('Error fetching all patients:', err);
-      return sendJson(500, { message: 'Error fetching patients' });
+      return sendJson(res, 500, { message: 'Error fetching patients' });
     }
   }
 
@@ -33,13 +33,13 @@ export async function handlePatientRoutes(req, res) {
       `, [patientId]);
 
       if (rows.length === 0) {
-        return sendJson(404, { message: 'Primary physician not assigned' });
+        return sendJson(res, 404, { message: 'Primary physician not assigned' });
       }
 
-      return sendJson(200, rows[0]);
+      return sendJson(res, 200, rows[0]);
     } catch (err) {
       console.error('Error fetching primary physician:', err);
-      return sendJson(500, { message: 'Error fetching primary physician' });
+      return sendJson(res, 500, { message: 'Error fetching primary physician' });
     }
   }
 
@@ -55,14 +55,14 @@ export async function handlePatientRoutes(req, res) {
       `, [patientId]);
 
       if (rows.length === 0) {
-        return sendJson(404, { message: 'Patient not found' });
+        return sendJson(res, 404, { message: 'Patient not found' });
 
       }
 
-      return sendJson(200, rows[0]);
+      return sendJson(res, 200, rows[0]);
     } catch (err) {
       console.error('Error fetching patient by ID:', err);
-      return sendJson(500, { message: 'Error fetching patient data' });
+      return sendJson(res, 500, { message: 'Error fetching patient data' });
     }
   }
 
@@ -77,15 +77,71 @@ export async function handlePatientRoutes(req, res) {
         WHERE a.DoctorID = ?
       `, [doctorId]);
 
-      return sendJson(200, rows);
+      return sendJson(res, 200, rows);
 
     } catch (err) {
       console.error('Error fetching doctor patients:', err);
-      return sendJson(500, { message: 'Error fetching patients' });
+      return sendJson(res, 500, { message: 'Error fetching patients' });
 
     }
   }
+  if (method === 'PUT' && matchById) {
+    const patientId = matchById[1];
+    let body = '';
+  
+    req.on('data', chunk => body += chunk);
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        console.log("Received update data:", data);
 
-  return sendJson(404, { message: 'Patient route not found' });
+        const { email, address } = data;
+        console.log("Parsed update data:", data);
+
+        const [userResult] = await db.query(
+          'SELECT UserID FROM patient WHERE PatientID = ?',
+          [patientId]
+        );
+  
+        if (userResult.length === 0) {
+          return sendJson(res, 404, { message: 'Patient not found' });
+        }
+  
+        const userId = userResult[0].UserID;
+        
+        if (address !== undefined && address !== '') {
+          await db.query(
+            `UPDATE patient SET Address = ? WHERE PatientID = ?`,
+            [address, patientId]
+          );
+        }
+        
+        if (email !== undefined && email !== '') {
+          await db.query(
+            `UPDATE login SET email = ? WHERE UserID = ?`,
+            [email, userId]
+          );
+        }
+
+        const [updated] = await db.query(`
+          SELECT p.*, l.email
+          FROM patient p
+          JOIN login l ON p.UserID = l.UserID
+          WHERE p.PatientID = ?
+        `, [patientId]);
+  
+        return sendJson(res, 200, updated[0]);
+  
+      } catch (err) {
+        console.error('Error updating profile:', err);
+        return sendJson(res, 500, { message: 'Failed to update profile' });
+      }
+    });
+  
+    return; 
+  }
+  
+
+  return sendJson(res, 404, { message: 'Patient route not found' });
 
 }

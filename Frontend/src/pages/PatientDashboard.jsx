@@ -12,13 +12,16 @@ const PatientDashboard = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [doctorOffices, setDoctorOffices] = useState([]);
   const [filteredOffices, setFilteredOffices] = useState([]);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [updatedEmail, setUpdatedEmail] = useState('');
+  const [updatedAddress, setUpdatedAddress] = useState('');
 
   const currentPatientID = JSON.parse(localStorage.getItem('user'))?.PatientID;
 
   useEffect(() => {
     const fetchPatientData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken');
 
         const profileRes = await fetch(`/api/patients/${currentPatientID}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -72,7 +75,7 @@ const PatientDashboard = () => {
     setFilteredOffices(filtered);
     
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       const res = await fetch(`/api/appointments/available/${primaryPhysician.DoctorID}/${date}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -90,7 +93,7 @@ const PatientDashboard = () => {
     if (!selectedTime || !reason) return alert("Time and reason required.");
   
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
   
       const response = await fetch('/api/appointments', {
         method: 'POST',
@@ -124,8 +127,77 @@ const PatientDashboard = () => {
       alert("Failed to schedule appointment");
     }
   };
+  const handleCancelAppointment = async (appointmentId) => {
+    if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
   
+    try {
+      const token = localStorage.getItem('authToken');
   
+      const response = await fetch(`/api/appointments/${appointmentId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to cancel appointment');
+      }
+      
+      const updatedAppointments = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const appointmentsData = await updatedAppointments.json();
+      setUpcomingAppointments(appointmentsData);
+  
+    } catch (error) {
+      console.error('Cancel appointment error:', error);
+      alert("Unable to cancel appointment");
+    }
+  };
+  console.log("currentPatientID:", currentPatientID);
+  const handleSaveProfile = async () => {
+    const token = localStorage.getItem("authToken");
+    console.log("Read token from localStorage:", token);
+
+    if (!token) {
+      alert("No auth token found. Please log in again.");
+      return;
+    }
+    try {
+      console.log("Making PUT request to:", `/api/patients/${currentPatientID}`);
+      const response = await fetch(`http://localhost:5000/api/patients/${currentPatientID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          email: updatedEmail,
+          address: updatedAddress,
+        }),
+      });
+  
+      console.log("PUT request sent. Status:", response.status);
+  
+      const result = await response.json();
+      console.log("Server response:", result);
+  
+      if (!response.ok) {
+        throw new Error(result.message || "Update failed");
+      }
+  
+      setProfile(result);
+      setIsEditingProfile(false);
+      setUpdatedEmail(result.Email);
+      setUpdatedAddress(result.Address);
+  
+      console.log("Profile updated.");
+    } catch (err) {
+      console.error("Failed to update profile:", err.message);
+      alert("Could not update profile info");
+    }
+  };
   
 
   const formatDateTime = (dt) =>
@@ -144,9 +216,55 @@ const PatientDashboard = () => {
               <p>{profile.FirstName} {profile.LastName}</p>
               <p><FiPhone /> {profile.PhoneNumber}</p>
               <p><FiMail /> {profile.Email}</p>
+              <p><strong>Address: </strong> {profile.Address}, {profile.City}, {profile.State}, {profile.ZipCode}</p>
+              <button 
+              onClick={() => {
+                setIsEditingProfile(true);
+                setUpdatedEmail(profile.Email || '');
+                setUpdatedAddress(profile.Address || '');
+              }} className="edit-profile-btn">
+                Edit Profile
+              </button>
             </div>
           )}
         </div>
+        {isEditingProfile && (
+        <div className="modal-overlay">
+          <div className="appointment-modal">
+            <div className="modal-header">
+              <h2>Edit Profile</h2>
+              <button className="close-modal-btn" onClick={() => setIsEditingProfile(false)}>
+                <FiX />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <form onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }}>
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={updatedEmail}
+                  onChange={(e) => setUpdatedEmail(e.target.value)}
+                />
+
+                <label>Address</label>
+                <input
+                  type="text"
+                  value={updatedAddress}
+                  onChange={(e) => setUpdatedAddress(e.target.value)}
+                />
+
+                <div className="form-actions">
+                  <button type="submit" className="submit-btn">Save</button>
+                  <button type="button" className="cancel-btn" onClick={() => setIsEditingProfile(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
         {/* Primary Doctor */}
         <div className="dashboard-card physician-section">
@@ -174,6 +292,14 @@ const PatientDashboard = () => {
                 <div className="clinic-info">
                   <strong>Clinic:</strong> {appt.OfficeName}
                 </div>
+                <div className="cancel-appt-btn-wrapper">
+                  <button
+                    className="cancel-appt-btn"
+                    onClick={() => handleCancelAppointment(appt.AppointmentID)}
+                  >
+                    x
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -183,15 +309,19 @@ const PatientDashboard = () => {
         <div className="dashboard-card prescriptions-section">
           <div className="card-header"><h2>Prescriptions</h2></div>
           {prescriptions.map(p => (
-            <div key={p.PrescriptionID}>
-              <h3>{p.MedicationName}</h3>
-              <p>{p.Dosage} - {p.Instructions}</p>
-            </div>
-          ))}
+          <div key={p.PrescriptionID} className="prescription-item">
+            <h3>{p.MedicationName}</h3>
+            <p><strong>Dosage:</strong> {p.Dosage}</p>
+            <p><strong>Frequency:</strong> {p.Frequency}</p>
+            <p><strong>Start:</strong> {new Date(p.StartDate).toLocaleDateString()}</p>
+            <p><strong>End:</strong> {new Date(p.EndDate).toLocaleDateString()}</p>
+            <p><strong>Notes:</strong> {p.Notes}</p>
+            <p><strong>Prescribed by:</strong> Dr. {p.DoctorFirstName} {p.DoctorLastName}</p>
+          </div>
+        ))}
         </div>
       </div>
 
-      {/* Modal */}
       {isAppointmentModalOpen && (
         <div className="modal-overlay">
           <div className="appointment-modal">
@@ -239,6 +369,7 @@ const PatientDashboard = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

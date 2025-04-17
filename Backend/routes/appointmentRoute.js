@@ -110,6 +110,17 @@ export async function handleAppointmentRoutes(req, res) {
       return sendJson(res, 500, { message: "Could not create appointment" });
     }
   }
+  const matchDeleteAppointment = pathname.match(/^\/api\/appointments\/(\d+)$/);
+  if (method === 'DELETE' && matchDeleteAppointment) {
+    const appointmentID = matchDeleteAppointment[1];
+    try {
+      await db.execute(`DELETE FROM appointment WHERE AppointmentID = ?`, [appointmentID]);
+      return sendJson(res, 200, { message: 'Appointment canceled successfully' });
+    } catch (err) {
+      console.error("Error deleting appointment:", err);
+      return sendJson(res, 500, { message: "Error canceling appointment" });
+    }
+  }
 
   sendJson(res, 404, { message: 'Appointment route not found.' });
 }

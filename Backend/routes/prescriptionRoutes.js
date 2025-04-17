@@ -21,7 +21,7 @@ export async function handlePrescriptionRoutes(req, res) {
       );
       return sendJson(res, 200, rows);
     } catch (err) {
-      console.error('❌ Error fetching prescriptions:', err.message);
+      console.error('Error fetching prescriptions:', err.message);
       return sendJson(res, 500, { message: 'Error fetching prescriptions' });
     }
   }
@@ -36,20 +36,19 @@ export async function handlePrescriptionRoutes(req, res) {
         req.on('end', async () => {
           try {
             body = JSON.parse(rawData);
+            return await insertPrescription(body, res);
           } catch (err) {
-            console.error('❌ Invalid JSON body:', err);
+            console.error('Invalid JSON body:', err);
             return sendJson(res, 400, { message: 'Invalid JSON' });
           }
-
-          await insertPrescription(body, res);
         });
         return;
       }
 
-      await insertPrescription(body, res);
+      return await insertPrescription(body, res);
 
     } catch (err) {
-      console.error('❌ Failed processing POST /api/prescriptions:', err.message);
+      console.error('Failed processing POST /api/prescriptions:', err.message);
       return sendJson(res, 500, { message: 'Server error' });
     }
   }
@@ -105,7 +104,7 @@ async function insertPrescription(body, res) {
     return sendJson(res, 201, { message: 'Prescription created', PrescriptionID: result.insertId });
 
   } catch (err) {
-    console.error('❌ Error inserting prescription:', err.message);
+    console.error('Error inserting prescription:', err.message);
     return sendJson(res, 500, { message: 'Error inserting prescription' });
   }
 }

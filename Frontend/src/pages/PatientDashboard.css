@@ -173,7 +173,6 @@
   }
   
   .appointment-status {
-    color: #666;
     font-size: 0.9rem;
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -190,13 +189,23 @@
   .prescription-item {
     border: 1px solid #eee;
     border-radius: 8px;
-    padding: 1rem;
+    padding: 16px 20px;
     margin-bottom: 1rem;
-    transition: background-color 0.2s ease;
+    background-color: #f9fafd;
+  }
+  .prescription-item p{
+    color:#000550;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  .prescription-item h3{
+    color:#000550;
+    margin: 0 0 10px 0;
+    margin: 6px 0;
   }
   
   .prescription-item:hover {
-    background-color: #f8f9fa;
+    background-color: #f2f5ff;
   }
   
   .prescription-item:last-child {
@@ -205,7 +214,7 @@
   
   .medication-name {
     margin: 0 0 0.5rem 0;
-    color: #2c3e50;
+    color: #060041;
     font-size: 1.2rem;
   }
   
@@ -297,6 +306,7 @@
     font-size: 0.9rem;
     color: #555;
     margin-top: 4px;
+    
   }
   .appointment-form .form-control {
     width: 100%;
@@ -371,7 +381,25 @@
   .submit-btn:active {
     transform: translateY(0);
   }
+  .cancel-btn-wrapper {
+    margin-top: 0.75rem;
+    text-align: left;   
+  }
+  .cancel-appt-btn {
+    background: #7e252e;
+    color: white;
+    border: none;
+    margin-top: 0.75rem;
+    border-radius: 5px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
   
+  .cancel-appt-btn:hover {
+    background: #af4852;
+  }
   /* Responsive Design */
   @media (max-width: 768px) {
     .patient-dashboard {
