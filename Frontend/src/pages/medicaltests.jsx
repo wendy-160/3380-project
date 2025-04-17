@@ -16,6 +16,65 @@ const MedicalTests = () => {
   const [updateForm, setUpdateForm] = useState({ results: '', notes: '' });
 
   useEffect(() => {
+
+    // Get the current doctor's ID from localStorage
+    const currentUser = JSON.parse(localStorage.getItem('user')) || {};
+    const doctorID = currentUser.DoctorID;
+
+    // First, fetch all tests
+    fetch("http://localhost:5000/api/tests")
+      .then((res) => res.json())
+      .then(async (data) => {
+        // If we have tests, fetch patient details for each test
+        if (Array.isArray(data) && data.length > 0) {
+          // Create a map to store patient information
+          const patientMap = new Map();
+          
+          // Process each test to add patient information
+          const testsWithPatients = await Promise.all(data.map(async (test) => {
+            // If we already have this patient's info, use it from our map
+            if (patientMap.has(test.PatientID)) {
+              return {
+                ...test,
+                PatientName: patientMap.get(test.PatientID)
+              };
+            }
+            
+            // Otherwise, fetch the patient information
+            try {
+              const patientRes = await fetch(`http://localhost:5000/api/patients/${test.PatientID}`);
+              const patientData = await patientRes.json();
+              
+              // Create a full name from patient data
+              const patientName = patientData ? `${patientData.FirstName} ${patientData.LastName}` : 'Unknown Patient';
+              
+              // Store in our map for future use
+              patientMap.set(test.PatientID, patientName);
+              
+              // Return the test with patient name
+              return {
+                ...test,
+                PatientName: patientName
+              };
+            } catch (err) {
+              console.error(`Error fetching patient ${test.PatientID}:`, err);
+              return {
+                ...test,
+                PatientName: 'Unknown Patient'
+              };
+            }
+          }));
+          
+          setTests(testsWithPatients);
+        } else {
+          setTests(data);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching tests:", error);
+        setLoading(false);
+      });
     fetchTests();
     fetch('http://localhost:5000/api/patients')
       .then(res => res.json())

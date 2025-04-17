@@ -85,7 +85,7 @@ export async function handleTestRoutes(req, res) {
     req.on('end', async () => {
       try {
           body = JSON.parse(rawData);
-          console.log(`Parsed body for PUT /api/tests/${testID}:`, body);
+          console.log(`🟡 Parsed body for PUT /api/tests/${testID}:`, body);
   
         const { results, notes } = body;
 
@@ -100,13 +100,12 @@ export async function handleTestRoutes(req, res) {
           return sendJson(res, 200, { message: 'Test updated successfully', result });
   
         } catch (err) {
-          console.error('Failed to update test:', err.message);
+          console.error('❌ Failed to update test:', err.message);
           return sendJson(res, 500, { message: 'Update failed', error: err.message });
         }
         });
         return;
   }
-
     try {
       const { results, notes } = body;
   
@@ -121,7 +120,7 @@ export async function handleTestRoutes(req, res) {
       return sendJson(res, 200, { message: 'Test updated successfully', result });
   
     } catch (err) {
-      console.error('Failed to update test:', err.message);
+      console.error('❌ Failed to update test:', err.message);
       return sendJson(res, 500, { message: 'Update failed', error: err.message });
     }
   }

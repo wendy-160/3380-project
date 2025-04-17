@@ -6,7 +6,7 @@ dotenv.config();
 const db = await mysql.createPool({
   host: 'localhost',
   user: 'root', 
-  password: '1722AutumnLeaves!', // put in your own MySQL password
+  password: 'Thinhvu1108!', // put in your own MySQL password
   database: 'medicalclinicdb',
   waitForConnections: true,
   connectionLimit: 10,
