@@ -6,6 +6,11 @@ export async function handleAdminRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
+  const sendJson = (res, statusCode, data) => {
+    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(data));
+  };
+  
   if (method === 'GET' && pathname === '/api/admin/billings') {
     const { status, startDate, endDate, search } = Object.fromEntries(parsedUrl.searchParams.entries());
 
@@ -55,7 +60,7 @@ export async function handleAdminRoutes(req, res) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify(rows));
     } catch (err) {
-      console.error('❌ Error fetching admin billings:', err);
+      console.error('Error fetching admin billings:', err);
       res.writeHead(500);
       return res.end(JSON.stringify({ message: 'Failed to fetch billing records' }));
     }
@@ -91,7 +96,7 @@ export async function handleAdminRoutes(req, res) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ message: 'Billing record updated successfully' }));
       } catch (err) {
-        console.error('❌ SQL error during billing update:', err);
+        console.error('SQL error during billing update:', err);
         res.writeHead(500, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ message: 'Failed to update billing record' }));
       }
@@ -138,14 +143,14 @@ export async function handleAdminRoutes(req, res) {
         res.writeHead(201, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ message: 'Billing record created', BillingID: result.insertId }));
       } catch (err) {
-        console.error('❌ Error creating billing record:', err);
+        console.error('Error creating billing record:', err);
         res.writeHead(500);
         return res.end(JSON.stringify({ message: 'Failed to create billing record' }));
       }
     });
     return;
   }
-
+  
   if (method === 'GET' && pathname === '/api/admin/patients') {
     try {
       const [rows] = await db.query(`
@@ -154,7 +159,7 @@ export async function handleAdminRoutes(req, res) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify(rows));
     } catch (err) {
-      console.error('❌ Error fetching patients:', err);
+      console.error('Error fetching patients:', err);
       res.writeHead(500);
       return res.end(JSON.stringify({ message: 'Failed to fetch patients' }));
     }
@@ -168,9 +173,20 @@ export async function handleAdminRoutes(req, res) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify(rows));
     } catch (err) {
-      console.error('❌ Error fetching appointments:', err);
+      console.error('Error fetching appointments:', err);
       res.writeHead(500);
       return res.end(JSON.stringify({ message: 'Failed to fetch appointments' }));
+    }
+  }
+  if (method === 'GET' && pathname === '/api/admin/clinics') {
+    try {
+      const [clinics] = await db.query(`
+        SELECT OfficeID, OfficeName FROM office ORDER BY OfficeName
+      `);
+      return sendJson(res, 200, clinics);
+    } catch (err) {
+      console.error('Error fetching clinics:', err);
+      return sendJson(res, 500, { message: 'Failed to fetch clinics' });
     }
   }
 
@@ -182,7 +198,7 @@ export async function handleAdminRoutes(req, res) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify(rows));
     } catch (err) {
-      console.error('❌ Error fetching prescriptions:', err);
+      console.error('Error fetching prescriptions:', err);
       res.writeHead(500);
       return res.end(JSON.stringify({ message: 'Failed to fetch prescriptions' }));
     }
@@ -196,7 +212,7 @@ export async function handleAdminRoutes(req, res) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify(rows));
     } catch (err) {
-      console.error('❌ Error fetching tests:', err);
+      console.error('Error fetching tests:', err);
       res.writeHead(500);
       return res.end(JSON.stringify({ message: 'Failed to fetch tests' }));
     }
@@ -204,47 +220,51 @@ export async function handleAdminRoutes(req, res) {
 
   if (method === 'GET' && pathname === '/api/admin/users') {
     try {
-      const [doctors] = await db.query(`
-        SELECT d.DoctorID AS ID, CONCAT('doctor-', d.DoctorID) AS CompositeID, d.FirstName, d.LastName, l.email AS Email, 'doctor' AS role
-        FROM doctor d
-        JOIN login l ON d.UserID = l.UserID
+      const [rows] = await db.query(`
+        SELECT 
+        l.UserID,
+        l.email AS Email,
+        l.role,
+        d.DoctorID,
+        p.PatientID,
+        d.FirstName AS DoctorFirstName,
+        d.LastName AS DoctorLastName,
+        p.FirstName AS PatientFirstName,
+        p.LastName AS PatientLastName,
+        CONCAT(l.role, '-', l.UserID) AS CompositeID
+      FROM login l
+      LEFT JOIN doctor d ON l.UserID = d.UserID
+      LEFT JOIN patient p ON l.UserID = p.UserID
+      WHERE l.role IN ('Doctor', 'Patient')
       `);
 
-      const [patients] = await db.query(`
-        SELECT p.PatientID AS ID, CONCAT('patient-', p.PatientID) AS CompositeID, p.FirstName, p.LastName, l.email AS Email, 'patient' AS role
-        FROM patient p
-        JOIN login l ON p.UserID = l.UserID
-      `);
-
-      const users = [...doctors, ...patients];
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify(users));
+      return res.end(JSON.stringify(rows));
     } catch (err) {
-      console.error('❌ Error fetching users:', err);
+      console.error('Error fetching users:', err);
       res.writeHead(500);
       return res.end(JSON.stringify({ message: 'Failed to fetch users' }));
     }
   }
 
-  if (method === 'GET' && pathname === '/api/admin/appointments/past') {
+  if (method === 'GET' && pathname === '/api/admin/appointments/full') {
     try {
       const [appointments] = await db.query(`
-        SELECT a.AppointmentID, a.DateTime, a.Reason, a.Status,
+        SELECT a.AppointmentID, a.DateTime, a.Reason, a.Status, a.DoctorID, a.OfficeID, o.OfficeName,
                p.FirstName AS PatientFirstName, p.LastName AS PatientLastName,
                d.FirstName AS DoctorFirstName, d.LastName AS DoctorLastName
         FROM appointment a
         JOIN patient p ON a.PatientID = p.PatientID
         JOIN doctor d ON a.DoctorID = d.DoctorID
-        WHERE a.DateTime < NOW()
+        JOIN office o ON a.OfficeID = o.OfficeID
         ORDER BY a.DateTime DESC
       `);
-
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify(appointments));
     } catch (err) {
-      console.error('❌ Error fetching past appointments:', err);
+      console.error('Error fetching all appointments:', err);
       res.writeHead(500);
-      return res.end(JSON.stringify({ message: 'Failed to fetch past appointments' }));
+      return res.end(JSON.stringify({ message: 'Failed to fetch all appointments' }));
     }
   }
 
@@ -254,42 +274,89 @@ export async function handleAdminRoutes(req, res) {
     const id = userEditMatch[2];
 
     try {
-      const { FirstName, LastName } = req.body || {};
-      if (!FirstName || !LastName) {
+      const { FirstName, LastName, Email } = req.body || {};
+      if (!FirstName || !LastName || !Email) {
         res.writeHead(400);
-        return res.end(JSON.stringify({ message: 'Missing FirstName or LastName' }));
+        return res.end(JSON.stringify({ message: 'Missing required fields' }));
       }
 
       const table = role === 'doctor' ? 'doctor' : 'patient';
       const idColumn = role === 'doctor' ? 'DoctorID' : 'PatientID';
 
-      const [result] = await db.query(
+      await db.query(
         `UPDATE ${table} SET FirstName = ?, LastName = ? WHERE ${idColumn} = ?`,
         [FirstName, LastName, id]
       );
 
+      const [userResult] = await db.query(
+        `SELECT UserID FROM ${table} WHERE ${idColumn} = ?`,
+        [id]
+      );
+      const userId = userResult[0]?.UserID;
+
+      if (userId) {
+        await db.query(
+          `UPDATE login SET email = ? WHERE UserID = ?`,
+          [Email, userId]
+        );
+      }
+
       res.writeHead(200);
       return res.end(JSON.stringify({ message: 'User updated successfully' }));
     } catch (err) {
-      console.error('❌ Error in PUT handler:', err);
+      console.error('Error in PUT handler:', err);
       res.writeHead(500);
       return res.end(JSON.stringify({ message: 'Failed to update user' }));
     }
   }
 
-  if (userEditMatch && method === 'DELETE') {
-    const role = userEditMatch[1];
-    const id = userEditMatch[2];
+  const matchClinic = pathname.match(/^\/api\/admin\/appointments\/clinic\/(\d+)$/);
+  if (method === 'GET' && matchClinic) {
+    const clinicId = matchClinic[1];
 
     try {
-      const table = role === 'doctor' ? 'doctor' : 'patient';
-      const idColumn = role === 'doctor' ? 'DoctorID' : 'PatientID';
+      const [rows] = await db.query(`
+        SELECT 
+          a.AppointmentID,
+          a.DateTime,
+          a.Status,
+          a.Reason,
+          o.OfficeID,
+          o.OfficeName,
+          p.FirstName AS PatientFirstName,
+          p.LastName AS PatientLastName,
+          d.FirstName AS DoctorFirstName,
+          d.LastName AS DoctorLastName
+        FROM appointment a
+        JOIN office o ON a.OfficeID = o.OfficeID
+        JOIN patient p ON a.PatientID = p.PatientID
+        JOIN doctor d ON a.DoctorID = d.DoctorID
+        WHERE o.OfficeID = ?
+        ORDER BY a.DateTime ASC
+      `, [clinicId]);
 
-      await db.query(`DELETE FROM ${table} WHERE ${idColumn} = ?`, [id]);
-      res.writeHead(200);
-      return res.end(JSON.stringify({ message: 'User deleted' }));
+      return sendJson(200, rows);
     } catch (err) {
-      console.error('❌ Error deleting user:', err);
+      console.error("Failed to fetch appointments for clinic:", err);
+      return sendJson(500, { message: "Failed to fetch clinic appointments" });
+    }
+  }
+
+  if (method === 'DELETE' && pathname.match(/^\/api\/admin\/users\/(doctor|patient)\/(\d+)$/)) {
+    const [, role, userId] = pathname.match(/^\/api\/admin\/users\/(doctor|patient)\/(\d+)$/);
+  
+    try {
+      if (role === 'doctor') {
+        await db.query('DELETE FROM doctor WHERE UserID = ?', [userId]);
+      } else if (role === 'patient') {
+        await db.query('DELETE FROM patient WHERE UserID = ?', [userId]);
+      }
+      await db.query('DELETE FROM login WHERE UserID = ?', [userId]);
+  
+      res.writeHead(204);
+      return res.end();
+    } catch (err) {
+      console.error('Error deleting user:', err);
       res.writeHead(500);
       return res.end(JSON.stringify({ message: 'Failed to delete user' }));
     }

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { FiDollarSign, FiEdit2, FiFilter, FiSearch, FiX, FiCheck, FiDownload, FiPlusCircle } from 'react-icons/fi';
 import './AdminBilling.css';
 
 const AdminBilling = () => {
@@ -224,7 +223,7 @@ const AdminBilling = () => {
         <h1>Billing Management</h1>
         <div className="header-actions">
           <button className="create-btn" onClick={() => setIsCreateModalOpen(true)}>
-            <FiPlusCircle /> Create New Bill
+            Create New Bill
           </button>
         </div>
       </div>
@@ -307,7 +306,7 @@ const AdminBilling = () => {
                       setIsUpdateModalOpen(true);
                     }}
                   >
-                    <FiEdit2 /> Update
+                    Update
                   </button>
                 </td>
               </tr>
@@ -326,7 +325,7 @@ const AdminBilling = () => {
                 className="close-modal-btn"
                 onClick={() => setIsCreateModalOpen(false)}
               >
-                <FiX />
+              
               </button>
             </div>
             <form onSubmit={handleCreateBill} className="create-form">
@@ -483,7 +482,7 @@ const AdminBilling = () => {
                   Cancel
                 </button>
                 <button type="submit" className="submit-btn">
-                  <FiCheck /> Create Bill
+                   Create Bill
                 </button>
               </div>
             </form>
@@ -504,7 +503,7 @@ const AdminBilling = () => {
                   setSelectedBill(null);
                 }}
               >
-                <FiX />
+              
               </button>
             </div>
             <form onSubmit={handleUpdateStatus} className="status-form">
@@ -583,7 +582,7 @@ const AdminBilling = () => {
                   Cancel
                 </button>
                 <button type="submit" className="submit-btn">
-                  <FiCheck /> Update Record
+                   Update Record
                 </button>
               </div>
             </form>
