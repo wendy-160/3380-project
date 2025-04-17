@@ -55,7 +55,7 @@ export async function handleReportRoutes(req, res) {
         TestsOrdered: tests[0].TestsOrdered
       });
     } catch (err) {
-      console.error('❌ Error generating doctor performance report:', err);
+      console.error('Error generating doctor performance report:', err);
       return sendJson(res, 500, { error: err.message });
     }
   }
@@ -110,10 +110,50 @@ export async function handleReportRoutes(req, res) {
 
       return sendJson(res, 200, rows);
     } catch (err) {
-      console.error('❌ Error generating clinic utilization report:', err);
+      console.error(' Error generating clinic utilization report:', err);
       return sendJson(res, 500, { error: err.message });
     }
   }
+
+  if (method === 'GET' && pathname.startsWith('/api/reports/referral-outcomes')) {
+    const searchParams = parsedUrl.searchParams;
+    const startDate = searchParams.get('startDate') || '2024-01-01';
+    const endDate = searchParams.get('endDate') || '2024-12-31';
+    const doctorId = searchParams.get('doctorId') || null;
+    const status = searchParams.get('status') || 'Approved'; // default to Approved
+  
+    try {
+      const query = `
+      SELECT 
+        r.ReferralID,
+        CONCAT(p.FirstName, ' ', p.LastName) AS PatientName,
+        CONCAT(s.FirstName, ' ', s.LastName) AS SpecialistName,
+        r.Status AS ReferralStatus,
+        CASE WHEN a.AppointmentID IS NOT NULL THEN 'Yes' ELSE 'No' END AS AppointmentScheduled,
+        a.DateTime AS AppointmentDate
+      FROM referral r
+      JOIN patient p ON r.PatientID = p.PatientID
+      JOIN doctor s ON r.SpecialistDoctorID = s.DoctorID
+      LEFT JOIN appointment a 
+        ON a.PatientID = r.PatientID AND a.DoctorID = r.SpecialistDoctorID
+      WHERE r.Status = ?
+        AND r.Date BETWEEN ? AND ?
+        ${doctorId ? 'AND r.SpecialistDoctorID = ?' : ''}
+      ORDER BY r.ReferralID DESC
+    `;
+  
+      const params = doctorId
+        ? [status, startDate, endDate, doctorId]
+        : [status, startDate, endDate];
+  
+      const [rows] = await db.query(query, params);
+      return sendJson(res, 200, rows);
+    } catch (err) {
+      console.error('Error generating referral outcome report with filters:', err);
+      return sendJson(res, 500, { error: err.message });
+    }
+  }
+  
 
   return sendJson(res, 404, { message: 'Report route not found' });
 }

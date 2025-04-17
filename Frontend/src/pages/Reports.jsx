@@ -15,6 +15,9 @@ const Reports = () => {
   const [offices, setOffices] = useState([]);
   const [selectedOffice, setSelectedOffice] = useState('');
   const [aggregation, setAggregation] = useState('Monthly');
+  const [startDate, setStartDate] = useState('2024-01-01');
+  const [endDate, setEndDate] = useState('2024-12-31');
+  const [referralStatus, setReferralStatus] = useState('Approved');
 
   const isAdmin = user?.Role === 'Admin';
 
@@ -65,6 +68,16 @@ const Reports = () => {
           }
         });
       }
+      else if (reportType === 'referral_outcomes') {
+        response = await axios.get(`http://localhost:5000/api/reports/referral-outcomes`, {
+          params: {
+            startDate,
+            endDate,
+            doctorId: selectedDoctor || '',
+            status: referralStatus
+          }
+        });
+      }
 
       setReportData(response.data);
     } catch (err) {
@@ -94,6 +107,12 @@ const Reports = () => {
               onClick={() => setReportType('clinic_utilization')}
             >
               Clinic Utilization Report
+            </button>
+            <button
+              className={reportType === 'referral_outcomes' ? 'active' : ''}
+              onClick={() => setReportType('referral_outcomes')}
+            >
+              Referral Outcome Report
             </button>
           </div>
 
@@ -145,6 +164,42 @@ const Reports = () => {
               </button>
             </div>
           )}
+          {reportType === 'referral_outcomes' && (
+          <div className="report-filters">
+            <label>
+              Start Date:
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            </label>
+            <label>
+              End Date:
+              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            </label>
+            <label>
+              Specialist:
+              <select value={selectedDoctor} onChange={(e) => setSelectedDoctor(e.target.value)}>
+                <option value="">-- All --</option>
+                {doctors.map((doc) => (
+                  <option key={doc.DoctorID} value={doc.DoctorID}>
+                    Dr. {doc.LastName}, {doc.FirstName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Referral Status:
+              <select value={referralStatus} onChange={(e) => setReferralStatus(e.target.value)}>
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </label>
+            <button onClick={generateReport} disabled={loading}>
+              {loading ? 'Generating...' : 'Generate Report'}
+            </button>
+          </div>
+        )}
 
           <div className="report-results">
             {loading ? (
@@ -156,6 +211,9 @@ const Reports = () => {
                 )}
                 {reportType === 'clinic_utilization' && (
                   <ClinicUtilizationReport data={reportData} aggregation={aggregation} />
+                )}
+                {reportType === 'referral_outcomes' && (
+                  <ReferralOutcomeReport data={reportData} />
                 )}
               </>
             ) : (
@@ -268,6 +326,35 @@ const ClinicUtilizationReport = ({ data, aggregation }) => (
       </tbody>
     </table>
     
+  </div>
+);
+const ReferralOutcomeReport = ({ data }) => (
+  <div className="referral-outcome-report">
+    <h2>Referral Outcome Report</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Referral ID</th>
+          <th>Patient</th>
+          <th>Specialist</th>
+          <th>Status</th>
+          <th>Appointment Scheduled</th>
+          <th>Appointment Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((row, idx) => (
+          <tr key={idx}>
+            <td>{row.ReferralID}</td>
+            <td>{row.PatientName}</td>
+            <td>{row.SpecialistName}</td>
+            <td>{row.ReferralStatus}</td>
+            <td>{row.AppointmentScheduled}</td>
+            <td>{row.AppointmentDate ? new Date(row.AppointmentDate).toLocaleString() : '-'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   </div>
 );
 
