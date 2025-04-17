@@ -45,12 +45,12 @@
 }
 
 .add-button {
-    background-color: #4CAF50;
+    background-color: #00065c;
     color: white;
 }
 
 .add-button:hover {
-    background-color: #45a049;
+    background-color: #1a2069;
 }
 
 /* Success and Error Messages */
@@ -319,13 +319,13 @@
 }
 
 .submit-button {
-    background-color: #4CAF50;
+    background-color: #050653;
     color: white;
     border: none;
 }
 
 .submit-button:hover {
-    background-color: #45a049;
+    background-color: #1d1e52;
 }
 
 .cancel-button {

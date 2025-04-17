@@ -18,6 +18,10 @@ export async function handleAdminRoutes(req, res) {
       let query = `
         SELECT 
           b.BillingID,
+          b.PatientID,
+          b.AppointmentID,
+          b.PrescriptionID,
+          b.TestID,
           CONCAT(p.FirstName, ' ', p.LastName) AS PatientName,
           CASE
             WHEN b.PrescriptionID IS NOT NULL THEN 'Prescription'
@@ -76,15 +80,15 @@ export async function handleAdminRoutes(req, res) {
       req.on('end', async () => {
         try {
           body = JSON.parse(rawData);
-          console.log(`🟡 Parsed body for PUT /api/admin/billings/${billId}:`, body);
+          console.log(`Parsed body for PUT /api/admin/billings/${billId}:`, body);
           await handleBillingUpdate(billId, body, res);
         } catch (err) {
-          console.error('❌ Invalid JSON in billing update:', err);
+          console.error('Invalid JSON in billing update:', err);
           return sendJson(res, 400, { message: 'Invalid JSON format' });
         }
       });
     } else {
-      console.log(`🟡 Parsed body for PUT /api/admin/billings/${billId}:`, body);
+      console.log(`Parsed body for PUT /api/admin/billings/${billId}:`, body);
       await handleBillingUpdate(billId, body, res);
     }
   
@@ -95,50 +99,56 @@ export async function handleAdminRoutes(req, res) {
 
   if (method === 'POST' && pathname === '/api/admin/billings') {
     let rawBody = '';
+  
     req.on('data', chunk => rawBody += chunk);
-    req.on('end', async () => {
-      let body;
+    req.on('end', () => {
       try {
-        body = JSON.parse(rawBody);
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ message: 'Invalid JSON' }));
-      }
-
-      const {
-        PatientID, AppointmentID, PrescriptionID, TestID,
-        Amount, PaymentStatus, BillingDate,
-        PaymentMethod, PaymentDate, Notes
-      } = body;
-
-      try {
-        const [result] = await db.query(`
+        const body = JSON.parse(rawBody);
+        console.log('Parsed body for POST /api/admin/billings:', body);
+  
+        const {
+          PatientID, AppointmentID, PrescriptionID, TestID,
+          Amount, PaymentStatus, BillingDate,
+          PaymentMethod, PaymentDate, Notes
+        } = body;
+  
+        db.query(`
           INSERT INTO billing 
           (PatientID, AppointmentID, PrescriptionID, TestID, Amount, PaymentStatus, BillingDate, PaymentMethod, PaymentDate, Notes)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
-          PatientID,
-          AppointmentID || null,
-          PrescriptionID || null,
-          TestID || null,
-          Amount,
+          parseInt(PatientID),
+          parseInt(AppointmentID || '') || null,
+          PrescriptionID ? parseInt(PrescriptionID) : null,
+          TestID ? parseInt(TestID) : null,
+          parseFloat(Amount),
           PaymentStatus,
           BillingDate,
           PaymentMethod || null,
           PaymentDate || null,
           Notes || null
-        ]);
-
-        res.writeHead(201, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ message: 'Billing record created', BillingID: result.insertId }));
+        ])
+          .then(([result]) => {
+            console.log('Billing record created:', result);
+            res.writeHead(201, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Billing record created', BillingID: result.insertId }));
+          })
+          .catch(err => {
+            console.error('DB insert error:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Failed to create billing record' }));
+          });
+  
       } catch (err) {
-        console.error('Error creating billing record:', err);
-        res.writeHead(500);
-        return res.end(JSON.stringify({ message: 'Failed to create billing record' }));
+        console.error('SQL Insert Error Details:', err.sqlMessage || err.message);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ message: 'Invalid JSON' }));
       }
     });
+  
     return;
   }
+  
   
   if (method === 'GET' && pathname === '/api/admin/patients') {
     try {

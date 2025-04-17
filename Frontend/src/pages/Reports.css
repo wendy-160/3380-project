@@ -95,7 +95,8 @@
   font-weight: 500;
 }
 
-.doctor-performance-report, .clinic-utilization-report {
+.doctor-performance-report,
+.clinic-utilization-report {
   background-color: white;
   border: 1px solid #eaeaea;
   border-radius: 6px;
@@ -103,7 +104,8 @@
   margin-bottom: 30px;
 }
 
-.doctor-performance-report h2, .clinic-utilization-report h2 {
+.doctor-performance-report h2,
+.clinic-utilization-report h2 {
   padding: 15px 20px;
   margin: 0;
   background-color: #f8f9fa;
@@ -112,24 +114,30 @@
   font-size: 18px;
 }
 
-.doctor-performance-report table, .clinic-utilization-report table {
+.doctor-performance-report table,
+.clinic-utilization-report table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.doctor-performance-report th, .doctor-performance-report td, .clinic-utilization-report th, .clinic-utilization-report td {
+.doctor-performance-report th,
+.doctor-performance-report td,
+.clinic-utilization-report th,
+.clinic-utilization-report td {
   padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid #eaeaea;
 }
 
-.doctor-performance-report th, .clinic-utilization-report th {
+.doctor-performance-report th,
+.clinic-utilization-report th {
   background-color: #f8f9fa;
   font-weight: 600;
   color: #495057;
 }
 
-.doctor-performance-report tbody tr:last-child td, .clinic-utilization-report tbody tr:last-child td {
+.doctor-performance-report tbody tr:last-child td,
+.clinic-utilization-report tbody tr:last-child td {
   border-bottom: none;
 }
 
@@ -191,7 +199,6 @@
   font-size: 12px;
 }
 
-
 .clinic-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -248,20 +255,23 @@
   .report-selection {
     flex-direction: column;
   }
-  
+
   .report-filters {
     grid-template-columns: 1fr;
   }
-  
-  .doctor-summary-metrics, .clinic-summary {
+
+  .doctor-summary-metrics,
+  .clinic-summary {
     grid-template-columns: 1fr;
   }
-  
-  .doctor-performance-report, .clinic-utilization-report {
+
+  .doctor-performance-report,
+  .clinic-utilization-report {
     overflow-x: auto;
   }
-  
-  .doctor-performance-report table, .clinic-utilization-report table {
+
+  .doctor-performance-report table,
+  .clinic-utilization-report table {
     min-width: 650px;
   }
 }
