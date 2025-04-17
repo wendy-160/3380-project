@@ -29,7 +29,7 @@ const About = () => {
                                 <p>We approach every patient with empathy and respect</p>
                         </div>
                         <div className="value-card">
-                                <h3>Excelence</h3>
+                                <h3>Excellence</h3>
                                 <p>We strive for the highest standards in medical care</p>
                         </div>
                         <div className="value-card">
