@@ -1,41 +1,57 @@
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+.admin-billing-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 25px;
+    font-family: sans-serif;
+    color: #333;
+} 
+.page-header h1 {
+    font-size: 28px;
+    color: #000747;
+}
+.billing-records {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+.billing-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.billing-table th {
+    background-color: #11184b;
+    color: white;
+    text-align: left;
+    padding: 14px 16px;
+    font-weight: 600;
+}
+.billing-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+}
+.edit-btn {
     display: flex;
-    justify-content: center;
     align-items: center;
-    z-index: 1000;
+    gap: 5px;
+    background-color: #0f0e42;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
-.create-modal {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 24px;
+.status-modal, .create-modal {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
 }
-.status-modal {
-    background-color: white;
-    border-radius: 8px;
-    width: 600px;
-    max-width: 90%;
-    padding: 1.5rem;
-    overflow-y: auto;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-}
-
-.create-modal {
-    background-color: white;
-    border-radius: 8px;
-    width: 600px;
-    max-width: 90%;
-    padding: 1.5rem;
-    overflow-y: auto;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+.status-form, .create-form {
+  padding: 20px;
 }

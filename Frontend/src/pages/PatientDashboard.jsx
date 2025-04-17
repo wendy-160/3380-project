@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiUser, FiCalendar, FiClock, FiUserPlus, FiX, FiPhone, FiMail } from 'react-icons/fi';
+import { FiUser, FiCalendar, FiUserPlus, FiX, FiPhone, FiMail } from 'react-icons/fi';
 import './PatientDashboard.css';
 
 const PatientDashboard = () => {

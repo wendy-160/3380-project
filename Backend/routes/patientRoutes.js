@@ -86,6 +86,7 @@ export async function handlePatientRoutes(req, res) {
     }
   }
 
+
   if (method === 'PUT' && matchById) {
     const patientId = matchById[1];
     let body = req.body;
