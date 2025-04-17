@@ -185,8 +185,8 @@ const DoctorDashboard = () => {
                     <p className="referral-reason"><span className="label">Reason:</span> {ref.Reason}</p>
                   </div>
                   <div className="referral-actions">
-                    <button className="approve-btn" onClick={() => handleApproveReferral(ref.ReferralId)}><FiCheck /></button>
-                    <button className="reject-btn" onClick={() => handleRejectReferral(ref.ReferralId)}><FiX /></button>
+                    <button className="approve-btn" onClick={() => handleApproveReferral(ref.ReferralId)}>Accept</button>
+                    <button className="reject-btn" onClick={() => handleRejectReferral(ref.ReferralId)}>Reject</button>
                   </div>
                 </div>
               ))}
