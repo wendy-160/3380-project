@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { FiDollarSign, FiCreditCard, FiClock, FiCheck, FiX, FiAlertCircle } from 'react-icons/fi';
 import './PatientBilling.css';
 
 const PatientBilling = () => {
@@ -11,6 +10,9 @@ const PatientBilling = () => {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [error, setError] = useState(null);
   const currentPatientID = JSON.parse(localStorage.getItem('user'))?.PatientID;
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [cvv, setCvv] = useState('');
 
   useEffect(() => {
     if (currentPatientID) {
@@ -42,38 +44,41 @@ const PatientBilling = () => {
 
   const handleMakePayment = async (e) => {
     e.preventDefault();
-    
-    if (!paymentMethod || parseFloat(paymentAmount) <= 0) {
-      setError('Please fill in all required fields with valid values');
+  
+    if (!paymentMethod || parseFloat(paymentAmount) <= 0 || !cardNumber || !expiry || !cvv) {
+      setError('Please fill in all required payment details.');
       return;
     }
-    
+  
     try {
-      setError(null);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/billing/${selectedBill.BillID}/status`, {
+      const updatedStatus = selectedBill.Amount === parseFloat(paymentAmount) ? 'Paid' : 'Partially Paid';
+  
+      console.log('Simulated payment with card:', cardNumber, expiry, cvv);
+
+      const response = await fetch(`/api/billing/${selectedBill.BillingID}/status`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          status: selectedBill.Amount === parseFloat(paymentAmount) ? 'Paid' : 'Partially Paid',
+          status: updatedStatus,
           amount: parseFloat(paymentAmount),
-          paymentMethod: paymentMethod,
+          paymentMethod,
           paymentDate: new Date().toISOString()
         })
       });
-
-      if (!response.ok) {
-        throw new Error(`Payment failed: ${response.status}`);
-      }
-      
+  
+      if (!response.ok) throw new Error('Payment update failed');
+  
       setIsPaymentModalOpen(false);
       setSelectedBill(null);
       setPaymentAmount('');
       setPaymentMethod('');
+      setCardNumber('');
+      setExpiry('');
+      setCvv('');
       fetchBillings();
+  
     } catch (error) {
       console.error('Error processing payment:', error);
       setError('Payment processing failed. Please try again later.');
@@ -103,32 +108,30 @@ const PatientBilling = () => {
   };
 
   return (
-    <div className="billing-page">
-      <h1 className="page-title">Billing & Payments</h1>
+    <div className="patient-billing-page">
+      <h1 className="patient-billing-title">Billing & Payments</h1>
       
       {error && (
-        <div className="error-message">
-          <FiAlertCircle /> {error}
+        <div className="patient-billing-error">
+          {error}
         </div>
       )}
       
       {loading ? (
-        <div className="loading-spinner">
+        <div className="patient-billing-spinner">
           <p>Loading billing information...</p>
         </div>
       ) : (
         <>
-          {/* Outstanding Bills Section */}
-          <div className="billing-section">
-            <h2 className="section-title">
-              <FiAlertCircle className="section-icon" />
+
+          <div className="patient-billing-section">
+            <h2 className="patient-billing-section-title">
               Outstanding Bills
             </h2>
-            <div className="bills-grid">
+            <div className="patient-billing-grid">
               {bills.filter(bill => ['Pending', 'Partially Paid', 'Insurance Pending', 'Overdue'].includes(bill.PaymentStatus)).length === 0 ? (
-                <div className="no-bills">
-                  <div className="no-bills-icon">
-                    <FiCheck />
+                <div className="patient-billing-empty">
+                  <div className="patient-billing-empty-icon">
                   </div>
                   <p>You have no outstanding bills</p>
                 </div>
@@ -136,29 +139,29 @@ const PatientBilling = () => {
                 bills
                   .filter(bill => ['Pending', 'Partially Paid', 'Insurance Pending', 'Overdue'].includes(bill.PaymentStatus))
                   .map(bill => (
-                    <div key={bill.BillingID} className={`bill-card ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
-                      <div className="bill-header">
+                    <div key={bill.BillingID} className={`patient-billing-card ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
+                      <div className="patient-billing-header">
                         <div>
                           <h3>{getBillSource(bill)}</h3>
-                          <span className="bill-type">{bill.Description || 'Medical Service'}</span>
+                          <span className="patient-billing-type">{bill.Description || 'Medical Service'}</span>
                         </div>
-                        <span className={`status-badge ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
+                        <span className={`patient-billing-status ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
                           {bill.PaymentStatus}
                         </span>
                       </div>
-                      <div className="bill-details">
-                        <p className="bill-amount">{formatCurrency(bill.Amount)}</p>
-                        <p className="bill-date">Billing Date: {formatDate(bill.BillingDate)}</p>
+                      <div className="patient-billing-details">
+                        <p className="patient-billing-amount">{formatCurrency(bill.Amount)}</p>
+                        <p className="patient-billing-date">Billing Date: {formatDate(bill.BillingDate)}</p>
                         {bill.PaymentStatus !== 'Insurance Pending' && (
                           <button 
-                            className="pay-now-btn"
+                            className="patient-billing-btn"
                             onClick={() => {
                               setSelectedBill(bill);
                               setPaymentAmount(bill.Amount.toString());
                               setIsPaymentModalOpen(true);
                             }}
                           >
-                            <FiCreditCard /> Pay Now
+                          Pay Now
                           </button>
                         )}
                       </div>
@@ -168,14 +171,13 @@ const PatientBilling = () => {
             </div>
           </div>
           
-          {/* Payment History Section */}
-          <div className="billing-section">
-            <h2 className="section-title">
-              <FiClock className="section-icon" />
+
+          <div className="patient-billing-section">
+            <h2 className="patient-billing-section-title">
               Payment History
             </h2>
-            <div className="payment-history">
-              <table className="payment-table">
+            <div className="patient-payment-history">
+              <table className="patient-payment-table">
                 <thead>
                   <tr>
                     <th>Billing Date</th>
@@ -194,11 +196,11 @@ const PatientBilling = () => {
                       <tr key={bill.BillingID}>
                         <td>{formatDate(bill.BillingDate)}</td>
                         <td>{getBillSource(bill)}</td>
-                        <td className="amount-cell">{formatCurrency(bill.Amount)}</td>
+                        <td className="patient-amount-cell">{formatCurrency(bill.Amount)}</td>
                         <td>{bill.PaymentDate ? formatDate(bill.PaymentDate) : '-'}</td>
                         <td>{bill.PaymentMethod || '-'}</td>
                         <td>
-                          <span className={`payment-status ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
+                          <span className={`patient-payment-status ${bill.PaymentStatus.toLowerCase().replace(' ', '-')}`}>
                             {bill.PaymentStatus}
                           </span>
                         </td>
@@ -211,40 +213,38 @@ const PatientBilling = () => {
         </>
       )}
       
-      {/* Payment Modal with error handling */}
       {isPaymentModalOpen && selectedBill && (
-        <div className="modal-overlay">
-          <div className="payment-modal">
-            <div className="modal-header">
+        <div className="patient-modal-overlay">
+          <div className="patient-payment-modal">
+            <div className="patient-modal-header">
               <h2>Make Payment</h2>
               <button 
-                className="close-modal-btn"
+                className="patient-close-modal-btn"
                 onClick={() => {
                   setIsPaymentModalOpen(false);
                   setSelectedBill(null);
                 }}
-              >
-                <FiX />
+              > x
               </button>
             </div>
-            <form onSubmit={handleMakePayment} className="payment-form">
-              <div className="bill-summary">
+            <form onSubmit={handleMakePayment} className="patient-payment-form">
+              <div className="patient-bill-summary">
                 <h3>{getBillSource(selectedBill)}</h3>
-                <p className="bill-id">Bill ID: {selectedBill.BillingID}</p>
-                <p className="total-amount">Total Amount: {formatCurrency(selectedBill.Amount)}</p>
+                <p className="patient-bill-id">Bill ID: {selectedBill.BillingID}</p>
+                <p className="patient-total-amount">Total Amount: {formatCurrency(selectedBill.Amount)}</p>
                 {selectedBill.PaymentStatus === 'Partially Paid' && (
-                  <p className="remaining-amount">
+                  <p className="patient-remaining-amount">
                     Remaining Balance: {formatCurrency(selectedBill.Amount - selectedBill.PaidAmount)}
                   </p>
                 )}
               </div>
 
-              <div className="form-group">
+              <div className="patient-form-group">
                 <label htmlFor="amount">Payment Amount</label>
                 <input
                   type="number"
                   id="amount"
-                  className="form-control"
+                  className="patient-form-control"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                   min="0.01"
@@ -254,11 +254,11 @@ const PatientBilling = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className="patient-form-group">
                 <label htmlFor="paymentMethod">Payment Method</label>
                 <select
                   id="paymentMethod"
-                  className="form-control"
+                  className="patient-form-control"
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   required
@@ -266,14 +266,56 @@ const PatientBilling = () => {
                   <option value="">Select payment method</option>
                   <option value="Credit Card">Credit Card</option>
                   <option value="Debit Card">Debit Card</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
                 </select>
               </div>
+              <div className="patient-form-group">
+                <label htmlFor="cardNumber">Card Number</label>
+                <input
+                  type="text"
+                  id="cardNumber"
+                  className="patient-form-control"
+                  placeholder="1234 5678 9012 3456"
+                  maxLength="19"
+                  value={cardNumber}
+                  onChange={(e) => setCardNumber(e.target.value)}
+                  required
+                />
+              </div>
 
-              <div className="form-actions">
+              <div className="patient-form-group">
+                <label htmlFor="expiry">Expiration Date</label>
+                <input
+                  type="text"
+                  id="expiry"
+                  className="patient-form-control"
+                  placeholder="MM/YY"
+                  maxLength="5"
+                  value={expiry}
+                  onChange={(e) => setExpiry(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="patient-form-group">
+                <label htmlFor="cvv">CVV</label>
+                <input
+                  type="text"
+                  id="cvv"
+                  className="patient-form-control"
+                  placeholder="123"
+                  maxLength="3"
+                  value={cvv}
+                  onChange={(e) => setCvv(e.target.value)}
+                  required
+                />
+              </div>
+
+              
+
+              <div className="patient-form-actions">
                 <button 
                   type="button" 
-                  className="cancel-btn"
+                  className="patient-cancel-btn"
                   onClick={() => {
                     setIsPaymentModalOpen(false);
                     setSelectedBill(null);
@@ -281,15 +323,15 @@ const PatientBilling = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="submit-btn">
-                  <FiCheck /> Confirm Payment
+                <button type="submit" className="patient-submit-btn">
+                  Confirm Payment
                 </button>
               </div>
             </form>
             
             {error && (
-              <div className="modal-error">
-                <FiAlertCircle /> {error}
+              <div className="patient-modal-error">
+                 {error}
               </div>
             )}
           </div>

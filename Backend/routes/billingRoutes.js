@@ -29,7 +29,7 @@ export async function handleBillingRoutes(req, res) {
 
       return sendJson(res, 200, rows);
     } catch (err) {
-      console.error("❌ Billing query error:", err);
+      console.error("Billing query error:", err);
       return sendJson(res, 500, { error: err.message });
     }
   }
@@ -42,16 +42,16 @@ export async function handleBillingRoutes(req, res) {
     req.on('data', chunk => body += chunk);
     req.on('end', async () => {
       try {
-        const { status } = JSON.parse(body);
+        const { status, paymentDate, paymentMethod } = JSON.parse(body);
 
         await db.query(
-          'UPDATE billing SET PaymentStatus = ? WHERE BillingID = ?',
-          [status, billID]
+          'UPDATE billing SET PaymentStatus = ?, PaymentDate = ?, PaymentMethod = ? WHERE BillingID = ?',
+          [status, paymentDate, paymentMethod, billID]
         );
 
-        return sendJson(res, 200, { message: 'Payment status updated successfully' });
+        return sendJson(res, 200, { message: 'Payment updated successfully' });
       } catch (err) {
-        console.error("❌ Billing update error:", err);
+        console.error("Billing update error:", err);
         return sendJson(res, 500, { error: err.message });
       }
     });
@@ -69,7 +69,7 @@ export async function handleBillingRoutes(req, res) {
       `);
       return sendJson(res, 200, rows);
     } catch (err) {
-      console.error("❌ Billing patient list error:", err);
+      console.error("Billing patient list error:", err);
       return sendJson(res, 500, { error: err.message });
     }
   }
