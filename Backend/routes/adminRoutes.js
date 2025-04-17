@@ -68,41 +68,30 @@ export async function handleAdminRoutes(req, res) {
 
   if (method === 'PUT' && pathname.match(/^\/api\/admin\/billings\/\d+$/)) {
     const billId = pathname.split('/').pop();
-    let rawBody = '';
-
-    req.on('data', chunk => rawBody += chunk);
-    req.on('end', async () => {
-      let body;
-      try {
-        body = JSON.parse(rawBody);
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ message: 'Invalid JSON' }));
-      }
-
-      const { PaymentStatus, PaymentMethod, PaymentDate, Notes } = body;
-      try {
-        const [result] = await db.query(`
-          UPDATE billing
-          SET PaymentStatus = ?, PaymentMethod = ?, PaymentDate = ?, Notes = ?
-          WHERE BillingID = ?
-        `, [PaymentStatus, PaymentMethod, PaymentDate || null, Notes || null, billId]);
-
-        if (result.affectedRows === 0) {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          return res.end(JSON.stringify({ message: 'Billing record not found' }));
+    let body = req.body;
+  
+    if (!body) {
+      let rawData = '';
+      req.on('data', chunk => rawData += chunk);
+      req.on('end', async () => {
+        try {
+          body = JSON.parse(rawData);
+          console.log(`🟡 Parsed body for PUT /api/admin/billings/${billId}:`, body);
+          await handleBillingUpdate(billId, body, res);
+        } catch (err) {
+          console.error('❌ Invalid JSON in billing update:', err);
+          return sendJson(res, 400, { message: 'Invalid JSON format' });
         }
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ message: 'Billing record updated successfully' }));
-      } catch (err) {
-        console.error('SQL error during billing update:', err);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ message: 'Failed to update billing record' }));
-      }
-    });
+      });
+    } else {
+      console.log(`🟡 Parsed body for PUT /api/admin/billings/${billId}:`, body);
+      await handleBillingUpdate(billId, body, res);
+    }
+  
     return;
   }
+  
+  
 
   if (method === 'POST' && pathname === '/api/admin/billings') {
     let rawBody = '';
@@ -362,6 +351,31 @@ export async function handleAdminRoutes(req, res) {
     }
   }
 
+  async function handleBillingUpdate(billId, data, res) {
+    const { PaymentStatus, PaymentMethod, PaymentDate, Notes } = data;
+    console.log("🛠️ Updating billing record:", { PaymentStatus, PaymentMethod, PaymentDate, Notes });
+  
+    try {
+      const [result] = await db.query(`
+        UPDATE billing
+        SET PaymentStatus = ?, PaymentMethod = ?, PaymentDate = ?, Notes = ?
+        WHERE BillingID = ?
+      `, [PaymentStatus, PaymentMethod, PaymentDate || null, Notes || null, billId]);
+  
+      if (result.affectedRows === 0) {
+        console.warn("⚠️ Billing record not found or not updated.");
+        return sendJson(res, 404, { message: 'Billing record not found' });
+      }
+  
+      console.log("✅ Billing update successful.");
+      return sendJson(res, 200, { message: 'Billing record updated successfully' });
+  
+    } catch (err) {
+      console.error('❌ SQL error during billing update:', err);
+      return sendJson(res, 500, { message: 'Failed to update billing record' });
+    }
+  }
+  
   res.writeHead(404);
   res.end(JSON.stringify({ message: 'Admin route not found' }));
 }
