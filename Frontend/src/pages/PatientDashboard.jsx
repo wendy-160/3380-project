@@ -215,12 +215,12 @@ const PatientDashboard = () => {
             <div className="profile-details">
               <p>{profile.FirstName} {profile.LastName}</p>
               <p><FiPhone /> {profile.PhoneNumber}</p>
-              <p><FiMail /> {profile.Email}</p>
+              <p><FiMail /> {profile.email}</p>
               <p><strong>Address: </strong> {profile.Address}, {profile.City}, {profile.State}, {profile.ZipCode}</p>
               <button 
               onClick={() => {
                 setIsEditingProfile(true);
-                setUpdatedEmail(profile.Email || '');
+                setUpdatedEmail(profile.email || '');
                 setUpdatedAddress(profile.Address || '');
               }} className="edit-profile-btn">
                 Edit Profile
