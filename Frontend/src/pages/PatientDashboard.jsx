@@ -15,6 +15,8 @@ const PatientDashboard = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [updatedEmail, setUpdatedEmail] = useState('');
   const [updatedAddress, setUpdatedAddress] = useState('');
+  const [referredSpecialists, setReferredSpecialists] = useState([]);
+
 
   const currentPatientID = JSON.parse(localStorage.getItem('user'))?.PatientID;
 
@@ -32,6 +34,7 @@ const PatientDashboard = () => {
         const doctorRes = await fetch(`/api/patients/${currentPatientID}/primary-physician`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        
         if (doctorRes.ok) {
           const doctorData = await doctorRes.json();
           setPrimaryPhysician(doctorData);
@@ -44,6 +47,13 @@ const PatientDashboard = () => {
             setDoctorOffices(officeData);
           }
         }
+        const referralRes = await fetch(`/api/referrals/patient/${currentPatientID}/approved`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (referralRes.ok) {
+          const specialists = await referralRes.json();
+          setReferredSpecialists(specialists);
+        }        
         
         const appointmentRes = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -62,27 +72,55 @@ const PatientDashboard = () => {
     if (currentPatientID) fetchPatientData();
   }, [currentPatientID]);
 
-  const handleDateSelection = async (date) => {
-    setSelectedDate(date);
-    if (!primaryPhysician?.DoctorID) {
-      console.warn("Primary physician not available");
-      return;
-    }
-    const selectedDay = new Date(date).toLocaleDateString('en-US', { weekday: 'short' }); // e.g. 'Mon'
-    const filtered = doctorOffices.filter(office =>
-      office.WorkDays?.split(',').map(day => day.trim()).includes(selectedDay)
-    );
-    setFilteredOffices(filtered);
-    
+  const handleSpecialistChange = async (e) => {
+    const doctorId = e.target.value;
+    if (!doctorId) return;
+  
+    const selectedDate = document.getElementById("date")?.value;
+    if (!selectedDate) return;
+  
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`/api/appointments/available/${primaryPhysician.DoctorID}/${date}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      setAvailableTimeSlots(data);
-    } catch (error) {
-      console.error("Error fetching time slots:", error);
+  
+      const [slotsRes, officeRes] = await Promise.all([
+        fetch(`/api/appointments/available/${doctorId}/${selectedDate}`),
+        fetch(`/api/doctors/${doctorId}/offices`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
+  
+      const slots = await slotsRes.json();
+      const officeData = await officeRes.json();
+  
+      setAvailableTimeSlots(slots);
+      setFilteredOffices(officeData);
+    } catch (err) {
+      console.error("Error fetching specialist info:", err);
+    }
+  };
+  const handleDateSelection = async (date) => {
+    setSelectedDate(date);
+    const selectedDoctorId = document.getElementById("specialist")?.value || primaryPhysician?.DoctorID;
+    if (!selectedDoctorId) return;
+  
+    const selectedDay = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
+  
+    try {
+      const [officeRes, slotRes] = await Promise.all([
+        fetch(`/api/doctors/${selectedDoctorId}/offices`),
+        fetch(`/api/appointments/available/${selectedDoctorId}/${date}`)
+      ]);
+      const officeData = await officeRes.json();
+      const slotData = await slotRes.json();
+  
+      setFilteredOffices(
+        officeData.filter(office =>
+          office.WorkDays?.split(',').map(day => day.trim()).includes(selectedDay)
+        )
+      );
+      setAvailableTimeSlots(slotData);
+    } catch (err) {
+      console.error("Error fetching office/timeslot data:", err);
     }
   };
 
@@ -103,7 +141,7 @@ const PatientDashboard = () => {
         },
         body: JSON.stringify({
           PatientID: currentPatientID,
-          DoctorID: primaryPhysician?.DoctorID,
+          DoctorID: document.getElementById("specialist").value || primaryPhysician?.DoctorID,
           OfficeID: document.getElementById("office").value,
           DateTime: selectedTime,
           Reason: reason,
@@ -332,13 +370,23 @@ const PatientDashboard = () => {
             <div className="modal-body">
               <form onSubmit={(e) => { e.preventDefault(); handleCreateAppointment(); }}>
                 <label>Date</label>
-                <input
-                  type="date"
-                  id="date"
-                  min={new Date().toISOString().split("T")[0]}
-                  onChange={(e) => handleDateSelection(e.target.value)}
-                  disabled={!primaryPhysician}
-                />
+                  <label>Referred Specialist</label>
+                    <select id="specialist" onChange={handleSpecialistChange}>
+                      <option value="">Use Primary Physician</option>
+                      {referredSpecialists.map(s => (
+                        <option key={s.DoctorID} value={s.DoctorID}>
+                          Dr. {s.FirstName} {s.LastName} - {s.Specialization}
+                        </option>
+                      ))}
+                    </select>
+
+                    <label>Date</label>
+                    <input
+                      type="date"
+                      id="date"
+                      min={new Date().toISOString().split("T")[0]}
+                      onChange={(e) => handleDateSelection(e.target.value)}
+                    />
                 {selectedDate && (
                   <>
                     <label>Time</label>

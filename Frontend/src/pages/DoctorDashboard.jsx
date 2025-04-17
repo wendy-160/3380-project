@@ -14,6 +14,8 @@ const DoctorDashboard = () => {
   const [referralReason, setReferralReason] = useState('');
   const [referralNotes, setReferralNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [specialization, setSpecialization] = useState('');
+  const [doctorProfile, setDoctorProfile] = useState(null);
 
   const currentDoctorID = JSON.parse(localStorage.getItem('user'))?.DoctorID;
 
@@ -25,6 +27,12 @@ const DoctorDashboard = () => {
 
         const appointmentsRes = await axios.get(`http://localhost:5000/api/appointments/doctor/${currentDoctorID}/date/${today}`);
         setTodaysAppointments(Array.isArray(appointmentsRes.data) ? appointmentsRes.data : []);
+
+        const doctorRes = await axios.get(`http://localhost:5000/api/doctors/${currentDoctorID}`);
+        setDoctorProfile(doctorRes.data);
+        
+        setSpecialization(doctorRes.data.Specialization);
+        console.log('Doctor specialization:', doctorRes.data.Specialization);
 
         const referralsRes = await axios.get(`http://localhost:5000/api/referrals/pending/doctor/${currentDoctorID}`);
         setPendingReferrals(Array.isArray(referralsRes.data) ? referralsRes.data : []);
@@ -111,39 +119,62 @@ const DoctorDashboard = () => {
   return (
     <div className="doctor-dashboard">
       <h1 className="dashboard-title">Doctor Dashboard</h1>
-
-      <div className="dashboard-grid">
-        <div className="dashboard-card appointments-section">
-          <div className="card-header">
-            <FiCalendar className="card-icon" />
-            <h2 className="card-title">Today's Appointments</h2>
-          </div>
-
-          {todaysAppointments.length > 0 ? (
-            <div className="appointments-list">
-              {todaysAppointments.map(appt => (
-                <div key={appt.AppointmentID} className="appointment-item">
-                  <div className="appointment-time">
-                    <FiClock className="time-icon" />
-                    <span>{formatTime(appt.DateTime)}</span>
-                  </div>
-                  <div className="appointment-details">
-                    <h3 className="patient-name">{appt.PatientName} {appt.PatientLastName}</h3>
-                    <p className="appointment-reason">{appt.Reason}</p>
-                  </div>
-                  <FiChevronRight className="chevron-icon" />
-                </div>
-              ))}
-            </div>
-          ) : <p className="no-data">No appointments scheduled for today.</p>}
+  
+      {/* Doctor Profile */}
+      <div className="dashboard-card doctor-profile">
+        <h2>Doctor Profile</h2>
+        <p><strong>Name:</strong> Dr. {doctorProfile?.FirstName} {doctorProfile?.LastName}</p>
+        <p><strong>Specialization:</strong> {specialization}</p>
+      </div>
+  
+      {/* Today's Appointments (shown to all doctors) */}
+      <div className="dashboard-card appointments-section">
+        <div className="card-header">
+          <FiCalendar className="card-icon" />
+          <h2 className="card-title">Today's Appointments</h2>
         </div>
-
+        {todaysAppointments.length > 0 ? (
+          <div className="appointments-list">
+            {todaysAppointments.map(appt => (
+              <div key={appt.AppointmentID} className="appointment-item">
+                <div className="appointment-time">
+                  <FiClock className="time-icon" />
+                  <span>{formatTime(appt.DateTime)}</span>
+                </div>
+                <div className="appointment-details">
+                  <h3 className="patient-name">{appt.PatientName} {appt.PatientLastName}</h3>
+                  <p className="appointment-reason">{appt.Reason}</p>
+                </div>
+                <FiChevronRight className="chevron-icon" />
+              </div>
+            ))}
+          </div>
+        ) : <p className="no-data">No appointments scheduled for today.</p>}
+      </div>
+  
+      {/* Referral Creation (only for general doctors) */}
+      {specialization === 'Primary Care Physician' && (
+        <div className="dashboard-card create-referral-section">
+          <div className="card-header">
+            <FiUserPlus className="card-icon" />
+            <h2 className="card-title">Create Referral to Specialist</h2>
+          </div>
+          <div className="referral-intro">
+            <p>Create a new specialist referral for one of your patients.</p>
+            <button className="create-referral-btn" onClick={handleCreateReferral}>
+              Create New Referral
+            </button>
+          </div>
+        </div>
+      )}
+  
+      {/* Referral Approvals (only for specialists) */}
+      {specialization !== 'Primary Care Physician' && (
         <div className="dashboard-card referrals-section">
           <div className="card-header">
             <FiUserPlus className="card-icon" />
             <h2 className="card-title">Pending Referral Approvals</h2>
           </div>
-
           {pendingReferrals.length > 0 ? (
             <div className="referrals-list">
               {pendingReferrals.map(ref => (
@@ -162,21 +193,9 @@ const DoctorDashboard = () => {
             </div>
           ) : <p className="no-data">No pending referrals to approve.</p>}
         </div>
-      </div>
-
-      <div className="dashboard-card create-referral-section">
-        <div className="card-header">
-          <FiUserPlus className="card-icon" />
-          <h2 className="card-title">Create Referral to Specialist</h2>
-        </div>
-        <div className="referral-intro">
-          <p>Create a new specialist referral for one of your patients.</p>
-          <button className="create-referral-btn" onClick={handleCreateReferral}>
-            Create New Referral
-          </button>
-        </div>
-      </div>
-
+      )}
+  
+      {/* Modal for Creating a Referral */}
       {isReferralModalOpen && (
         <div className="modal-overlay">
           <div className="referral-modal">
@@ -203,7 +222,7 @@ const DoctorDashboard = () => {
                     ))}
                   </select>
                 </div>
-
+  
                 <div className="form-group">
                   <label htmlFor="specialist">Specialist</label>
                   <select
@@ -219,7 +238,7 @@ const DoctorDashboard = () => {
                     ))}
                   </select>
                 </div>
-
+  
                 <div className="form-group">
                   <label htmlFor="reason">Reason for Referral</label>
                   <textarea
@@ -229,7 +248,7 @@ const DoctorDashboard = () => {
                     rows="4"
                   />
                 </div>
-
+  
                 <div className="form-group">
                   <label htmlFor="notes">Additional Notes</label>
                   <textarea
@@ -239,7 +258,7 @@ const DoctorDashboard = () => {
                     rows="3"
                   />
                 </div>
-
+  
                 <div className="form-actions">
                   <button type="button" onClick={() => setIsReferralModalOpen(false)}>
                     Cancel

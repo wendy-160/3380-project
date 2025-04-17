@@ -11,8 +11,8 @@ export async function handlePatientRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
-  console.log(`➡️ Incoming request: ${method} ${pathname}`);
-  console.log('🔁 Routing to patientRoutes');
+  console.log(`Incoming request: ${method} ${pathname}`);
+  console.log('Routing to patientRoutes');
 
   if (method === 'GET' && pathname === '/api/patients') {
     try {
@@ -73,10 +73,10 @@ export async function handlePatientRoutes(req, res) {
     const doctorId = matchByDoctor[1];
     try {
       const [rows] = await db.execute(`
-        SELECT DISTINCT p.PatientID, p.FirstName, p.LastName
+        SELECT p.PatientID, p.FirstName, p.LastName
         FROM patient p
-        JOIN appointment a ON p.PatientID = a.PatientID
-        WHERE a.DoctorID = ?
+        JOIN patient_doctor_assignment a ON p.PatientID = a.PatientID
+        WHERE a.DoctorID = ? AND a.PrimaryPhysicianFlag = 1
       `, [doctorId]);
 
       return sendJson(res, 200, rows);
@@ -97,15 +97,15 @@ export async function handlePatientRoutes(req, res) {
       req.on('end', async () => {
         try {
           body = JSON.parse(rawData);
-          console.log(`🟡 Parsed body for PUT /api/patients/${patientId}:`, body);
+          console.log(`Parsed body for PUT /api/patients/${patientId}:`, body);
           await handleUpdatePatient(patientId, body, res);
         } catch (err) {
-          console.error('❌ Failed to parse JSON:', err.message);
+          console.error('Failed to parse JSON:', err.message);
           return sendJson(res, 400, { message: 'Invalid JSON format' });
         }
       });
     } else {
-      console.log(`🟡 Parsed body for PUT /api/patients/${patientId}:`, body);
+      console.log(`Parsed body for PUT /api/patients/${patientId}:`, body);
       await handleUpdatePatient(patientId, body, res);
     }
 
@@ -132,7 +132,7 @@ async function handleUpdatePatient(patientId, data, res) {
     const userId = userResult[0].UserID;
 
     if (address !== undefined && address !== '') {
-      console.log('📬 Updating address...');
+      console.log('Updating address...');
       await db.query(
         'UPDATE patient SET Address = ? WHERE PatientID = ?',
         [address, patientId]
@@ -140,7 +140,7 @@ async function handleUpdatePatient(patientId, data, res) {
     }
 
     if (email !== undefined && email !== '') {
-      console.log('📧 Updating email...');
+      console.log('Updating email...');
       await db.query(
         'UPDATE login SET email = ? WHERE UserID = ?',
         [email, userId]
@@ -154,11 +154,11 @@ async function handleUpdatePatient(patientId, data, res) {
       WHERE p.PatientID = ?
     `, [patientId]);
 
-    console.log("✅ Updated patient data:", updated[0]);
+    console.log("Updated patient data:", updated[0]);
     return sendJson(res, 200, updated[0]);
 
   } catch (err) {
-    console.error('❌ Error updating patient profile:', err);
+    console.error('Error updating patient profile:', err);
     return sendJson(res, 500, { message: 'Failed to update profile' });
   }
 }

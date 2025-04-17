@@ -6,21 +6,45 @@ export async function handleAppointmentRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
-  if (method === 'GET' && pathname === '/api/appointments') {
+  if (method === 'POST' && pathname === '/api/appointments') {
     try {
-      const [rows] = await db.execute(`
-        SELECT a.AppointmentID, a.PatientID, a.DoctorID, a.OfficeID, a.DateTime, a.Reason, a.Status,
-               p.FirstName AS PatientFirstName, p.LastName AS PatientLastName,
-               d.FirstName AS DoctorFirstName, d.LastName AS DoctorLastName
-        FROM appointment a
-        JOIN patient p ON a.PatientID = p.PatientID
-        JOIN doctor d ON a.DoctorID = d.DoctorID
-        ORDER BY a.DateTime DESC
-      `);
-      return sendJson(res, 200, rows);
+      const { PatientID, DoctorID, OfficeID, DateTime, Reason, status } = req.body;
+      
+      const [doctorRows] = await db.execute(
+        `SELECT Specialization FROM doctor WHERE DoctorID = ?`,
+        [DoctorID]
+      );
+  
+      if (doctorRows.length === 0) {
+        return sendJson(res, 404, { message: 'Doctor not found' });
+      }
+  
+      const specialization = doctorRows[0].Specialization?.trim().toLowerCase();
+
+      if (specialization !== 'primary care physician') {
+        const [referralRows] = await db.execute(
+          `SELECT * FROM referral 
+           WHERE PatientID = ? AND SpecialistDoctorID = ? AND Status = 'Approved'`,
+          [PatientID, DoctorID]
+        );
+  
+        if (referralRows.length === 0) {
+          return sendJson(res, 403, {
+            message: 'You must have an approved referral to book with this specialist.'
+          });
+        }
+      }
+  
+      const [result] = await db.execute(
+        `INSERT INTO appointment (PatientID, DoctorID, OfficeID, DateTime, Reason, Status)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [PatientID, DoctorID, OfficeID, DateTime, Reason, status]
+      );
+  
+      return sendJson(res, 201, { AppointmentID: result.insertId });
     } catch (err) {
-      console.error('Error fetching all appointments:', err);
-      return sendJson(res, 500, { message: 'Error fetching appointments' });
+      console.error("Create appointment error:", err);
+      return sendJson(res, 500, { message: "Could not create appointment" });
     }
   }
 

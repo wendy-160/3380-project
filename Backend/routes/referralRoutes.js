@@ -6,6 +6,10 @@ export async function handleReferralRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
+  function sendJson(res, statusCode, data) {
+    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(data));
+  }
   const matchPending = pathname.match(/^\/api\/referrals\/pending\/doctor\/(\d+)$/);
   if (method === 'GET' && matchPending) {
     const doctorID = matchPending[1];
@@ -13,19 +17,19 @@ export async function handleReferralRoutes(req, res) {
     try {
       const [rows] = await db.execute(`
         SELECT r.ReferralId, r.PatientId, r.SpecialistDoctorId, r.Reason, r.Notes, r.Status,
-               p.FirstName AS PatientName,
-               s.FirstName AS SpecialistName, s.Specialization AS Specialty
+                p.FirstName AS PatientName,
+                s.FirstName AS SpecialistName, s.Specialization AS Specialty
         FROM referral r
         JOIN patient p ON r.PatientId = p.PatientID
         JOIN doctor s ON r.SpecialistDoctorId = s.DoctorID
-        WHERE r.ReferringDoctorID = ? AND r.Status = 'Pending'
+        WHERE r.SpecialistDoctorID = ? AND r.Status = 'Pending'
       `, [doctorID]);
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(rows));
       return;
     } catch (err) {
-      console.error('❌ Error fetching pending referrals:', err.message, err);
+      console.error('Error fetching pending referrals:', err.message, err);
       res.writeHead(500);
       res.end(JSON.stringify({ message: 'Failed to fetch referrals' }));
       return;
@@ -33,24 +37,24 @@ export async function handleReferralRoutes(req, res) {
   }
 
   if (method === 'POST' && pathname.startsWith('/api/referrals')) {
-    console.log('🧠 Inside POST /api/referrals route');
+    console.log('Inside POST /api/referrals route');
 
     try {
       const { PatientID, SpecialistID, Reason, Notes, ReferredBy } = req.body;
 
-      console.log('✅ Parsed referral from req.body:', {
+      console.log('Parsed referral from req.body:', {
         PatientID, SpecialistID, Reason, Notes, ReferredBy
       });
 
       if (!PatientID || !SpecialistID || !Reason || !ReferredBy) {
-        console.warn('⚠️ Missing required fields');
+        console.warn('Missing required fields');
         res.writeHead(400);
         res.end(JSON.stringify({ message: 'Missing required fields' }));
         return;
       }
 
       if (parseInt(SpecialistID) === parseInt(ReferredBy)) {
-        console.warn('❌ Referring to self is not allowed');
+        console.warn('Referring to self is not allowed');
         res.writeHead(400);
         res.end(JSON.stringify({ message: 'Cannot refer patient to yourself.' }));
         return;
@@ -61,7 +65,7 @@ export async function handleReferralRoutes(req, res) {
         VALUES (?, ?, ?, ?, ?, 'Pending')
       `, [PatientID, SpecialistID, Reason, Notes || '', ReferredBy]);
 
-      console.log('✅ Referral inserted with ID:', result.insertId);
+      console.log('Referral inserted with ID:', result.insertId);
 
       const [pendingReferrals] = await db.execute(`
         SELECT r.ReferralId, r.PatientId, r.SpecialistDoctorId, r.Reason, r.Notes, r.Status,
@@ -80,7 +84,7 @@ export async function handleReferralRoutes(req, res) {
         updatedPendingReferrals: pendingReferrals
       }));
     } catch (err) {
-      console.error('❌ Error inserting referral:', err.message, err);
+      console.error('Error inserting referral:', err.message, err);
       res.writeHead(500);
       res.end(JSON.stringify({ message: 'Failed to create referral' }));
     }
@@ -96,11 +100,11 @@ export async function handleReferralRoutes(req, res) {
         `UPDATE referral SET Status = 'Approved' WHERE ReferralID = ?`,
         [referralID]
       );
-      console.log(`✅ Referral ${referralID} approved`);
+      console.log(`Referral ${referralID} approved`);
       res.writeHead(200);
       res.end(JSON.stringify({ message: 'Referral approved' }));
     } catch (err) {
-      console.error('❌ Error approving referral:', err.message, err);
+      console.error('Error approving referral:', err.message, err);
       res.writeHead(500);
       res.end(JSON.stringify({ message: 'Failed to approve referral' }));
     }
@@ -116,15 +120,33 @@ export async function handleReferralRoutes(req, res) {
         `UPDATE referral SET Status = 'Rejected' WHERE ReferralID = ?`,
         [referralID]
       );
-      console.log(`❌ Referral ${referralID} rejected`);
+      console.log(`Referral ${referralID} rejected`);
       res.writeHead(200);
       res.end(JSON.stringify({ message: 'Referral rejected' }));
     } catch (err) {
-      console.error('❌ Error rejecting referral:', err.message, err);
+      console.error('Error rejecting referral:', err.message, err);
       res.writeHead(500);
       res.end(JSON.stringify({ message: 'Failed to reject referral' }));
     }
     return;
+  }
+  const matchApprovedReferrals = pathname.match(/^\/api\/referrals\/patient\/(\d+)\/approved$/);
+  if (method === 'GET' && matchApprovedReferrals) {
+    const patientID = matchApprovedReferrals[1];
+
+    try {
+      const [rows] = await db.execute(`
+        SELECT d.DoctorID, d.FirstName, d.LastName, d.Specialization, d.PhoneNumber
+        FROM referral r
+        JOIN doctor d ON r.SpecialistDoctorID = d.DoctorID
+        WHERE r.PatientID = ? AND r.Status = 'Approved'
+      `, [patientID]);
+
+      return sendJson(res, 200, rows);
+    } catch (err) {
+      console.error('Error fetching approved referrals:', err);
+      return sendJson(res, 500, { message: 'Error retrieving approved referrals' });
+    }
   }
 
   res.writeHead(404, { 'Content-Type': 'application/json' });
