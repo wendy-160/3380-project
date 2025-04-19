@@ -29,13 +29,18 @@ const server = http.createServer(async (req, res) => {
   const pathname = parsedUrl.pathname;
   const headers = req.headers;
 
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.setHeader('Access-Control-Allow-Origin', 'https://3380-project-git-main-jsnvus-projects.vercel.app');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (method === 'OPTIONS') {
-    res.writeHead(204);
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': 'https://3380-project-git-main-jsnvus-projects.vercel.app',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    });
     return res.end();
   }
 
@@ -54,7 +59,7 @@ const server = http.createServer(async (req, res) => {
         req.body = parse(body);
       }
 
-      console.log(`🟡 Parsed body for ${method} ${pathname}:`, req.body);
+      console.log(`Parsed body for ${method} ${pathname}:`, req.body);
       routeRequest(req, res, pathname, method);
     });
   } else {
@@ -63,7 +68,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 function routeRequest(req, res, pathname, method) {
-  console.log(`➡️ Incoming request: ${method} ${pathname}`);
+  console.log(`Incoming request: ${method} ${pathname}`);
 
   if ((pathname === '/' || pathname === '') && method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -77,44 +82,44 @@ function routeRequest(req, res, pathname, method) {
       pathname === '/api/users/role') {
     return handleAdminRoutes(req, res);
   } else if (pathname.startsWith('/api/auth')) {
-    console.log('🔁 Routing to authRoutes');
+    console.log('Routing to authRoutes');
     return handleAuthRoutes(req, res);
   } else if (pathname.startsWith('/api/billing')) {
-    console.log('🔁 Routing to billingRoutes');
+    console.log('Routing to billingRoutes');
     return handleBillingRoutes(req, res);
   } else if (pathname.startsWith('/api/reports')) {
-    console.log('🔁 Routing to reportRoutes');
+    console.log('Routing to reportRoutes');
     return handleReportRoutes(req, res);
   } else if (pathname.startsWith('/api/prescriptions')) {
-    console.log('🔁 Routing to prescriptionRoutes');
+    console.log('Routing to prescriptionRoutes');
     return handlePrescriptionRoutes(req, res);
   } else if (pathname.startsWith('/api/appointments')) {
-    console.log('🔁 Routing to appointmentRoutes');
+    console.log('Routing to appointmentRoutes');
     return handleAppointmentRoutes(req, res);
   } else if (pathname.startsWith('/api/tests')) {
-    console.log('🔁 Routing to testRoutes');
+    console.log('Routing to testRoutes');
     return handleTestRoutes(req, res);
   } else if (pathname.startsWith('/api/offices')) {
-    console.log('🔁 Routing to officeRoutes');
+    console.log('Routing to officeRoutes');
     return handleOfficeRoutes(req, res);
   } else if (pathname.startsWith('/api/medical-records')){
-    console.log('🔁 Routing to medicalRecordRoutes');
+    console.log('Routing to medicalRecordRoutes');
     return handleMedicalRecordRoutes(req, res);
   } else if (
     pathname.startsWith('/api/doctors') ||
     pathname.startsWith('/api/patients/assigned') ||
     pathname.match(/^\/api\/patients\/\d+\/primary-physician$/)
   ) {
-    console.log('🔁 Routing to doctorRoutes');
+    console.log('Routing to doctorRoutes');
     return handleDoctorRoutes(req, res);
   } else if (pathname.startsWith('/api/patients')) {
-    console.log('🔁 Routing to patientRoutes');
+    console.log('Routing to patientRoutes');
     return handlePatientRoutes(req, res);
   } else if (pathname.startsWith('/api/referrals')) {
-    console.log('🔁 Routing to referralRoutes');
+    console.log('Routing to referralRoutes');
     return handleReferralRoutes(req, res);
   } else if (pathname.startsWith('/api/doctor-offices')) {
-    console.log('🔁 Routing to doctorOfficeRoutes');
+    console.log('Routing to doctorOfficeRoutes');
     return handleDoctorOfficeRoutes(req, res);
   } else if (
     pathname.startsWith('/api/admin') || 
@@ -124,7 +129,7 @@ function routeRequest(req, res, pathname, method) {
   ) {
     return handleAdminRoutes(req, res);
   } else {
-    console.warn('❌ Route not found:', pathname);
+    console.warn('Route not found:', pathname);
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ message: 'Route not found' }));
   }
@@ -133,13 +138,13 @@ function routeRequest(req, res, pathname, method) {
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
     currentPort++;
-    console.log(`⚠️ Port ${currentPort - 1} in use. Trying ${currentPort}...`);
+    console.log(`Port ${currentPort - 1} in use. Trying ${currentPort}...`);
     server.listen(currentPort);
   } else {
-    console.error('❌ Server error:', err);
+    console.error('Server error:', err);
   }
 });
 
 server.listen(currentPort, () => {
-  console.log(`✅ Server running on port ${currentPort}`);
+  console.log(`Server running on port ${currentPort}`);
 });

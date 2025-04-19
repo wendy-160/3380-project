@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
+import AddDoctorForm from '../components/AddDoctorForm.jsx';
+
 
 const AdminDashboard = () => {
   const [appointments, setAppointments] = useState([]);
@@ -12,6 +14,7 @@ const AdminDashboard = () => {
   const [editingUserId, setEditingUserId] = useState(null);
   const [editedUser, setEditedUser] = useState({ FirstName: '', LastName: '' , Email: ''});
   const [clinicFilter, setClinicFilter] = useState('');
+  const [showDoctorModal, setShowDoctorModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -217,6 +220,18 @@ const AdminDashboard = () => {
         </tbody>
         </table>
       </div>
+      <button onClick={() => setShowDoctorModal(true)}>Add Doctor</button>
+      {showDoctorModal && (
+      <div className="modal-backdrop">
+        <div className="modal-content">
+          <h3>Add New Doctor</h3>
+          <AddDoctorForm
+            onClose={() => setShowDoctorModal(false)}
+            onDoctorAdded={() => window.location.reload()} 
+          />
+        </div>
+      </div>
+    )}
     </div>
   );
 };

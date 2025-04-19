@@ -86,7 +86,7 @@ export async function createDoctorOffice(req, res) {
     `, [doctorIdInt, officeIdInt]);
 
     if (existing.length > 0) {
-      console.log('🟡 Doctor already assigned to this office');
+      console.log('Doctor already assigned to this office');
 
       await db.query(`
         UPDATE doctor_office
@@ -98,7 +98,6 @@ export async function createDoctorOffice(req, res) {
       return res.end(JSON.stringify({ message: 'Assignment updated' }));
     }
 
-    // ✅ Insert new assignment
     const [result] = await db.query(`
       INSERT INTO doctor_office (DoctorID, OfficeID, WorkDays, WorkHours)
       VALUES (?, ?, ?, ?)

@@ -45,16 +45,9 @@ const PatientBilling = () => {
   const handleMakePayment = async (e) => {
     e.preventDefault();
   
-    if (!paymentMethod || parseFloat(paymentAmount) <= 0 || !cardNumber || !expiry || !cvv) {
-      setError('Please fill in all required payment details.');
-      return;
-    }
-  
     try {
-      const updatedStatus = selectedBill.Amount === parseFloat(paymentAmount) ? 'Paid' : 'Partially Paid';
+      const updatedStatus = 'Paid'; 
   
-      console.log('Simulated payment with card:', cardNumber, expiry, cvv);
-
       const response = await fetch(`/api/billing/${selectedBill.BillingID}/status`, {
         method: 'PUT',
         headers: {
@@ -62,9 +55,9 @@ const PatientBilling = () => {
         },
         body: JSON.stringify({
           status: updatedStatus,
-          amount: parseFloat(paymentAmount),
-          paymentMethod,
-          paymentDate: new Date().toISOString()
+          amount: selectedBill.Amount, 
+          paymentMethod: paymentMethod || 'Credit Card',
+          paymentDate: new Date().toISOString().split('T')[0]
         })
       });
   
@@ -77,8 +70,9 @@ const PatientBilling = () => {
       setCardNumber('');
       setExpiry('');
       setCvv('');
+      setError(null);
+      alert("Payment successful! This bill is now marked as Paid.");
       fetchBillings();
-  
     } catch (error) {
       console.error('Error processing payment:', error);
       setError('Payment processing failed. Please try again later.');

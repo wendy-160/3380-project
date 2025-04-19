@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiX, FiEdit2, FiFileText, FiCheck } from 'react-icons/fi';
-import './MedicalTests.css';
+import './medicaltests.css'
 
 const MedicalTests = () => {
   const [tests, setTests] = useState([]);
@@ -150,7 +149,7 @@ const MedicalTests = () => {
       <div className="page-header">
         <h1>Medical Tests</h1>
         <button className="order-test-btn" onClick={() => setIsOrderModalOpen(true)}>
-          <FiPlus /> Order New Test
+          + Order New Test
         </button>
       </div>
 
@@ -184,7 +183,7 @@ const MedicalTests = () => {
                   setIsUpdateModalOpen(true);
                     }}
                   >
-                  <FiEdit2 /> Update Results
+                  Update Results
                 </button>
                 )}
               </div>
@@ -198,7 +197,7 @@ const MedicalTests = () => {
           <div className="test-modal">
             <div className="modal-header">
               <h2>Order New Test</h2>
-              <button className="close-modal-btn" onClick={() => setIsOrderModalOpen(false)}><FiX /></button>
+              <button className="close-modal-btn" onClick={() => setIsOrderModalOpen(false)}>x</button>
             </div>
             <form onSubmit={handleOrderTest} className="test-form">
               <div className="form-group">
@@ -213,7 +212,7 @@ const MedicalTests = () => {
                 <input type="text" required value={testType} onChange={(e) => setTestType(e.target.value)} />
               </div>
               <div className="form-actions">
-                <button type="submit" className="submit-btn"><FiFileText /> Order Test</button>
+                <button type="submit" className="submit-btn">Order Test</button>
               </div>
             </form>
           </div>
@@ -225,7 +224,7 @@ const MedicalTests = () => {
           <div className="test-modal">
             <div className="modal-header">
               <h2>Update Test Results</h2>
-              <button className="close-modal-btn" onClick={() => { setIsUpdateModalOpen(false); setSelectedTest(null); }}><FiX /></button>
+              <button className="close-modal-btn" onClick={() => { setIsUpdateModalOpen(false); setSelectedTest(null); }}>x</button>
             </div>
             <form onSubmit={handleUpdateResults} className="test-form">
               <div className="test-info">
@@ -250,7 +249,7 @@ const MedicalTests = () => {
                 />
               </div>
               <div className="form-actions">
-                <button type="submit" className="submit-btn"><FiCheck /> Save</button>
+                <button type="submit" className="submit-btn"> Save</button>
               </div>
             </form>
           </div>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FiCalendar, FiClock, FiUserPlus, FiCheck, FiX, FiChevronRight } from 'react-icons/fi';
 import './DoctorDashboard.css';
 
 const DoctorDashboard = () => {
@@ -130,7 +129,6 @@ const DoctorDashboard = () => {
       {/* Today's Appointments (shown to all doctors) */}
       <div className="dashboard-card appointments-section">
         <div className="card-header">
-          <FiCalendar className="card-icon" />
           <h2 className="card-title">Today's Appointments</h2>
         </div>
         {todaysAppointments.length > 0 ? (
@@ -138,14 +136,12 @@ const DoctorDashboard = () => {
             {todaysAppointments.map(appt => (
               <div key={appt.AppointmentID} className="appointment-item">
                 <div className="appointment-time">
-                  <FiClock className="time-icon" />
                   <span>{formatTime(appt.DateTime)}</span>
                 </div>
                 <div className="appointment-details">
                   <h3 className="patient-name">{appt.PatientName} {appt.PatientLastName}</h3>
                   <p className="appointment-reason">{appt.Reason}</p>
                 </div>
-                <FiChevronRight className="chevron-icon" />
               </div>
             ))}
           </div>
@@ -156,7 +152,6 @@ const DoctorDashboard = () => {
       {specialization === 'Primary Care Physician' && (
         <div className="dashboard-card create-referral-section">
           <div className="card-header">
-            <FiUserPlus className="card-icon" />
             <h2 className="card-title">Create Referral to Specialist</h2>
           </div>
           <div className="referral-intro">
@@ -172,7 +167,6 @@ const DoctorDashboard = () => {
       {specialization !== 'Primary Care Physician' && (
         <div className="dashboard-card referrals-section">
           <div className="card-header">
-            <FiUserPlus className="card-icon" />
             <h2 className="card-title">Pending Referral Approvals</h2>
           </div>
           {pendingReferrals.length > 0 ? (
@@ -202,7 +196,6 @@ const DoctorDashboard = () => {
             <div className="modal-header">
               <h2>Create Specialist Referral</h2>
               <button className="close-modal-btn" onClick={() => setIsReferralModalOpen(false)}>
-                <FiX />
               </button>
             </div>
             <div className="modal-body">

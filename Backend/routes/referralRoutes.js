@@ -2,7 +2,7 @@ import db from '../db.js';
 import { URL } from 'url';
 
 export async function handleReferralRoutes(req, res) {
-  const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+  const parsedUrl = new URL(req.url, `http:${req.headers.host}`);
   const pathname = parsedUrl.pathname;
   const method = req.method;
 

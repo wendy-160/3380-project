@@ -49,12 +49,6 @@
     margin-bottom: 1.5rem;
   }
   
-  .card-icon {
-    font-size: 1.5rem;
-    color: #1e293b;
-    margin-right: 0.75rem;
-  }
-  
   .card-title {
     font-size: 1.25rem;
     font-weight: 600;
@@ -105,11 +99,6 @@
     border-right: 1px solid #e2e8f0;
   }
   
-  .time-icon {
-    color: #1e293b;
-    margin-right: 0.5rem;
-  }
-  
   .appointment-details {
     flex: 1;
     padding: 0 1rem;
@@ -127,11 +116,6 @@
     margin: 0;
   }
   
-  .chevron-icon {
-    color: #94a3b8;
-    font-size: 1.25rem;
-    margin-left: auto;
-  }
   
   /* Referrals Section */
   .referrals-list {

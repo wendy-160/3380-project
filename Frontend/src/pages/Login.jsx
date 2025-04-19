@@ -1,5 +1,4 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -17,7 +16,7 @@ const Login = () => {
     setError(null);
   
     try {
-      await login({ email, password }); // login function from AuthContext
+      await login({ email, password });
       navigate("/dashboard"); 
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);

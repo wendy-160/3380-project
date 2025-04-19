@@ -1,6 +1,5 @@
 import db from '../db.js';
 
-// Get all offices
 export async function getAllOffices(req, res) {
     try {
         const [rows] = await db.query(`SELECT * FROM office`);
@@ -21,7 +20,6 @@ export async function getAllOffices(req, res) {
     }
 }
 
-// Get offices by state
 export async function getOfficesByState(req, res) {
     try {
         const state = req.params.state;
@@ -43,7 +41,6 @@ export async function getOfficesByState(req, res) {
     }
 }
 
-// Get office by ID
 export async function getOfficeById(req, res) {
     try {
         const id = req.params.id;
@@ -74,7 +71,6 @@ export async function getOfficeById(req, res) {
     }
 }
 
-// Create a new office
 export async function createOffice(req, res) {
     try {
         const requiredFields = ['OfficeName', 'PhoneNumber', 'Address', 'City', 'State', 'ZipCode' ];
@@ -147,12 +143,10 @@ export async function createOffice(req, res) {
     }
 }
 
-// edit an existing clinic
 export async function updateOffice(req, res) {
     try {
         const id = req.params.id;
         
-        // Check if office exists
         const [checkResult] = await db.query(
             `SELECT OfficeID FROM office WHERE OfficeID = ?`, 
             [id]
@@ -167,7 +161,6 @@ export async function updateOffice(req, res) {
             return true;
         }
         
-        // Validate required fields
         const requiredFields = ['OfficeName', 'PhoneNumber', 'Address', 'City', 'State', 'ZipCode'];
         
         for (const field of requiredFields) {
@@ -192,7 +185,6 @@ export async function updateOffice(req, res) {
             OperatingHours = null
         } = req.body;
         
-        // Update the office in the db
         const query = `
             UPDATE office SET
             OfficeName = ?,
@@ -222,7 +214,6 @@ export async function updateOffice(req, res) {
             throw new Error('Failed to update office');
         }
         
-        // Get the updated office
         const [updatedOffice] = await db.query(
             `SELECT * FROM office WHERE OfficeID = ?`, 
             [id]
@@ -247,7 +238,7 @@ export async function updateOffice(req, res) {
         return true;
     }
 }
-// Delete an office
+
 export async function deleteOffice(req, res) {
     try {
         const id = req.params.id;
@@ -267,7 +258,6 @@ export async function deleteOffice(req, res) {
             return true;
         }
         
-        // Delete the office
         const [result] = await db.query(
             `DELETE FROM office WHERE OfficeID = ?`, 
             [id]
@@ -295,5 +285,4 @@ export async function deleteOffice(req, res) {
         return true;
     }
 }
-
 

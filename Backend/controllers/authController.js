@@ -68,7 +68,6 @@ async function register(req, res) {
       if (doctorMatch.length > 0) {
         const assignedDoctorID = doctorMatch[0].DoctorID;
         console.log("Assigning doctor:", assignedDoctorID, "to patient:", patientID);
-        // Insert into patient_doctor_assignment
         await db.query(
           `INSERT INTO patient_doctor_assignment (
             PatientID, DoctorID, AssignmentDate, PrimaryPhysicianFlag
@@ -93,16 +92,39 @@ async function register(req, res) {
 }
 
 async function login(req, res) {
-  const { email, password } = req.body;
-
   try {
+    console.log("🔐 Login route hit");
+
+    if (!req.body) {
+      console.error("No request body received");
+      return sendJson(res, 400, { message: "Missing request body" });
+    }
+
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      console.error("Missing email or password");
+      return sendJson(res, 400, { message: "Email and password are required" });
+    }
+    console.log("🔎 Checking login table for email:", email);
     const [results] = await db.query("SELECT * FROM login WHERE email = ?", [email]);
+    console.log("📦 Query result:", results);
+
     if (results.length === 0) {
       return sendJson(res, 401, { message: "User not found" });
     }
 
     const user = results[0];
+    console.log("🧍 User row from DB:", user);
+
+    if (!user?.password) {
+      console.error("No password field on user object");
+      return sendJson(res, 500, { message: "User record corrupted: password missing" });
+    }
+    console.log("🔐 Password valid:", isPasswordValid);
+    
     const isPasswordValid = await bcrypt.compare(password, user.password);
+
     if (!isPasswordValid) {
       return sendJson(res, 401, { message: "Invalid credentials" });
     }
@@ -123,12 +145,14 @@ async function login(req, res) {
       if (patientRows.length > 0) PatientID = patientRows[0].PatientID;
     }
 
+    console.log(`Login success for ${email}, role: ${role}`);
+
     res.writeHead(200, {
       'Content-Type': 'application/json',
       'Set-Cookie': `auth_token=${token}; HttpOnly; SameSite=Strict; Max-Age=3600`
     });
     res.end(JSON.stringify({
-      message: '✅ Login successful',
+      message: 'Login successful',
       token,
       role,
       email: user.email,
@@ -137,17 +161,18 @@ async function login(req, res) {
     }));
 
   } catch (err) {
-    console.error("Login error:", err);
+    console.error("Login error:", err.message);
     return sendJson(res, 500, { message: "Server error during login" });
   }
 }
+
 
 function logout(req, res) {
   res.writeHead(200, {
     'Content-Type': 'application/json',
     'Set-Cookie': 'auth_token=; Max-Age=0; HttpOnly; SameSite=Strict'
   });
-  res.end(JSON.stringify({ message: "✅ Logged out successfully" }));
+  res.end(JSON.stringify({ message: "Logged out successfully" }));
 }
 
 function sendJson(res, statusCode, data) {

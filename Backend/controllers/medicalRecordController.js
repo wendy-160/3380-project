@@ -1,6 +1,5 @@
 import db from '../db.js';
 
-// Get Medical Records by PatientID
 export async function handleGetMedicalRecordsByPatientId(req, res, patientId) {
   try {
     const [results] = await db.query(
@@ -25,7 +24,6 @@ export async function handleGetMedicalRecordsByPatientId(req, res, patientId) {
   }
 }
 
-// Create Medical Record
 export async function handleCreateMedicalRecord(req, res, body) {
   try {
     const { patientId, appointmentId, doctorId, visitDate, diagnosis, treatmentPlan, notes } = body;

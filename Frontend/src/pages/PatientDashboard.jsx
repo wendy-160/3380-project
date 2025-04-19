@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { FiUser, FiCalendar, FiUserPlus, FiX, FiPhone, FiMail } from 'react-icons/fi';
 import './PatientDashboard.css';
 
 const PatientDashboard = () => {
@@ -248,12 +247,12 @@ const PatientDashboard = () => {
       <div className="dashboard-grid">
         {/* Profile */}
         <div className="dashboard-card profile-section">
-          <div className="card-header"><FiUser className="card-icon" /><h2>My Profile</h2></div>
+          <div className="card-header"><h2>My Profile</h2></div>
           {profile && (
             <div className="profile-details">
               <p>{profile.FirstName} {profile.LastName}</p>
-              <p><FiPhone /> {profile.PhoneNumber}</p>
-              <p><FiMail /> {profile.email}</p>
+              <p>Phone {profile.PhoneNumber}</p>
+              <p>Phone {profile.email}</p>
               <p><strong>Address: </strong> {profile.Address}, {profile.City}, {profile.State}, {profile.ZipCode}</p>
               <button 
               onClick={() => {
@@ -272,7 +271,7 @@ const PatientDashboard = () => {
             <div className="modal-header">
               <h2>Edit Profile</h2>
               <button className="close-modal-btn" onClick={() => setIsEditingProfile(false)}>
-                <FiX />
+                x
               </button>
             </div>
 
@@ -306,12 +305,12 @@ const PatientDashboard = () => {
 
         {/* Primary Doctor */}
         <div className="dashboard-card physician-section">
-          <div className="card-header"><FiUserPlus className="card-icon" /><h2>My Primary Physician</h2></div>
+          <div className="card-header"><h2>My Primary Physician</h2></div>
           {primaryPhysician ? (
             <div>
               <h3>Dr. {primaryPhysician.FirstName} {primaryPhysician.LastName}</h3>
               <p>{primaryPhysician.Specialization}</p>
-              <p><FiPhone /> {primaryPhysician.PhoneNumber}</p>
+              <p>Phone {primaryPhysician.PhoneNumber}</p>
             </div>
           ) : (
             <p>Primary physician not assigned</p>
@@ -320,7 +319,7 @@ const PatientDashboard = () => {
 
         {/* Appointments */}
         <div className="dashboard-card appointments-section">
-          <div className="card-header"><FiCalendar className="card-icon" /><h2>Appointments</h2></div>
+          <div className="card-header"><h2>Appointments</h2></div>
           <button className="schedule-appointment-btn" onClick={() => setIsAppointmentModalOpen(true)}>Schedule New Appointment</button>
           <div className="appointments-list">
             {upcomingAppointments.map(appt => (
@@ -365,7 +364,7 @@ const PatientDashboard = () => {
           <div className="appointment-modal">
             <div className="modal-header">
               <h2>Schedule Appointment</h2>
-              <button onClick={() => setIsAppointmentModalOpen(false)}><FiX /></button>
+              <button onClick={() => setIsAppointmentModalOpen(false)}>x</button>
             </div>
             <div className="modal-body">
               <form onSubmit={(e) => { e.preventDefault(); handleCreateAppointment(); }}>

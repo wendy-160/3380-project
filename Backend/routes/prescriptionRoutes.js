@@ -11,6 +11,22 @@ export async function handlePrescriptionRoutes(req, res) {
     res.end(JSON.stringify(data));
   };
 
+  if (method === 'GET' && pathname === '/api/appointments') {
+    const doctorId = parsedUrl.searchParams.get('doctorId');
+    if (!doctorId) return sendJson(res, 400, { message: 'Missing doctorId' });
+
+    try {
+      const [rows] = await db.query(
+        `SELECT AppointmentID, PatientID, DateTime FROM appointment WHERE DoctorID = ?`,
+        [doctorId]
+      );
+      return sendJson(res, 200, rows);
+    } catch (err) {
+      console.error('Error fetching appointments:', err.message);
+      return sendJson(res, 500, { message: 'Error fetching appointments' });
+    }
+  }
+
   const matchActive = pathname.match(/^\/api\/prescriptions\/patient\/(\d+)\/active$/);
   if (method === 'GET' && matchActive) {
     const patientID = matchActive[1];
@@ -100,7 +116,6 @@ async function insertPrescription(body, res) {
       ]
     );
 
-    console.log('✅ Prescription inserted with ID:', result.insertId);
     return sendJson(res, 201, { message: 'Prescription created', PrescriptionID: result.insertId });
 
   } catch (err) {

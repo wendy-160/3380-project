@@ -1,4 +1,4 @@
-import { getAllDoctors, getSpecialists, getAssignedPatients, getPrimaryPhysician, getDoctorOffices, getDoctorById } from '../controllers/doctorController.js';
+import { getAllDoctors, getSpecialists, getAssignedPatients, getPrimaryPhysician, getDoctorOffices, getDoctorById, handleRegisterDoctor } from '../controllers/doctorController.js';
 
 export function handleDoctorRoutes(req, res) {
   const url = req.url;
@@ -11,6 +11,10 @@ export function handleDoctorRoutes(req, res) {
   if (url === '/api/doctors/specialists' && method === 'GET') {
     return getSpecialists(req, res);
   }
+  if (method === 'POST' && url === '/api/doctors/register') {
+    return handleRegisterDoctor(req, res);
+  }
+
 
   const doctorByIdMatch = url.match(/^\/api\/doctors\/(\d+)$/);
   if (doctorByIdMatch && method === 'GET') {

@@ -1,4 +1,6 @@
 import db from '../db.js';
+import bcrypt from 'bcryptjs';
+
 
 export async function getAllDoctors(req, res) {
   try {
@@ -118,5 +120,50 @@ export async function getDoctorById(req, res, doctorId) {
     console.error('Error fetching doctor by ID:', error);
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ message: 'Internal server error' }));
+  }
+  
+}
+export async function handleRegisterDoctor(req, res) {
+  try {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk;
+    });
+
+    req.on('end', async () => {
+      const { username, password, email, FirstName, LastName, Specialization, PhoneNumber } = JSON.parse(body);
+
+      if (!username || !password || !email || !FirstName || !LastName || !Specialization || !PhoneNumber) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: 'Missing required fields' }));
+      }
+
+      const [existing] = await db.query(`SELECT * FROM login WHERE username = ?`, [username]);
+      if (existing.length > 0) {
+        res.writeHead(409, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: 'Username already exists' }));
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const [loginResult] = await db.query(`
+        INSERT INTO login (username, password, email, role)
+        VALUES (?, ?, ?, 'Doctor')
+      `, [username, hashedPassword, email]);
+
+      const userID = loginResult.insertId;
+
+      await db.query(`
+        INSERT INTO doctor (UserID, FirstName, LastName, Specialization, PhoneNumber)
+        VALUES (?, ?, ?, ?, ?)
+      `, [userID, FirstName, LastName, Specialization, PhoneNumber]);
+
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ message: 'Doctor registered successfully', UserID: userID }));
+    });
+  } catch (err) {
+    console.error('Error registering doctor:', err);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 }

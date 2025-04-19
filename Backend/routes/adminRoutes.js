@@ -363,7 +363,7 @@ export async function handleAdminRoutes(req, res) {
 
   async function handleBillingUpdate(billId, data, res) {
     const { PaymentStatus, PaymentMethod, PaymentDate, Notes } = data;
-    console.log("🛠️ Updating billing record:", { PaymentStatus, PaymentMethod, PaymentDate, Notes });
+    console.log("Updating billing record:", { PaymentStatus, PaymentMethod, PaymentDate, Notes });
   
     try {
       const [result] = await db.query(`
@@ -373,15 +373,15 @@ export async function handleAdminRoutes(req, res) {
       `, [PaymentStatus, PaymentMethod, PaymentDate || null, Notes || null, billId]);
   
       if (result.affectedRows === 0) {
-        console.warn("⚠️ Billing record not found or not updated.");
+        console.warn("Billing record not found or not updated.");
         return sendJson(res, 404, { message: 'Billing record not found' });
       }
   
-      console.log("✅ Billing update successful.");
+      console.log("Billing update successful.");
       return sendJson(res, 200, { message: 'Billing record updated successfully' });
   
     } catch (err) {
-      console.error('❌ SQL error during billing update:', err);
+      console.error('SQL error during billing update:', err);
       return sendJson(res, 500, { message: 'Failed to update billing record' });
     }
   }

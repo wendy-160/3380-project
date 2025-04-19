@@ -14,37 +14,40 @@ export async function handleReportRoutes(req, res) {
   const doctorPerformanceMatch = pathname.match(/^\/api\/reports\/doctor\/(\d+)$/);
   if (method === 'GET' && doctorPerformanceMatch) {
     const doctorId = doctorPerformanceMatch[1];
+    const searchParams = parsedUrl.searchParams;
+    const startDate = searchParams.get('startDate') || '2024-01-01';
+    const endDate = searchParams.get('endDate') || '2024-12-31';
 
     try {
       const [appointments] = await db.query(`
         SELECT COUNT(*) AS TotalAppointments
         FROM appointment
-        WHERE DoctorID = ?
-      `, [doctorId]);
+        WHERE DoctorID = ? AND DateTime BETWEEN ? AND ?
+      `, [doctorId, startDate, endDate]);
 
       const [referrals] = await db.query(`
         SELECT COUNT(*) AS TotalReferrals
         FROM referral
-        WHERE ReferringDoctorID = ?
-      `, [doctorId]);
+        WHERE ReferringDoctorID = ? AND Date BETWEEN ? AND ?
+      `, [doctorId, startDate, endDate]);
 
       const [completedAppointments] = await db.query(`
         SELECT COUNT(*) AS CompletedAppointments
         FROM appointment
-        WHERE DoctorID = ? AND Status = 'Completed'
-      `, [doctorId]);
+        WHERE DoctorID = ? AND Status = 'Completed' AND DateTime BETWEEN ? AND ?
+      `, [doctorId, startDate, endDate]);
 
       const [prescriptions] = await db.query(`
         SELECT COUNT(*) AS Prescriptions
         FROM prescription
-        WHERE DoctorID = ?
-      `, [doctorId]);
+        WHERE DoctorID = ? AND StartDate BETWEEN ? AND ?
+      `, [doctorId, startDate, endDate]);
 
       const [tests] = await db.query(`
         SELECT COUNT(*) AS TestsOrdered
         FROM medicaltest
-        WHERE DoctorID = ?
-      `, [doctorId]);
+        WHERE DoctorID = ? AND OrderDate BETWEEN ? AND ?
+      `, [doctorId, startDate, endDate]);
 
       return sendJson(res, 200, {
         doctorId: parseInt(doctorId),
@@ -95,7 +98,7 @@ export async function handleReportRoutes(req, res) {
         SELECT 
           o.OfficeName, o.OfficeID,
           ${selectDateParts},
-          COUNT(*) AS AppointmentCount
+          COUNT(a.AppointmentID) AS AppointmentCount
         FROM appointment a
         JOIN office o ON a.OfficeID = o.OfficeID
         WHERE a.DateTime BETWEEN ? AND ?
@@ -120,32 +123,33 @@ export async function handleReportRoutes(req, res) {
     const startDate = searchParams.get('startDate') || '2024-01-01';
     const endDate = searchParams.get('endDate') || '2024-12-31';
     const doctorId = searchParams.get('doctorId') || null;
-    const status = searchParams.get('status') || 'Approved'; // default to Approved
-  
+    const status = searchParams.get('status') || 'Approved';
+    const specialization = searchParams.get('specialization') || null;
+
     try {
       const query = `
-      SELECT 
-        r.ReferralID,
-        CONCAT(p.FirstName, ' ', p.LastName) AS PatientName,
-        CONCAT(s.FirstName, ' ', s.LastName) AS SpecialistName,
-        r.Status AS ReferralStatus,
-        CASE WHEN a.AppointmentID IS NOT NULL THEN 'Yes' ELSE 'No' END AS AppointmentScheduled,
-        a.DateTime AS AppointmentDate
-      FROM referral r
-      JOIN patient p ON r.PatientID = p.PatientID
-      JOIN doctor s ON r.SpecialistDoctorID = s.DoctorID
-      LEFT JOIN appointment a 
-        ON a.PatientID = r.PatientID AND a.DoctorID = r.SpecialistDoctorID
-      WHERE r.Status = ?
-        AND r.Date BETWEEN ? AND ?
-        ${doctorId ? 'AND r.SpecialistDoctorID = ?' : ''}
-      ORDER BY r.ReferralID DESC
-    `;
-  
-      const params = doctorId
-        ? [status, startDate, endDate, doctorId]
-        : [status, startDate, endDate];
-  
+        SELECT 
+          r.ReferralID,
+          CONCAT(p.FirstName, ' ', p.LastName) AS PatientName,
+          CONCAT(s.FirstName, ' ', s.LastName) AS SpecialistName,
+          r.Status AS ReferralStatus,
+          CASE WHEN a.AppointmentID IS NOT NULL THEN 'Yes' ELSE 'No' END AS AppointmentScheduled,
+          a.DateTime AS AppointmentDate
+        FROM referral r
+        JOIN patient p ON r.PatientID = p.PatientID
+        JOIN doctor s ON r.SpecialistDoctorID = s.DoctorID
+        LEFT JOIN appointment a ON a.PatientID = r.PatientID AND a.DoctorID = r.SpecialistDoctorID
+        WHERE r.Status = ?
+          AND DATE(r.Date) BETWEEN ? AND ?
+          ${doctorId ? 'AND r.SpecialistDoctorID = ?' : ''}
+          ${specialization ? 'AND s.Specialization = ?' : ''}
+        ORDER BY r.ReferralID DESC
+      `;
+
+      const params = [status, startDate, endDate];
+      if (doctorId) params.push(doctorId);
+      if (specialization) params.push(specialization);
+
       const [rows] = await db.query(query, params);
       return sendJson(res, 200, rows);
     } catch (err) {
@@ -153,7 +157,6 @@ export async function handleReportRoutes(req, res) {
       return sendJson(res, 500, { error: err.message });
     }
   }
-  
 
   return sendJson(res, 404, { message: 'Report route not found' });
 }
