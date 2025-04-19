@@ -8,7 +8,7 @@ export async function handleAppointmentRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
-  if (method === 'POST' && pathname === '${API}/api/appointments') {
+  if (method === 'POST' && pathname === '/api/appointments') {
     try {
       const { PatientID, DoctorID, OfficeID, DateTime, Reason, status } = req.body;
       
@@ -121,7 +121,7 @@ export async function handleAppointmentRoutes(req, res) {
     }
   }
 
-  if (method === 'POST' && pathname === '${API}/api/appointments') {
+  if (method === 'POST' && pathname === '/api/appointments') {
     try {
       const { PatientID, DoctorID, OfficeID, DateTime, Reason, status } = req.body;
 
@@ -148,7 +148,7 @@ export async function handleAppointmentRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname === '${API}/api/appointments') {
+  if (method === 'GET' && pathname === '/api/appointments') {
     const doctorId = parsedUrl.searchParams.get('doctorId');
     if (!doctorId) return sendJson(res, 400, { message: 'Missing doctorId' });
   
@@ -163,7 +163,25 @@ export async function handleAppointmentRoutes(req, res) {
       return sendJson(res, 500, { message: 'Error fetching appointments' });
     }
   }
-  
+
+  const matchCompletedAppointments = pathname.match(/^\/api\/appointments\/patient\/(\d+)\/completed$/);
+if (method === 'GET' && matchCompletedAppointments) {
+  const patientID = matchCompletedAppointments[1];
+  try {
+    const [rows] = await db.execute(`
+      SELECT a.*, d.FirstName AS DoctorFirstName, d.LastName AS DoctorLastName
+      FROM appointment a
+      JOIN doctor d ON a.DoctorID = d.DoctorID
+      WHERE a.PatientID = ? AND a.Status = 'Completed'
+      ORDER BY a.DateTime DESC
+    `, [patientID]);
+
+    return sendJson(res, 200, Array.isArray(rows) ? rows : []);
+  } catch (err) {
+    console.error("Error fetching completed appointments:", err);
+    return sendJson(res, 500, { message: "Error fetching completed appointments" });
+  }
+}
 
   sendJson(res, 404, { message: 'Appointment route not found.' });
 }

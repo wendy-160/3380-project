@@ -9,15 +9,15 @@ export async function handleAuthRoutes(req, res) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
-  if (method === 'POST' && pathname === '${API}/api/auth/register') {
+  if (method === 'POST' && pathname === '/api/auth/register') {
     return register(req, res);
   }
 
-  if (method === 'POST' && pathname === '${API}/api/auth/login') {
+  if (method === 'POST' && pathname === '/api/auth/login') {
     return login(req, res);
   }
 
-  if (method === 'GET' && pathname === '${API}/api/auth/me') {
+  if (method === 'GET' && pathname === '/api/auth/me') {
     const email = req.headers['x-user-email'];
 
     if (!email) {

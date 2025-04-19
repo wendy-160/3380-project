@@ -56,7 +56,7 @@ const MedicalRecordsPage = () => {
     };
 
     try {
-      const res = await fetch('${API}/api/medical-records', {
+      const res = await fetch('/api/medical-records', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

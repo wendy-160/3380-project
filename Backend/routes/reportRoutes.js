@@ -65,7 +65,7 @@ export async function handleReportRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname === '${API}/api/reports/clinic-utilization') {
+  if (method === 'GET' && pathname === '/api/reports/clinic-utilization') {
     const searchParams = parsedUrl.searchParams;
     const aggregation = searchParams.get('aggregation') || 'Monthly';
     const officeId = searchParams.get('officeId');
@@ -120,7 +120,7 @@ export async function handleReportRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname.startsWith('${API}/api/reports/referral-outcomes')) {
+  if (method === 'GET' && pathname.startsWith('/api/reports/referral-outcomes')) {
     const searchParams = parsedUrl.searchParams;
     const startDate = searchParams.get('startDate') || '2024-01-01';
     const endDate = searchParams.get('endDate') || '2024-12-31';

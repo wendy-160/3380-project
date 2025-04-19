@@ -5,11 +5,11 @@ export async function handleOfficeRoutes(req, res){
     const url = req.url;
     const method = req.method;
     
-    if (url === '${API}/api/offices' && method === 'GET') {
+    if (url === '/api/offices' && method === 'GET') {
         return await getAllOffices(req, res);
     }
     
-    if (url === '${API}/api/offices' && method === 'POST') {
+    if (url === '/api/offices' && method === 'POST') {
         return await createOffice(req, res);
     }
     

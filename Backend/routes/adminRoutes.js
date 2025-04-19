@@ -13,7 +13,7 @@ export async function handleAdminRoutes(req, res) {
     res.end(JSON.stringify(data));
   };
   
-  if (method === 'GET' && pathname === '${API}/api/admin/billings') {
+  if (method === 'GET' && pathname === '/api/admin/billings') {
     const { status, startDate, endDate, search } = Object.fromEntries(parsedUrl.searchParams.entries());
 
     try {
@@ -99,7 +99,7 @@ export async function handleAdminRoutes(req, res) {
   
   
 
-  if (method === 'POST' && pathname === '${API}/api/admin/billings') {
+  if (method === 'POST' && pathname === '/api/admin/billings') {
     let rawBody = '';
   
     req.on('data', chunk => rawBody += chunk);
@@ -152,7 +152,7 @@ export async function handleAdminRoutes(req, res) {
   }
   
   
-  if (method === 'GET' && pathname === '${API}/api/admin/patients') {
+  if (method === 'GET' && pathname === '/api/admin/patients') {
     try {
       const [rows] = await db.query(`
         SELECT PatientID, FirstName, LastName FROM patient
@@ -166,7 +166,7 @@ export async function handleAdminRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname === '${API}/api/admin/appointments') {
+  if (method === 'GET' && pathname === '/api/admin/appointments') {
     try {
       const [rows] = await db.query(`
         SELECT AppointmentID, DateTime AS AppointmentDate FROM appointment
@@ -179,7 +179,7 @@ export async function handleAdminRoutes(req, res) {
       return res.end(JSON.stringify({ message: 'Failed to fetch appointments' }));
     }
   }
-  if (method === 'GET' && pathname === '${API}/api/admin/clinics') {
+  if (method === 'GET' && pathname === '/api/admin/clinics') {
     try {
       const [clinics] = await db.query(`
         SELECT OfficeID, OfficeName FROM office ORDER BY OfficeName
@@ -191,7 +191,7 @@ export async function handleAdminRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname === '${API}/api/admin/prescriptions') {
+  if (method === 'GET' && pathname === '/api/admin/prescriptions') {
     try {
       const [rows] = await db.query(`
         SELECT PrescriptionID, MedicationName AS MedicineName FROM prescription
@@ -205,7 +205,7 @@ export async function handleAdminRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname === '${API}/api/admin/tests') {
+  if (method === 'GET' && pathname === '/api/admin/tests') {
     try {
       const [rows] = await db.query(`
         SELECT TestID, TestName FROM medicaltest
@@ -219,7 +219,7 @@ export async function handleAdminRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname === '${API}/api/admin/users') {
+  if (method === 'GET' && pathname === '/api/admin/users') {
     try {
       const [rows] = await db.query(`
         SELECT 
@@ -248,7 +248,7 @@ export async function handleAdminRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname === '${API}/api/admin/appointments/full') {
+  if (method === 'GET' && pathname === '/api/admin/appointments/full') {
     try {
       const [appointments] = await db.query(`
         SELECT a.AppointmentID, a.DateTime, a.Reason, a.Status, a.DoctorID, a.OfficeID, o.OfficeName,

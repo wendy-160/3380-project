@@ -60,7 +60,8 @@ const PatientDashboard = () => {
         const appointmentRes = await fetch(`${API}/api/appointments/patient/${currentPatientID}/upcoming`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUpcomingAppointments(await appointmentRes.json());
+        const appointments = await appointmentRes.json();
+        setUpcomingAppointments(Array.isArray(appointments) ? appointments : []);
         
 
         const prescriptionRes = await fetch(`${API}/api/prescriptions/patient/${currentPatientID}/active`, {
@@ -148,7 +149,7 @@ const PatientDashboard = () => {
     try {
       const token = localStorage.getItem('authToken');
   
-      const response = await fetch('${API}/api/appointments', {
+      const response = await fetch('/api/appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -10,12 +10,12 @@ export function handleDoctorOfficeRoutes(req, res) {
 
   console.log('Matching path:', pathname, 'Method:', method);
 
-  if (pathname === '${API}/api/doctor-offices' && method === 'GET') {
+  if (pathname === '/api/doctor-offices' && method === 'GET') {
     console.log('Handling GET all doctor offices');
     return getAllDoctorOffices(req, res);
   }
 
-  if (pathname === '${API}/api/doctor-offices' && method === 'POST') {
+  if (pathname === '/api/doctor-offices' && method === 'POST') {
     console.log('Handling POST new doctor-office assignment');
     return createDoctorOffice(req, res);
   }

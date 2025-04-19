@@ -13,7 +13,7 @@ export async function handlePrescriptionRoutes(req, res) {
     res.end(JSON.stringify(data));
   };
 
-  if (method === 'GET' && pathname === '${API}/api/appointments') {
+  if (method === 'GET' && pathname === '/api/appointments') {
     const doctorId = parsedUrl.searchParams.get('doctorId');
     if (!doctorId) return sendJson(res, 400, { message: 'Missing doctorId' });
 
@@ -44,7 +44,7 @@ export async function handlePrescriptionRoutes(req, res) {
     }
   }
 
-  if (method === 'POST' && pathname === '${API}/api/prescriptions') {
+  if (method === 'POST' && pathname === '/api/prescriptions') {
     try {
       let body = req.body;
 

@@ -32,7 +32,7 @@ export async function handleMedicalRecordRoutes(req, res) {
     }
   }
 
-  if (method === 'POST' && pathname === '${API}/api/medical-records') {
+  if (method === 'POST' && pathname === '/api/medical-records') {
     try {
       let body = req.body;
 

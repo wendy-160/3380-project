@@ -5,14 +5,14 @@ export function handleDoctorRoutes(req, res) {
   const url = req.url;
   const method = req.method;
 
-  if (url === '${API}/api/doctors' && method === 'GET') {
+  if (url === '/api/doctors' && method === 'GET') {
     return getAllDoctors(req, res);
   }
 
-  if (url === '${API}/api/doctors/specialists' && method === 'GET') {
+  if (url === '/api/doctors/specialists' && method === 'GET') {
     return getSpecialists(req, res);
   }
-  if (method === 'POST' && url === '${API}/api/doctors/register') {
+  if (method === 'POST' && url === '/api/doctors/register') {
     return handleRegisterDoctor(req, res);
   }
 
@@ -37,7 +37,7 @@ export function handleDoctorRoutes(req, res) {
   const officeMatch = url.match(/^\/api\/doctors\/(\d+)\/offices$/);
   if (officeMatch && method === 'GET') {
     const doctorId = officeMatch[1];
-    return getDoctorOffices(req, res, doctorId);
+    return getDoctorOffices({ ...req, params: { doctorId } }, res);
   }
 
   res.writeHead(404, { 'Content-Type': 'application/json' });

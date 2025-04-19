@@ -13,7 +13,7 @@ export async function handleTestRoutes(req, res) {
     res.end(JSON.stringify(data));
   };
 
-  if (method === 'GET' && pathname === '${API}/api/tests') {
+  if (method === 'GET' && pathname === '/api/tests') {
     try {
       const [rows] = await db.query(`
         SELECT 
@@ -29,7 +29,7 @@ export async function handleTestRoutes(req, res) {
     }
   }
 
-  if (method === 'POST' && pathname === '${API}/api/tests') {
+  if (method === 'POST' && pathname === '/api/tests') {
     let body = req.body;
 
     if (!body) {
@@ -50,7 +50,7 @@ export async function handleTestRoutes(req, res) {
     return await insertTest(body, res);
   }
 
-  if (method === 'PUT' && pathname.startsWith('${API}/api/tests/')) {
+  if (method === 'PUT' && pathname.startsWith('/api/tests/')) {
     const testID = pathname.split('/').pop();
 
     let body = req.body;

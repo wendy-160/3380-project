@@ -61,7 +61,7 @@ export async function handleBillingRoutes(req, res) {
     return;
   }
 
-  if (method === 'GET' && pathname === '${API}/api/billing/patients') {
+  if (method === 'GET' && pathname === '/api/billing/patients') {
     try {
       const [rows] = await db.query(`
         SELECT DISTINCT p.PatientID, p.FirstName, p.LastName, p.MRN

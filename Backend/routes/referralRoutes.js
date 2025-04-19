@@ -4,7 +4,7 @@ const API = process.env.REACT_APP_API_URL;
 
 
 export async function handleReferralRoutes(req, res) {
-  const parsedUrl = new URL(req.url, `http:${req.headers.host}`);
+  const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
@@ -38,7 +38,7 @@ export async function handleReferralRoutes(req, res) {
     }
   }
 
-  if (method === 'POST' && pathname.startsWith('${API}/api/referrals')) {
+  if (method === 'POST' && pathname.startsWith('/api/referrals')) {
     console.log('Inside POST /api/referrals route');
 
     try {
