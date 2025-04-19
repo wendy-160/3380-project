@@ -121,9 +121,9 @@ async function login(req, res) {
       console.error("No password field on user object");
       return sendJson(res, 500, { message: "User record corrupted: password missing" });
     }
-    console.log("🔐 Password valid:", isPasswordValid);
-    
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log("🔐 Password valid:", isPasswordValid);
+  
 
     if (!isPasswordValid) {
       return sendJson(res, 401, { message: "Invalid credentials" });
