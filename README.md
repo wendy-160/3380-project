@@ -45,8 +45,12 @@ The app should now be running
   -email: admin@example.com
   -password: Admin123
 - Doctor:
+  (Primary Care Physician) 
   -email: doctor@example.com
   -password: Doctor123
+  (Specialist)
+  -email: yang.heart@example.com
+  -password: Yang123
 - Patient:
   -email: john.doe@example.com
   -password: John123
