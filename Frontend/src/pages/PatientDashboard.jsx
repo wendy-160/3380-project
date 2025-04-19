@@ -268,8 +268,8 @@ const PatientDashboard = () => {
           {profile && (
             <div className="profile-details">
               <p>{profile.FirstName} {profile.LastName}</p>
-              <p>Phone {profile.PhoneNumber}</p>
-              <p>Phone {profile.email}</p>
+              <p><strong>Phone: </strong> {profile.PhoneNumber}</p>
+              <p><strong>Email: </strong>{profile.email}</p>
               <p><strong>Address: </strong> {profile.Address}, {profile.City}, {profile.State}, {profile.ZipCode}</p>
               <button 
               onClick={() => {
@@ -327,7 +327,7 @@ const PatientDashboard = () => {
             <div>
               <h3>Dr. {primaryPhysician.FirstName} {primaryPhysician.LastName}</h3>
               <p>{primaryPhysician.Specialization}</p>
-              <p>Phone {primaryPhysician.PhoneNumber}</p>
+              <p><strong>Phone: </strong> {primaryPhysician.PhoneNumber}</p>
             </div>
           ) : (
             <p>Primary physician not assigned</p>
@@ -360,39 +360,39 @@ const PatientDashboard = () => {
         </div>
 
         {/* Prescriptions */}
-<div className="dashboard-card prescriptions-section">
-  <div className="card-header"><h2>Prescriptions</h2></div>
-  {prescriptions.length > 0 ? prescriptions.map(p => (
-    <div key={p.PrescriptionID} className="prescription-item">
-      <h3>{p.MedicationName}</h3>
-      <p><strong>Dosage:</strong> {p.Dosage}</p>
-      <p><strong>Frequency:</strong> {p.Frequency}</p>
-      <p><strong>Start:</strong> {new Date(p.StartDate).toLocaleDateString()}</p>
-      <p><strong>End:</strong> {new Date(p.EndDate).toLocaleDateString()}</p>
-      <p><strong>Notes:</strong> {p.Notes}</p>
-      <p><strong>Prescribed by:</strong> Dr. {p.DoctorFirstName} {p.DoctorLastName}</p>
-    </div>
-  )) : (
-    <p>No prescriptions available. You may need to complete a visit first.</p>
-  )}
-</div>
-
-{/* Test Results */}
-<div className="dashboard-card test-results-section">
-  <div className="card-header"><h2>Test Results</h2></div>
-  {testResults && testResults.length > 0 ? testResults.map(test => (
-    <div key={test.TestID} className="test-result-item">
-      <h3>{test.TestName}</h3>
-      <p><strong>Ordered by:</strong> Dr. {test.DoctorFirstName} {test.DoctorLastName}</p>
-      <p><strong>Status:</strong> {test.ResultStatus}</p>
-      <p><strong>Result:</strong> {test.Result || "Pending"}</p>
-      <p><strong>Notes:</strong> {test.Notes}</p>
-      <p><strong>Date Ordered:</strong> {new Date(test.OrderDate).toLocaleDateString()}</p>
-    </div>
-  )) : (
-    <p>No test results to show. Complete an appointment to receive lab tests.</p>
-  )}
-</div>
+        <div className="dashboard-card prescriptions-section">
+          <div className="card-header"><h2>Prescriptions</h2></div>
+          {prescriptions.length > 0 ? prescriptions.map(p => (
+            <div key={p.PrescriptionID} className="prescription-item">
+              <h3>{p.MedicationName}</h3>
+              <p><strong>Dosage:</strong> {p.Dosage}</p>
+              <p><strong>Frequency:</strong> {p.Frequency}</p>
+              <p><strong>Start:</strong> {new Date(p.StartDate).toLocaleDateString()}</p>
+              <p><strong>End:</strong> {new Date(p.EndDate).toLocaleDateString()}</p>
+              <p><strong>Notes:</strong> {p.Notes}</p>
+              <p><strong>Prescribed by:</strong> Dr. {p.DoctorFirstName} {p.DoctorLastName}</p>
+            </div>
+          )) : (
+            <p>No prescriptions available. You may need to complete a visit first.</p>
+          )}
+        </div>
+        
+        {/* Test Results */}
+        <div className="dashboard-card test-results-section">
+          <div className="card-header"><h2>Test Results</h2></div>
+          {testResults && testResults.length > 0 ? testResults.map(test => (
+            <div key={test.TestID} className="test-result-item">
+              <h3>{test.TestName}</h3>
+              <p><strong>Ordered by:</strong> Dr. {test.DoctorFirstName} {test.DoctorLastName}</p>
+              <p><strong>Status:</strong> {test.ResultStatus}</p>
+              <p><strong>Result:</strong> {test.Result || "Pending"}</p>
+              <p><strong>Notes:</strong> {test.Notes}</p>
+              <p><strong>Date Ordered:</strong> {new Date(test.OrderDate).toLocaleDateString()}</p>
+            </div>
+          )) : (
+            <p>No test results to show. Complete an appointment to receive lab tests.</p>
+          )}
+        </div>
 
 {/* My Visits */}
 <div className="dashboard-card visits-section">
