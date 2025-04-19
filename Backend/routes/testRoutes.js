@@ -12,6 +12,31 @@ export async function handleTestRoutes(req, res) {
     res.writeHead(statusCode, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(data));
   };
+  
+  //so test results pop up on patient dashboard
+  const matchTests = pathname.match(/^\/api\/tests\/patient\/(\d+)\/?$/);
+  if (method === 'GET' && matchTests) {
+    const patientID = matchTests[1];
+    try {
+      const [rows] = await db.query(
+        `SELECT 
+          t.*,
+          d.FirstName AS DoctorFirstName,
+          d.LastName AS DoctorLastName
+        FROM 
+          medicaltest t
+        JOIN 
+          doctor d ON t.DoctorID = d.DoctorID
+        WHERE 
+          t.PatientID = ?`,
+        [patientID]
+      );
+      return sendJson(res, 200, rows);
+    } catch (err) {
+      console.error("Error fetching test results:", err);
+      return sendJson(res, 500, { message: "Error fetching test results" });
+    }
+  }
 
   if (method === 'GET' && pathname === '/api/tests') {
     try {
