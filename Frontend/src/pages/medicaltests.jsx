@@ -76,20 +76,20 @@ const MedicalTests = () => {
         setLoading(false);
       });
     fetchTests();
-    fetch('${API}/api/patients')
+    fetch(`${API}/api/patients`)
       .then(res => res.json())
       .then(setPatients);
-    fetch('${API}/api/appointments')
+    fetch(`${API}/api/appointments`)
       .then(res => res.json())
       .then(setAppointments);
-    fetch('${API}/api/offices')
+    fetch(`${API}/api/offices`)
       .then(res => res.json())
       .then(setOffices);
   }, []);
 
   const fetchTests = () => {
     setLoading(true);
-    fetch('${API}/api/tests')
+    fetch(`${API}/api/tests`)
       .then(res => res.json())
       .then(data => {
         setTests(data);
@@ -98,7 +98,7 @@ const MedicalTests = () => {
   };
 
   const orderTest = async () => {
-    await fetch('${API}/api/tests', {
+    await fetch(`${API}/api/tests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ test_type: testType, patient_id: patientId })

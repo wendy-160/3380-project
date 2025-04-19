@@ -36,7 +36,7 @@ const DoctorClinicAssignment = () => {
     // Fetch all clinics
     const fetchClinics = async () => {
         try {
-            const response = await fetch('${API}/api/offices');
+            const response = await fetch(`${API}/api/offices`);
             
             if (!response.ok) {
                 throw new Error(`Failed to fetch clinics. Status: ${response.status}`);
@@ -58,7 +58,7 @@ const DoctorClinicAssignment = () => {
     // Fetch all doctors
     const fetchDoctors = async () => {
         try {
-            const response = await fetch('${API}/api/doctors');
+            const response = await fetch(`${API}/api/doctors`);
             
             if (!response.ok) {
                 throw new Error(`Failed to fetch doctors. Status: ${response.status}`);
@@ -80,7 +80,7 @@ const DoctorClinicAssignment = () => {
     // Fetch all doctor-clinic assignments
     const fetchAssignments = async () => {
         try {
-            const response = await fetch('${API}/api/doctor-offices');
+            const response = await fetch(`${API}/api/doctor-offices`);
             
             if (!response.ok) {
                 throw new Error(`Failed to fetch assignments. Status: ${response.status}`);
@@ -136,7 +136,7 @@ const DoctorClinicAssignment = () => {
             
             console.log('Sending assignment data:', JSON.stringify(formattedAssignment));
             
-            const response = await fetch('${API}/api/doctor-offices', {
+            const response = await fetch(`${API}/api/doctor-offices`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -32,7 +32,7 @@ const Reports = () => {
 
   const loadDoctors = async () => {
     try {
-      const response = await axios.get('${API}/api/doctors');
+      const response = await axios.get(`${API}/api/doctors`);
       setDoctors(response.data);
     } catch (error) {
       console.error('Error loading doctors:', error);
@@ -41,7 +41,7 @@ const Reports = () => {
 
   const loadOffices = async () => {
     try {
-      const response = await axios.get('${API}/api/offices');
+      const response = await axios.get(`${API}/api/offices`);
       setOffices(response.data);
     } catch (error) {
       console.error('Error loading offices:', error);

@@ -31,7 +31,7 @@ const ClinicManagement = () => {
             setError(null);
             setSuccessMessage(null);
 
-            const response = await fetch('${API}/api/offices');
+            const response = await fetch(`${API}/api/offices`);
 
             if(!response.ok) {
                 throw new Error(`Error Status: ${response.status}`);
@@ -72,7 +72,7 @@ const ClinicManagement = () => {
             setError(null);
             setSuccessMessage(null);
             
-            const response = await fetch('${API}/api/offices', {
+            const response = await fetch(`${API}/api/offices`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

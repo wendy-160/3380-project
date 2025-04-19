@@ -12,7 +12,7 @@ const Locations = () => {
         const fetchClinics = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('${API}/api/offices');
+                const response = await fetch(`${API}/api/offices`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);

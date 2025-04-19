@@ -20,9 +20,9 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const apptRes = await axios.get('${API}/api/admin/appointments/full');
-        const usersRes = await axios.get('${API}/api/admin/users');
-        const res = await axios.get('${API}/api/admin/clinics');
+        const apptRes = await axios.get(`${API}/api/admin/appointments/full`);
+        const usersRes = await axios.get(`${API}/api/admin/users`);
+        const res = await axios.get(`${API}/api/admin/clinics`);
         setClinics(res.data);
         setAppointments(apptRes.data);
         setUsers(usersRes.data);

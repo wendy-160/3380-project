@@ -56,7 +56,7 @@ const PrescriptionForm = () => {
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch('${API}/api/patients');
+      const res = await fetch(`${API}/api/patients`);
       if (!res.ok) throw new Error('Invalid response');
       const data = await res.json();
       setPatients(Array.isArray(data) ? data : []);
@@ -107,7 +107,7 @@ const PrescriptionForm = () => {
     };
 
     try {
-      const res = await fetch('${API}/api/prescriptions', {
+      const res = await fetch(`${API}/api/prescriptions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

@@ -37,7 +37,7 @@ const DoctorDashboard = () => {
         const referralsRes = await axios.get(`${API}/api/referrals/pending/doctor/${currentDoctorID}`);
         setPendingReferrals(Array.isArray(referralsRes.data) ? referralsRes.data : []);
 
-        const specialistsRes = await axios.get('${API}/api/doctors/specialists');
+        const specialistsRes = await axios.get(`${API}/api/doctors/specialists`);
         setSpecialists(Array.isArray(specialistsRes.data) ? specialistsRes.data : []);
 
         const patientsRes = await axios.get(`${API}/api/patients/doctor/${currentDoctorID}`);
@@ -74,7 +74,7 @@ const DoctorDashboard = () => {
     };
 
     try {
-      const response = await axios.post('${API}/api/referrals', referralData, {
+      const response = await axios.post(`${API}/api/referrals`, referralData, {
         headers: { 'Content-Type': 'application/json' }
       });
 

@@ -24,7 +24,7 @@ const AddDoctorForm = ({ onClose, onDoctorAdded }) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.post('${API}/api/doctors/register', formData);
+      await axios.post(`${API}/api/doctors/register`, formData);
       setMessage('Doctor added successfully!');
       setFormData({
         username: '',
