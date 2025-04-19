@@ -17,6 +17,8 @@ import { handleOfficeRoutes } from './routes/officeRoutes.js';
 import { handleDoctorOfficeRoutes } from './routes/doctorClinicRoutes.js';
 import { handleAdminRoutes } from './routes/adminRoutes.js';
 import { handleMedicalRecordRoutes } from './routes/medicalRecordRoutes.js';
+const API = process.env.REACT_APP_API_URL;
+
 
 dotenv.config();
 
@@ -87,56 +89,56 @@ function routeRequest(req, res, pathname, method) {
     return;
   }
 
-  if (pathname.startsWith('/api/admin') || 
-      pathname === '/api/users' || 
+  if (pathname.startsWith('${API}/api/admin') || 
+      pathname === '${API}/api/users' || 
       pathname.match(/^\/api\/users\/\d+$/) ||
-      pathname === '/api/users/role') {
+      pathname === '${API}/api/users/role') {
     return handleAdminRoutes(req, res);
-  } else if (pathname.startsWith('/api/auth')) {
+  } else if (pathname.startsWith('${API}/api/auth')) {
     console.log('Routing to authRoutes');
     return handleAuthRoutes(req, res);
-  } else if (pathname.startsWith('/api/billing')) {
+  } else if (pathname.startsWith('${API}/api/billing')) {
     console.log('Routing to billingRoutes');
     return handleBillingRoutes(req, res);
-  } else if (pathname.startsWith('/api/reports')) {
+  } else if (pathname.startsWith('${API}/api/reports')) {
     console.log('Routing to reportRoutes');
     return handleReportRoutes(req, res);
-  } else if (pathname.startsWith('/api/prescriptions')) {
+  } else if (pathname.startsWith('${API}/api/prescriptions')) {
     console.log('Routing to prescriptionRoutes');
     return handlePrescriptionRoutes(req, res);
-  } else if (pathname.startsWith('/api/appointments')) {
+  } else if (pathname.startsWith('${API}/api/appointments')) {
     console.log('Routing to appointmentRoutes');
     return handleAppointmentRoutes(req, res);
-  } else if (pathname.startsWith('/api/tests')) {
+  } else if (pathname.startsWith('${API}/api/tests')) {
     console.log('Routing to testRoutes');
     return handleTestRoutes(req, res);
-  } else if (pathname.startsWith('/api/offices')) {
+  } else if (pathname.startsWith('${API}/api/offices')) {
     console.log('Routing to officeRoutes');
     return handleOfficeRoutes(req, res);
-  } else if (pathname.startsWith('/api/medical-records')){
+  } else if (pathname.startsWith('${API}/api/medical-records')){
     console.log('Routing to medicalRecordRoutes');
     return handleMedicalRecordRoutes(req, res);
   } else if (
-    pathname.startsWith('/api/doctors') ||
-    pathname.startsWith('/api/patients/assigned') ||
+    pathname.startsWith('${API}/api/doctors') ||
+    pathname.startsWith('${API}/api/patients/assigned') ||
     pathname.match(/^\/api\/patients\/\d+\/primary-physician$/)
   ) {
     console.log('Routing to doctorRoutes');
     return handleDoctorRoutes(req, res);
-  } else if (pathname.startsWith('/api/patients')) {
+  } else if (pathname.startsWith('${API}/api/patients')) {
     console.log('Routing to patientRoutes');
     return handlePatientRoutes(req, res);
-  } else if (pathname.startsWith('/api/referrals')) {
+  } else if (pathname.startsWith('${API}/api/referrals')) {
     console.log('Routing to referralRoutes');
     return handleReferralRoutes(req, res);
-  } else if (pathname.startsWith('/api/doctor-offices')) {
+  } else if (pathname.startsWith('${API}/api/doctor-offices')) {
     console.log('Routing to doctorOfficeRoutes');
     return handleDoctorOfficeRoutes(req, res);
   } else if (
-    pathname.startsWith('/api/admin') || 
-    pathname === '/api/users' || 
+    pathname.startsWith('${API}/api/admin') || 
+    pathname === '${API}/api/users' || 
     pathname.match(/^\/api\/users\/\d+$/) ||
-    pathname === '/api/users/role'
+    pathname === '${API}/api/users/role'
   ) {
     return handleAdminRoutes(req, res);
   } else {

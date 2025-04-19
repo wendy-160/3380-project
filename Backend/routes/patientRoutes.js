@@ -1,5 +1,7 @@
 import db from '../db.js';
 import { URL } from 'url';
+const API = process.env.REACT_APP_API_URL;
+
 
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json' });
@@ -14,7 +16,7 @@ export async function handlePatientRoutes(req, res) {
   console.log(`Incoming request: ${method} ${pathname}`);
 
   // GET all patients
-  if (method === 'GET' && pathname === '/api/patients') {
+  if (method === 'GET' && pathname === '${API}/api/patients') {
     try {
       const [rows] = await db.query('SELECT * FROM patient');
       return sendJson(res, 200, rows);
@@ -24,7 +26,7 @@ export async function handlePatientRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname === '/api/patients/search') {
+  if (method === 'GET' && pathname === '${API}/api/patients/search') {
     const name = parsedUrl.searchParams.get('name')?.trim() || '';
     const dob = parsedUrl.searchParams.get('dob')?.trim() || '';
     const phone = parsedUrl.searchParams.get('phone')?.trim() || '';

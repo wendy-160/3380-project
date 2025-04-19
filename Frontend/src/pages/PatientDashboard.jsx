@@ -16,6 +16,8 @@ const PatientDashboard = () => {
   const [updatedEmail, setUpdatedEmail] = useState('');
   const [updatedAddress, setUpdatedAddress] = useState('');
   const [referredSpecialists, setReferredSpecialists] = useState([]);
+  const [completedAppointments, setCompletedAppointments] = useState([]);
+  const [testResults, setTestResults] = useState([]);
 
 
   const currentPatientID = JSON.parse(localStorage.getItem('user'))?.PatientID;
@@ -25,13 +27,13 @@ const PatientDashboard = () => {
       try {
         const token = localStorage.getItem('authToken');
 
-        const profileRes = await fetch(`/api/patients/${currentPatientID}`, {
+        const profileRes = await fetch(`${API}/api/patients/${currentPatientID}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const profileData = await profileRes.json();
         setProfile(profileData);
 
-        const doctorRes = await fetch(`/api/patients/${currentPatientID}/primary-physician`, {
+        const doctorRes = await fetch(`${API}/api/patients/${currentPatientID}/primary-physician`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         
@@ -39,7 +41,7 @@ const PatientDashboard = () => {
           const doctorData = await doctorRes.json();
           setPrimaryPhysician(doctorData);
 
-          const officesRes = await fetch(`/api/doctors/${doctorData.DoctorID}/offices`, {
+          const officesRes = await fetch(`${API}/api/doctors/${doctorData.DoctorID}/offices`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           if (officesRes.ok) {
@@ -47,7 +49,7 @@ const PatientDashboard = () => {
             setDoctorOffices(officeData);
           }
         }
-        const referralRes = await fetch(`/api/referrals/patient/${currentPatientID}/approved`, {
+        const referralRes = await fetch(`${API}/api/referrals/patient/${currentPatientID}/approved`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (referralRes.ok) {
@@ -55,19 +57,32 @@ const PatientDashboard = () => {
           setReferredSpecialists(specialists);
         }        
         
-        const appointmentRes = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
+        const appointmentRes = await fetch(`${API}/api/appointments/patient/${currentPatientID}/upcoming`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUpcomingAppointments(await appointmentRes.json());
+        
 
-        const prescriptionRes = await fetch(`/api/prescriptions/patient/${currentPatientID}/active`, {
+        const prescriptionRes = await fetch(`${API}/api/prescriptions/patient/${currentPatientID}/active`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPrescriptions(await prescriptionRes.json());
+
+        const completedRes = await fetch(`${API}/api/appointments/patient/${currentPatientID}/completed`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCompletedAppointments(await completedRes.json());
+        
+        const testRes = await fetch(`${API}/api/tests/patient/${currentPatientID}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTestResults(await testRes.json());
+        
       } catch (err) {
         console.error("Error fetching patient data:", err);
       }
     };
+
 
     if (currentPatientID) fetchPatientData();
   }, [currentPatientID]);
@@ -83,8 +98,8 @@ const PatientDashboard = () => {
       const token = localStorage.getItem('authToken');
   
       const [slotsRes, officeRes] = await Promise.all([
-        fetch(`/api/appointments/available/${doctorId}/${selectedDate}`),
-        fetch(`/api/doctors/${doctorId}/offices`, {
+        fetch(`${API}/api/appointments/available/${doctorId}/${selectedDate}`),
+        fetch(`${API}/api/doctors/${doctorId}/offices`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -107,8 +122,8 @@ const PatientDashboard = () => {
   
     try {
       const [officeRes, slotRes] = await Promise.all([
-        fetch(`/api/doctors/${selectedDoctorId}/offices`),
-        fetch(`/api/appointments/available/${selectedDoctorId}/${date}`)
+        fetch(`${API}/api/doctors/${selectedDoctorId}/offices`),
+        fetch(`${API}/api/appointments/available/${selectedDoctorId}/${date}`)
       ]);
       const officeData = await officeRes.json();
       const slotData = await slotRes.json();
@@ -133,7 +148,7 @@ const PatientDashboard = () => {
     try {
       const token = localStorage.getItem('authToken');
   
-      const response = await fetch('/api/appointments', {
+      const response = await fetch('${API}/api/appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -155,7 +170,7 @@ const PatientDashboard = () => {
       }
   
       setIsAppointmentModalOpen(false);
-      const updatedAppointments = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
+      const updatedAppointments = await fetch(`${API}/api/appointments/patient/${currentPatientID}/upcoming`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const appointmentsData = await updatedAppointments.json();
@@ -171,7 +186,7 @@ const PatientDashboard = () => {
     try {
       const token = localStorage.getItem('authToken');
   
-      const response = await fetch(`/api/appointments/${appointmentId}`, {
+      const response = await fetch(`${API}/api/appointments/${appointmentId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -182,7 +197,7 @@ const PatientDashboard = () => {
         throw new Error('Failed to cancel appointment');
       }
       
-      const updatedAppointments = await fetch(`/api/appointments/patient/${currentPatientID}/upcoming`, {
+      const updatedAppointments = await fetch(`${API}/api/appointments/patient/${currentPatientID}/upcoming`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const appointmentsData = await updatedAppointments.json();
@@ -203,7 +218,7 @@ const PatientDashboard = () => {
       return;
     }
     try {
-      console.log("Making PUT request to:", `/api/patients/${currentPatientID}`);
+      console.log("Making PUT request to:", `${API}/api/patients/${currentPatientID}`);
       const response = await fetch(`${API}/api/patients/${currentPatientID}`, {
         method: 'PUT',
         headers: {
@@ -344,21 +359,55 @@ const PatientDashboard = () => {
         </div>
 
         {/* Prescriptions */}
-        <div className="dashboard-card prescriptions-section">
-          <div className="card-header"><h2>Prescriptions</h2></div>
-          {prescriptions.map(p => (
-          <div key={p.PrescriptionID} className="prescription-item">
-            <h3>{p.MedicationName}</h3>
-            <p><strong>Dosage:</strong> {p.Dosage}</p>
-            <p><strong>Frequency:</strong> {p.Frequency}</p>
-            <p><strong>Start:</strong> {new Date(p.StartDate).toLocaleDateString()}</p>
-            <p><strong>End:</strong> {new Date(p.EndDate).toLocaleDateString()}</p>
-            <p><strong>Notes:</strong> {p.Notes}</p>
-            <p><strong>Prescribed by:</strong> Dr. {p.DoctorFirstName} {p.DoctorLastName}</p>
-          </div>
-        ))}
-        </div>
-      </div>
+<div className="dashboard-card prescriptions-section">
+  <div className="card-header"><h2>Prescriptions</h2></div>
+  {prescriptions.length > 0 ? prescriptions.map(p => (
+    <div key={p.PrescriptionID} className="prescription-item">
+      <h3>{p.MedicationName}</h3>
+      <p><strong>Dosage:</strong> {p.Dosage}</p>
+      <p><strong>Frequency:</strong> {p.Frequency}</p>
+      <p><strong>Start:</strong> {new Date(p.StartDate).toLocaleDateString()}</p>
+      <p><strong>End:</strong> {new Date(p.EndDate).toLocaleDateString()}</p>
+      <p><strong>Notes:</strong> {p.Notes}</p>
+      <p><strong>Prescribed by:</strong> Dr. {p.DoctorFirstName} {p.DoctorLastName}</p>
+    </div>
+  )) : (
+    <p>No prescriptions available. You may need to complete a visit first.</p>
+  )}
+</div>
+
+{/* Test Results */}
+<div className="dashboard-card test-results-section">
+  <div className="card-header"><h2>Test Results</h2></div>
+  {testResults && testResults.length > 0 ? testResults.map(test => (
+    <div key={test.TestID} className="test-result-item">
+      <h3>{test.TestName}</h3>
+      <p><strong>Ordered by:</strong> Dr. {test.DoctorFirstName} {test.DoctorLastName}</p>
+      <p><strong>Status:</strong> {test.ResultStatus}</p>
+      <p><strong>Result:</strong> {test.Result || "Pending"}</p>
+      <p><strong>Notes:</strong> {test.Notes}</p>
+      <p><strong>Date Ordered:</strong> {new Date(test.OrderDate).toLocaleDateString()}</p>
+    </div>
+  )) : (
+    <p>No test results to show. Complete an appointment to receive lab tests.</p>
+  )}
+</div>
+
+{/* My Visits */}
+<div className="dashboard-card visits-section">
+  <div className="card-header"><h2>My Visits</h2></div>
+  {completedAppointments && completedAppointments.length > 0 ? completedAppointments.map(visit => (
+    <div key={visit.AppointmentID} className="visit-item">
+      <p><strong>Date:</strong> {new Date(visit.DateTime).toLocaleDateString()}</p>
+      <p><strong>Doctor:</strong> Dr. {visit.DoctorFirstName} {visit.DoctorLastName}</p>
+      <p><strong>Reason:</strong> {visit.Reason}</p>
+      <p><strong>Status:</strong> {visit.status}</p>
+    </div>
+  )) : (
+    <p>No completed visits yet. Book and attend an appointment to begin treatment.</p>
+  )}
+</div>
+</div> {/* END of dashboard-grid */}
 
       {isAppointmentModalOpen && (
         <div className="modal-overlay">

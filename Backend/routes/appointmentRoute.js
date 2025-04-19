@@ -1,12 +1,14 @@
 import db from '../db.js';
 import { URL } from 'url';
+const API = process.env.REACT_APP_API_URL;
+
 
 export async function handleAppointmentRoutes(req, res) {
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
-  if (method === 'POST' && pathname === '/api/appointments') {
+  if (method === 'POST' && pathname === '${API}/api/appointments') {
     try {
       const { PatientID, DoctorID, OfficeID, DateTime, Reason, status } = req.body;
       
@@ -119,7 +121,7 @@ export async function handleAppointmentRoutes(req, res) {
     }
   }
 
-  if (method === 'POST' && pathname === '/api/appointments') {
+  if (method === 'POST' && pathname === '${API}/api/appointments') {
     try {
       const { PatientID, DoctorID, OfficeID, DateTime, Reason, status } = req.body;
 
@@ -146,7 +148,7 @@ export async function handleAppointmentRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname === '/api/appointments') {
+  if (method === 'GET' && pathname === '${API}/api/appointments') {
     const doctorId = parsedUrl.searchParams.get('doctorId');
     if (!doctorId) return sendJson(res, 400, { message: 'Missing doctorId' });
   

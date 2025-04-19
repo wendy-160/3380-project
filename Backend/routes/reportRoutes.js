@@ -1,5 +1,7 @@
 import db from '../db.js';
 import { URL } from 'url';
+const API = process.env.REACT_APP_API_URL;
+
 
 export async function handleReportRoutes(req, res) {
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
@@ -63,7 +65,7 @@ export async function handleReportRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname === '/api/reports/clinic-utilization') {
+  if (method === 'GET' && pathname === '${API}/api/reports/clinic-utilization') {
     const searchParams = parsedUrl.searchParams;
     const aggregation = searchParams.get('aggregation') || 'Monthly';
     const officeId = searchParams.get('officeId');
@@ -118,7 +120,7 @@ export async function handleReportRoutes(req, res) {
     }
   }
 
-  if (method === 'GET' && pathname.startsWith('/api/reports/referral-outcomes')) {
+  if (method === 'GET' && pathname.startsWith('${API}/api/reports/referral-outcomes')) {
     const searchParams = parsedUrl.searchParams;
     const startDate = searchParams.get('startDate') || '2024-01-01';
     const endDate = searchParams.get('endDate') || '2024-12-31';

@@ -1,5 +1,7 @@
 import db from '../db.js';
 import { URL } from 'url';
+const API = process.env.REACT_APP_API_URL;
+
 
 export async function handleMedicalRecordRoutes(req, res) {
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
@@ -30,7 +32,7 @@ export async function handleMedicalRecordRoutes(req, res) {
     }
   }
 
-  if (method === 'POST' && pathname === '/api/medical-records') {
+  if (method === 'POST' && pathname === '${API}/api/medical-records') {
     try {
       let body = req.body;
 

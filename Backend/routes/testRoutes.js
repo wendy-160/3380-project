@@ -1,5 +1,7 @@
 import db from '../db.js';
 import { URL } from 'url';
+const API = process.env.REACT_APP_API_URL;
+
 
 export async function handleTestRoutes(req, res) {
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
@@ -11,7 +13,7 @@ export async function handleTestRoutes(req, res) {
     res.end(JSON.stringify(data));
   };
 
-  if (method === 'GET' && pathname === '/api/tests') {
+  if (method === 'GET' && pathname === '${API}/api/tests') {
     try {
       const [rows] = await db.query(`
         SELECT 
@@ -27,7 +29,7 @@ export async function handleTestRoutes(req, res) {
     }
   }
 
-  if (method === 'POST' && pathname === '/api/tests') {
+  if (method === 'POST' && pathname === '${API}/api/tests') {
     let body = req.body;
 
     if (!body) {
@@ -48,7 +50,7 @@ export async function handleTestRoutes(req, res) {
     return await insertTest(body, res);
   }
 
-  if (method === 'PUT' && pathname.startsWith('/api/tests/')) {
+  if (method === 'PUT' && pathname.startsWith('${API}/api/tests/')) {
     const testID = pathname.split('/').pop();
 
     let body = req.body;

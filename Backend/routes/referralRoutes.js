@@ -1,5 +1,7 @@
 import db from '../db.js';
 import { URL } from 'url';
+const API = process.env.REACT_APP_API_URL;
+
 
 export async function handleReferralRoutes(req, res) {
   const parsedUrl = new URL(req.url, `http:${req.headers.host}`);
@@ -36,7 +38,7 @@ export async function handleReferralRoutes(req, res) {
     }
   }
 
-  if (method === 'POST' && pathname.startsWith('/api/referrals')) {
+  if (method === 'POST' && pathname.startsWith('${API}/api/referrals')) {
     console.log('Inside POST /api/referrals route');
 
     try {

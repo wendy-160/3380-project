@@ -1,17 +1,18 @@
 import { getAllDoctors, getSpecialists, getAssignedPatients, getPrimaryPhysician, getDoctorOffices, getDoctorById, handleRegisterDoctor } from '../controllers/doctorController.js';
+const API = process.env.REACT_APP_API_URL;
 
 export function handleDoctorRoutes(req, res) {
   const url = req.url;
   const method = req.method;
 
-  if (url === '/api/doctors' && method === 'GET') {
+  if (url === '${API}/api/doctors' && method === 'GET') {
     return getAllDoctors(req, res);
   }
 
-  if (url === '/api/doctors/specialists' && method === 'GET') {
+  if (url === '${API}/api/doctors/specialists' && method === 'GET') {
     return getSpecialists(req, res);
   }
-  if (method === 'POST' && url === '/api/doctors/register') {
+  if (method === 'POST' && url === '${API}/api/doctors/register') {
     return handleRegisterDoctor(req, res);
   }
 

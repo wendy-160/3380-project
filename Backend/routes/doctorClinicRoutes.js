@@ -1,4 +1,5 @@
 import { getAllDoctorOffices, createDoctorOffice, getDoctorOfficesByOffice, getDoctorOfficesByDoctor, updateDoctorOffice, deleteDoctorOffice} from '../controllers/doctorClinicController.js';
+const API = process.env.REACT_APP_API_URL;
 
 export function handleDoctorOfficeRoutes(req, res) {
   console.log('Doctor office route handler called with:', req.url, 'Method:', req.method);
@@ -9,12 +10,12 @@ export function handleDoctorOfficeRoutes(req, res) {
 
   console.log('Matching path:', pathname, 'Method:', method);
 
-  if (pathname === '/api/doctor-offices' && method === 'GET') {
+  if (pathname === '${API}/api/doctor-offices' && method === 'GET') {
     console.log('Handling GET all doctor offices');
     return getAllDoctorOffices(req, res);
   }
 
-  if (pathname === '/api/doctor-offices' && method === 'POST') {
+  if (pathname === '${API}/api/doctor-offices' && method === 'POST') {
     console.log('Handling POST new doctor-office assignment');
     return createDoctorOffice(req, res);
   }

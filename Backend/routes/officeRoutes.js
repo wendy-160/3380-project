@@ -1,14 +1,15 @@
 import { getAllOffices, getOfficesByState, getOfficeById, updateOffice, createOffice, deleteOffice } from '../controllers/officeController.js';
+const API = process.env.REACT_APP_API_URL;
 
 export async function handleOfficeRoutes(req, res){
     const url = req.url;
     const method = req.method;
     
-    if (url === '/api/offices' && method === 'GET') {
+    if (url === '${API}/api/offices' && method === 'GET') {
         return await getAllOffices(req, res);
     }
     
-    if (url === '/api/offices' && method === 'POST') {
+    if (url === '${API}/api/offices' && method === 'POST') {
         return await createOffice(req, res);
     }
     
