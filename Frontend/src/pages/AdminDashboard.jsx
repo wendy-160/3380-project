@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
 import AddDoctorForm from '../components/AddDoctorForm.jsx';
+const API = process.env.REACT_APP_API_URL;
 
 
 const AdminDashboard = () => {
@@ -19,9 +20,9 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const apptRes = await axios.get('http://localhost:5000/api/admin/appointments/full');
-        const usersRes = await axios.get('http://localhost:5000/api/admin/users');
-        const res = await axios.get('http://localhost:5000/api/admin/clinics');
+        const apptRes = await axios.get('${API}/api/admin/appointments/full');
+        const usersRes = await axios.get('${API}/api/admin/users');
+        const res = await axios.get('${API}/api/admin/clinics');
         setClinics(res.data);
         setAppointments(apptRes.data);
         setUsers(usersRes.data);
@@ -36,7 +37,7 @@ const AdminDashboard = () => {
 
   const handleDelete = async (user) => {
     try {
-      await axios.delete(`http://localhost:5000/api/admin/users/${user.role.toLowerCase()}/${user.UserID}`);
+      await axios.delete(`${API}/api/admin/users/${user.role.toLowerCase()}/${user.UserID}`);
       setUsers(prev => prev.filter(u => u.CompositeID !== user.CompositeID));
     } catch (err) {
       console.error('Failed to delete user:', err);

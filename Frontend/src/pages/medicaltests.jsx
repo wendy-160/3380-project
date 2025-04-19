@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './medicaltests.css'
+const API = process.env.REACT_APP_API_URL;
 
 const MedicalTests = () => {
   const [tests, setTests] = useState([]);
@@ -21,7 +22,7 @@ const MedicalTests = () => {
     const doctorID = currentUser.DoctorID;
 
     // First, fetch all tests
-    fetch("http://localhost:5000/api/tests")
+    fetch("${API}/api/tests")
       .then((res) => res.json())
       .then(async (data) => {
         // If we have tests, fetch patient details for each test
@@ -41,7 +42,7 @@ const MedicalTests = () => {
             
             // Otherwise, fetch the patient information
             try {
-              const patientRes = await fetch(`http://localhost:5000/api/patients/${test.PatientID}`);
+              const patientRes = await fetch(`${API}/api/patients/${test.PatientID}`);
               const patientData = await patientRes.json();
               
               // Create a full name from patient data
@@ -75,20 +76,20 @@ const MedicalTests = () => {
         setLoading(false);
       });
     fetchTests();
-    fetch('http://localhost:5000/api/patients')
+    fetch('${API}/api/patients')
       .then(res => res.json())
       .then(setPatients);
-    fetch('http://localhost:5000/api/appointments')
+    fetch('${API}/api/appointments')
       .then(res => res.json())
       .then(setAppointments);
-    fetch('http://localhost:5000/api/offices')
+    fetch('${API}/api/offices')
       .then(res => res.json())
       .then(setOffices);
   }, []);
 
   const fetchTests = () => {
     setLoading(true);
-    fetch('http://localhost:5000/api/tests')
+    fetch('${API}/api/tests')
       .then(res => res.json())
       .then(data => {
         setTests(data);
@@ -97,7 +98,7 @@ const MedicalTests = () => {
   };
 
   const orderTest = async () => {
-    await fetch('http://localhost:5000/api/tests', {
+    await fetch('${API}/api/tests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ test_type: testType, patient_id: patientId })
@@ -117,7 +118,7 @@ const MedicalTests = () => {
     e.preventDefault();
     if (!selectedTest?.TestID) return;
 
-    await fetch(`http://localhost:5000/api/tests/${selectedTest.TestID}`, {
+    await fetch(`${API}/api/tests/${selectedTest.TestID}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updateForm)

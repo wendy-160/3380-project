@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Locations.css';
+const API = process.env.REACT_APP_API_URL;
 
 const Locations = () => {
     const [clinics, setClinics] = useState([]);
@@ -11,7 +12,7 @@ const Locations = () => {
         const fetchClinics = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('http://localhost:5000/api/offices');
+                const response = await fetch('${API}/api/offices');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);

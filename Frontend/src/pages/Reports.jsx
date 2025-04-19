@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import './Reports.css';
+const API = process.env.REACT_APP_API_URL;
 
 const Reports = () => {
   const { user } = useAuth();
@@ -31,7 +32,7 @@ const Reports = () => {
 
   const loadDoctors = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/doctors');
+      const response = await axios.get('${API}/api/doctors');
       setDoctors(response.data);
     } catch (error) {
       console.error('Error loading doctors:', error);
@@ -40,7 +41,7 @@ const Reports = () => {
 
   const loadOffices = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/offices');
+      const response = await axios.get('${API}/api/offices');
       setOffices(response.data);
     } catch (error) {
       console.error('Error loading offices:', error);
@@ -60,11 +61,11 @@ const Reports = () => {
           setLoading(false);
           return;
         }
-        response = await axios.get(`http://localhost:5000/api/reports/doctor/${selectedDoctor}`, {
+        response = await axios.get(`/api/reports/doctor/${selectedDoctor}`, {
           params: { startDate, endDate }
         });
       } else if (reportType === 'clinic_utilization') {
-        response = await axios.get(`http://localhost:5000/api/reports/clinic-utilization`, {
+        response = await axios.get(`${API}/api/reports/clinic-utilization`, {
           params: {
             aggregation,
             officeId: selectedOffice || '',
@@ -73,7 +74,7 @@ const Reports = () => {
           }
         });
       } else if (reportType === 'referral_outcomes') {
-        response = await axios.get(`http://localhost:5000/api/reports/referral-outcomes`, {
+        response = await axios.get(`${API}/api/reports/referral-outcomes`, {
           params: {
             startDate,
             endDate,

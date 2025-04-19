@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './DocOffice.css';
+const API = process.env.REACT_APP_API_URL;
 
 const DoctorClinicAssignment = () => {
     const [clinics, setClinics] = useState([]);
@@ -35,7 +36,7 @@ const DoctorClinicAssignment = () => {
     // Fetch all clinics
     const fetchClinics = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/offices');
+            const response = await fetch('${API}/api/offices');
             
             if (!response.ok) {
                 throw new Error(`Failed to fetch clinics. Status: ${response.status}`);
@@ -57,7 +58,7 @@ const DoctorClinicAssignment = () => {
     // Fetch all doctors
     const fetchDoctors = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/doctors');
+            const response = await fetch('${API}/api/doctors');
             
             if (!response.ok) {
                 throw new Error(`Failed to fetch doctors. Status: ${response.status}`);
@@ -79,7 +80,7 @@ const DoctorClinicAssignment = () => {
     // Fetch all doctor-clinic assignments
     const fetchAssignments = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/doctor-offices');
+            const response = await fetch('${API}/api/doctor-offices');
             
             if (!response.ok) {
                 throw new Error(`Failed to fetch assignments. Status: ${response.status}`);
@@ -135,7 +136,7 @@ const DoctorClinicAssignment = () => {
             
             console.log('Sending assignment data:', JSON.stringify(formattedAssignment));
             
-            const response = await fetch('http://localhost:5000/api/doctor-offices', {
+            const response = await fetch('${API}/api/doctor-offices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -186,7 +187,7 @@ const DoctorClinicAssignment = () => {
             
             console.log(`Attempting to delete assignment: doctorId=${doctorId}, officeId=${officeId}`);
             
-            const response = await fetch(`http://localhost:5000/api/doctor-offices/${doctorId}/${officeId}`, {
+            const response = await fetch(`${API}/api/doctor-offices/${doctorId}/${officeId}`, {
                 method: 'DELETE'
             });
             

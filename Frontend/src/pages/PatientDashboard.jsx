@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './PatientDashboard.css';
+const API = process.env.REACT_APP_API_URL;
 
 const PatientDashboard = () => {
   const [profile, setProfile] = useState(null);
@@ -203,7 +204,7 @@ const PatientDashboard = () => {
     }
     try {
       console.log("Making PUT request to:", `/api/patients/${currentPatientID}`);
-      const response = await fetch(`http://localhost:5000/api/patients/${currentPatientID}`, {
+      const response = await fetch(`${API}/api/patients/${currentPatientID}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

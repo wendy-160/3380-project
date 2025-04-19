@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+const API = process.env.REACT_APP_API_URL;
 
 const AddDoctorForm = ({ onClose, onDoctorAdded }) => {
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ const AddDoctorForm = ({ onClose, onDoctorAdded }) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.post('http://localhost:5000/api/doctors/register', formData);
+      await axios.post('${API}/api/doctors/register', formData);
       setMessage('Doctor added successfully!');
       setFormData({
         username: '',

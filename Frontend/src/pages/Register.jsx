@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+const API = process.env.REACT_APP_API_URL;
 
 const US_STATES = [
   "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN",
@@ -38,7 +39,7 @@ const Register = () => {
   
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        "${API}/api/auth/register",
         {
           username: form.username,
           email: form.email,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './prescriptions.css';
+const API = process.env.REACT_APP_API_URL;
 
 const PrescriptionForm = () => {
   const [formData, setFormData] = useState({
@@ -55,7 +56,7 @@ const PrescriptionForm = () => {
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/patients');
+      const res = await fetch('${API}/api/patients');
       if (!res.ok) throw new Error('Invalid response');
       const data = await res.json();
       setPatients(Array.isArray(data) ? data : []);
@@ -67,7 +68,7 @@ const PrescriptionForm = () => {
 
   const fetchAppointments = async (doctorID) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/appointments?doctorId=${doctorID}`);
+      const res = await fetch(`${API}/api/appointments?doctorId=${doctorID}`);
       if (!res.ok) throw new Error('Invalid response');
       const data = await res.json();
       setAppointments(Array.isArray(data) ? data : []);
@@ -106,7 +107,7 @@ const PrescriptionForm = () => {
     };
 
     try {
-      const res = await fetch('http://localhost:5000/api/prescriptions', {
+      const res = await fetch('${API}/api/prescriptions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

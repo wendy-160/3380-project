@@ -29,18 +29,22 @@ const server = http.createServer(async (req, res) => {
   const pathname = parsedUrl.pathname;
   const headers = req.headers;
 
-  res.setHeader('Access-Control-Allow-Origin', 'https://3380-project-git-main-jsnvus-projects.vercel.app');
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://3380-project-git-main-jsnvus-projects.vercel.app'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-user-email');
+
 
   if (method === 'OPTIONS') {
-    res.writeHead(204, {
-      'Access-Control-Allow-Origin': 'https://3380-project-git-main-jsnvus-projects.vercel.app',
-      'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    });
+    res.writeHead(204);
     return res.end();
   }
 

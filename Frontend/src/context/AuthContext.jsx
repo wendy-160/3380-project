@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+const API = process.env.REACT_APP_API_URL;
 
 export const AuthContext = createContext();
 
@@ -18,7 +19,7 @@ export const AuthProvider = ({ children }) => {
       setUser(JSON.parse(storedUser));
     } else {
       axios
-        .get("http://localhost:5000/api/auth/me", { withCredentials: true })
+        .get(`${API}/api/auth/me`, { withCredentials: true })
         .then((res) => {
           const loadedUser = {
             Role: res.data.role.charAt(0).toUpperCase() + res.data.role.slice(1).toLowerCase(),
@@ -32,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", credentials, {
+      const res = await axios.post(`${API}/api/auth/login`, credentials, {
         withCredentials: true,
       });
 
@@ -57,7 +58,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post("http://localhost:5000/api/auth/logout", {}, { withCredentials: true });
+      await axios.post(`${API}/api/auth/logout`, {}, { withCredentials: true });
     } catch (error) {
       console.error("Logout failed", error);
     }

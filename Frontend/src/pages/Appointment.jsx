@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+const API = process.env.REACT_APP_API_URL;
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -17,7 +18,7 @@ const Appointments = () => {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/appointments/${patientID}`);
+        const res = await axios.get(`${API}/api/appointments/${patientID}`);
         setAppointments(res.data);
       } catch (err) {
         setError("Failed to load appointments.");
@@ -31,7 +32,7 @@ const Appointments = () => {
 
   const handleAddAppointment = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/appointments", {
+      const res = await axios.post("${API}/api/appointments", {
         patientID,
         doctorID: newAppointment.doctorID,
         dateTime: newAppointment.dateTime,
@@ -47,7 +48,7 @@ const Appointments = () => {
   };
   const handleEditAppointment = async () => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/appointments/${editingAppointmentID}`, {
+      const res = await axios.put(`${API}/api/appointments/${editingAppointmentID}`, {
         ...newAppointment,
         patientID, 
       });
@@ -63,7 +64,7 @@ const Appointments = () => {
   };
   const handleDeleteAppointment = async (appointmentID) => {
     try {
-      await axios.delete(`http://localhost:5000/api/appointments/${appointmentID}`, {
+      await axios.delete(`${API}/api/appointments/${appointmentID}`, {
         data: { patientID },
       });
       setAppointments((prevAppointments) =>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './DoctorDashboard.css';
+const API = process.env.REACT_APP_API_URL;
 
 const DoctorDashboard = () => {
   const [todaysAppointments, setTodaysAppointments] = useState([]);
@@ -24,22 +25,22 @@ const DoctorDashboard = () => {
       try {
         const today = new Date().toISOString().split('T')[0];
 
-        const appointmentsRes = await axios.get(`http://localhost:5000/api/appointments/doctor/${currentDoctorID}/date/${today}`);
+        const appointmentsRes = await axios.get(`${API}/api/appointments/doctor/${currentDoctorID}/date/${today}`);
         setTodaysAppointments(Array.isArray(appointmentsRes.data) ? appointmentsRes.data : []);
 
-        const doctorRes = await axios.get(`http://localhost:5000/api/doctors/${currentDoctorID}`);
+        const doctorRes = await axios.get(`${API}/api/doctors/${currentDoctorID}`);
         setDoctorProfile(doctorRes.data);
         
         setSpecialization(doctorRes.data.Specialization);
         console.log('Doctor specialization:', doctorRes.data.Specialization);
 
-        const referralsRes = await axios.get(`http://localhost:5000/api/referrals/pending/doctor/${currentDoctorID}`);
+        const referralsRes = await axios.get(`${API}/api/referrals/pending/doctor/${currentDoctorID}`);
         setPendingReferrals(Array.isArray(referralsRes.data) ? referralsRes.data : []);
 
-        const specialistsRes = await axios.get('http://localhost:5000/api/doctors/specialists');
+        const specialistsRes = await axios.get('${API}/api/doctors/specialists');
         setSpecialists(Array.isArray(specialistsRes.data) ? specialistsRes.data : []);
 
-        const patientsRes = await axios.get(`http://localhost:5000/api/patients/doctor/${currentDoctorID}`);
+        const patientsRes = await axios.get(`${API}/api/patients/doctor/${currentDoctorID}`);
         setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
       } catch (err) {
         console.error('Error fetching doctor data:', err);
@@ -73,7 +74,7 @@ const DoctorDashboard = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/referrals', referralData, {
+      const response = await axios.post('${API}/api/referrals', referralData, {
         headers: { 'Content-Type': 'application/json' }
       });
 
@@ -96,7 +97,7 @@ const DoctorDashboard = () => {
 
   const handleApproveReferral = async (referralID) => {
     try {
-      await axios.put(`http://localhost:5000/api/referrals/${referralID}/approve`);
+      await axios.put(`${API}/api/referrals/${referralID}/approve`);
       setPendingReferrals(prev => prev.filter(ref => ref.ReferralId !== referralID));
     } catch (err) {
       console.error('Error approving referral:', err);
@@ -105,7 +106,7 @@ const DoctorDashboard = () => {
 
   const handleRejectReferral = async (referralID) => {
     try {
-      await axios.put(`http://localhost:5000/api/referrals/${referralID}/reject`);
+      await axios.put(`${API}/api/referrals/${referralID}/reject`);
       setPendingReferrals(prev => prev.filter(ref => ref.ReferralId !== referralID));
     } catch (err) {
       console.error('Error rejecting referral:', err);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import './ClinicManagement.css';
+const API = process.env.REACT_APP_API_URL;
 
 const ClinicManagement = () => {
     const [clinics, setClinics] = useState([]);
@@ -30,7 +31,7 @@ const ClinicManagement = () => {
             setError(null);
             setSuccessMessage(null);
 
-            const response = await fetch('http://localhost:5000/api/offices');
+            const response = await fetch('${API}/api/offices');
 
             if(!response.ok) {
                 throw new Error(`Error Status: ${response.status}`);
@@ -71,7 +72,7 @@ const ClinicManagement = () => {
             setError(null);
             setSuccessMessage(null);
             
-            const response = await fetch('http://localhost:5000/api/offices', {
+            const response = await fetch('${API}/api/offices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -103,7 +104,7 @@ const ClinicManagement = () => {
             setError(null);
             setSuccessMessage(null);
             
-            const response = await fetch(`http://localhost:5000/api/offices/${newClinic.OfficeID}`, {
+            const response = await fetch(`${API}/api/offices/${newClinic.OfficeID}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -137,7 +138,7 @@ const ClinicManagement = () => {
             setError(null);
             setSuccessMessage(null);
             
-            const response = await fetch(`http://localhost:5000/api/offices/${clinicId}`, {
+            const response = await fetch(`${API}/api/offices/${clinicId}`, {
                 method: 'DELETE'
             });
             

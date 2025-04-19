@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './MedicalRecord.css';
+const API = process.env.REACT_APP_API_URL;
 
 const MedicalRecordsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,7 +25,7 @@ const MedicalRecordsPage = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/patients/search?name=${encodeURIComponent(searchTerm)}&dob=${encodeURIComponent(searchDOB)}&phone=${encodeURIComponent(searchPhone)}`,
+        `${API}/api/patients/search?name=${encodeURIComponent(searchTerm)}&dob=${encodeURIComponent(searchDOB)}&phone=${encodeURIComponent(searchPhone)}`,
         {
           credentials: 'include',
         }
