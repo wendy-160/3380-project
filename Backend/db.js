@@ -4,10 +4,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const db = await mysql.createPool({
-  host: 'localhost',
-  user: 'root', 
-  password: '1722AutumnLeaves!', // put in your own MySQL password
-  database: 'medicalclinicdb',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER, 
+  password: process.env.DB_PASSWORD, // put in your own MySQL password
+  database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT),
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
