@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import './AdminBilling.css';
 const API = process.env.REACT_APP_API_URL;
 
-
 const AdminBilling = () => {
   const [billings, setBillings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -121,7 +120,7 @@ const AdminBilling = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/billings/${selectedBill.BillingID}`, {
+      const response = await fetch(`${API}/api/admin/billings/${selectedBill.BillingID}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

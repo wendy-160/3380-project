@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './PatientBilling.css';
+const API = process.env.REACT_APP_API_URL;
 
 const PatientBilling = () => {
   const [bills, setBills] = useState([]);
@@ -24,7 +25,7 @@ const PatientBilling = () => {
     try {
       setError(null);
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/billing/patient/${currentPatientID}`, {
+      const response = await fetch(`${API}/api/billing/patient/${currentPatientID}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -48,7 +49,7 @@ const PatientBilling = () => {
     try {
       const updatedStatus = 'Paid'; 
   
-      const response = await fetch(`/api/billing/${selectedBill.BillingID}/status`, {
+      const response = await fetch(`${API}/api/billing/${selectedBill.BillingID}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
