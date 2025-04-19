@@ -31,7 +31,8 @@ const server = http.createServer(async (req, res) => {
 
   const allowedOrigins = [
     'http://localhost:3000',
-    'https://3380-project-git-main-jsnvus-projects.vercel.app'
+    'https://3380-project-git-main-jsnvus-projects.vercel.app',
+    'https://3380-project-one.vercel.app'
   ];
   
   const origin = req.headers.origin;
