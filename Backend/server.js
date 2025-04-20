@@ -90,12 +90,11 @@ function routeRequest(req, res, pathname, method, parsedUrl) {
     return;
   }
 
-  if (pathname.startsWith('/api/admin') || 
-      pathname === '/api/users' || 
-      pathname.match(/^\/api\/users\/\d+$/) ||
-      pathname === '/api/users/role') {
+  if (pathname.startsWith('/api/admin')) {
+    console.log('Routing to adminRoutes');
     return handleAdminRoutes(req, res);
-  } else if (pathname.startsWith('/api/auth')) {
+  }
+   else if (pathname.startsWith('/api/auth')) {
     console.log('Routing to authRoutes');
     return handleAuthRoutes(req, res, parsedUrl);
   } else if (pathname.startsWith('/api/billing')) {
