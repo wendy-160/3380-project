@@ -388,7 +388,7 @@ const PatientDashboard = () => {
               <p><strong>Status:</strong> {test.status}</p>
               <p><strong>Result:</strong> {test.Results || "Pending"}</p>
               <p><strong>Notes:</strong> {test.Notes}</p>
-              <p><strong>Date Ordered:</strong> {new Date(test.OrderDate).toLocaleDateString()}</p>
+              <p><strong>Date Ordered:</strong> {new Date(test.ResultDate).toLocaleDateString()}</p>
             </div>
           )) : (
             <p>No test results to show. Complete an appointment to receive lab tests.</p>
