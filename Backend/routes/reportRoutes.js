@@ -58,15 +58,15 @@ export async function handleReportRoutes(req, res) {
     try {
       const [rows] = await db.query(`
         SELECT 
-          CONCAT(d.FirstName, ' ', d.LastName) AS DoctorName,
-          COUNT(DISTINCT a.AppointmentID) AS TotalAppointments,
-          COALESCE(ROUND(COUNT(DISTINCT pr.PrescriptionID) / NULLIF(COUNT(DISTINCT a.AppointmentID), 0), 2), 0) AS AvgPrescriptions,
-          COALESCE(ROUND(COUNT(DISTINCT mt.TestID) / NULLIF(COUNT(DISTINCT a.AppointmentID), 0), 2), 0) AS AvgTests
-        FROM doctor d
-        LEFT JOIN appointment a ON a.DoctorID = d.DoctorID AND a.DateTime BETWEEN ? AND ?
-        LEFT JOIN prescription pr ON pr.DoctorID = d.DoctorID AND pr.StartDate BETWEEN ? AND ?
-        LEFT JOIN medicaltest mt ON mt.DoctorID = d.DoctorID AND mt.OrderDate BETWEEN ? AND ?
-        GROUP BY d.DoctorID
+        CONCAT(d.FirstName, ' ', d.LastName) AS DoctorName,
+        COUNT(DISTINCT a.AppointmentID) AS TotalAppointments,
+        COALESCE(ROUND(COUNT(DISTINCT pr.PrescriptionID) / NULLIF(COUNT(DISTINCT a.AppointmentID), 0), 2), 0) AS AvgPrescriptions,
+        COALESCE(ROUND(COUNT(DISTINCT mt.TestID) / NULLIF(COUNT(DISTINCT a.AppointmentID), 0), 2), 0) AS AvgTests
+      FROM doctor d
+      LEFT JOIN appointment a ON a.DoctorID = d.DoctorID AND a.DateTime BETWEEN ? AND ?
+      LEFT JOIN prescription pr ON pr.DoctorID = d.DoctorID AND pr.StartDate BETWEEN ? AND ?
+      LEFT JOIN medicaltest mt ON mt.DoctorID = d.DoctorID AND mt.TestDate BETWEEN ? AND ?
+      GROUP BY d.DoctorID
       `, [startDate, endDate, startDate, endDate, startDate, endDate]);
       return sendJson(res, 200, rows);
     } catch (err) {

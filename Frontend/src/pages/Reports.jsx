@@ -169,7 +169,7 @@ const ClinicProfitabilityReport = ({ data }) => (
         {data.map((row, index) => (
           <tr key={index}>
             <td>{row.OfficeName}</td>
-            <td>{row.TotalRevenue.toFixed(2)}</td>
+            <td>{parseFloat(row.TotalRevenue).toFixed(2)}</td>
             <td>{row.AppointmentCount}</td>
           </tr>
         ))}
@@ -217,8 +217,9 @@ const DoctorEfficiencyReport = ({ data }) => (
           <tr key={index}>
             <td>{row.DoctorName}</td>
             <td>{row.TotalAppointments}</td>
-            <td>{row.AvgPrescriptions.toFixed(2)}</td>
-            <td>{row.AvgTests.toFixed(2)}</td>
+            <td>{row.AvgPrescriptions ? row.AvgPrescriptions.toFixed(2) : '0.00'}</td>
+<td>{row.AvgTests ? row.AvgTests.toFixed(2) : '0.00'}</td>
+
           </tr>
         ))}
       </tbody>
