@@ -13,43 +13,27 @@ export async function handlePatientDoctorRoutes(req, res) {
 
   if (method === 'PUT' && pathname === '/api/patient-doctor/assign') {
     const { PatientID, DoctorID, isPrimary } = req.body;
-
-try {
-  await db.query(
-    `DELETE FROM patient_doctor_assignment WHERE PatientID = ?`,
-    [PatientID]
-  );
-
-  await db.query(
-    `INSERT INTO patient_doctor_assignment (PatientID, DoctorID, AssignmentDate, PrimaryPhysicianFlag) VALUES (?, ?, CURDATE(), ?)`,
-    [PatientID, DoctorID, isPrimary ? 1 : 0]
-  );
-
-  sendJson(200, { message: 'Patient reassigned successfully' });
-} catch (err) {
-  console.error('Error reassigning patient:', err);
-  sendJson(500, { error: err.message });
-}
-
-      try {
-        await db.query(
-          `DELETE FROM patient_doctor_assignment WHERE PatientID = ?`,
-          [PatientID]
-        );
-
-        await db.query(
-          `INSERT INTO patient_doctor_assignment (PatientID, DoctorID, AssignmentDate, PrimaryPhysicianFlag) VALUES (?, ?, CURDATE(), ?)`,
-          [PatientID, DoctorID, isPrimary ? 1 : 0]
-        );
-
-        sendJson(200, { message: 'Patient reassigned successfully' });
-      } catch (err) {
-        console.error('Error reassigning patient:', err);
-        sendJson(500, { error: err.message });
-      }
-    });
-    return;
+  
+    console.log('Reassigning patient:', { PatientID, DoctorID, isPrimary });
+  
+    try {
+      await db.query(
+        `DELETE FROM patient_doctor_assignment WHERE PatientID = ?`,
+        [PatientID]
+      );
+  
+      await db.query(
+        `INSERT INTO patient_doctor_assignment (PatientID, DoctorID, AssignmentDate, PrimaryPhysicianFlag) VALUES (?, ?, CURDATE(), ?)`,
+        [PatientID, DoctorID, isPrimary ? 1 : 0]
+      );
+  
+      return sendJson(200, { message: 'Patient reassigned successfully' });
+    } catch (err) {
+      console.error('Error reassigning patient:', err);
+      return sendJson(500, { error: err.message });
+    }
   }
+  
 
   sendJson(404, { message: 'Route not found' });
 }
