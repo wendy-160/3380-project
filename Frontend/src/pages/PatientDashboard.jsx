@@ -19,6 +19,7 @@ const PatientDashboard = () => {
   const [completedAppointments, setCompletedAppointments] = useState([]);
   const [testResults, setTestResults] = useState([]);
   const [medicalRecords, setMedicalRecords] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   const API = process.env.REACT_APP_API_URL
 
@@ -150,29 +151,46 @@ const PatientDashboard = () => {
   };
 
   const handleCreateAppointment = async () => {
-    const selectedTime = document.getElementById("time").value;
-    const reason = document.getElementById("reason").value;
+    const selectedTime = document.getElementById("time")?.value;
+    const reason = document.getElementById("reason")?.value;
+    const officeId = document.getElementById("office")?.value;
   
-    if (!selectedTime || !reason) return alert("Time and reason required.");
+    if (!selectedTime || !reason || !officeId) {
+      return alert("Time, reason, and clinic selection are required.");
+    }
+  
+    const token = localStorage.getItem('authToken');
+    const appointmentData = {
+      PatientID: currentPatientID,
+      DoctorID: document.getElementById("specialist").value || primaryPhysician?.DoctorID,
+      OfficeID: officeId,
+      DateTime: selectedTime,
+      Reason: reason,
+      status: selectedAppointment ? 'Rescheduled' : 'Scheduled'
+    };
   
     try {
-      const token = localStorage.getItem('authToken');
-  
-      const response = await fetch(`${API}/api/appointments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          PatientID: currentPatientID,
-          DoctorID: document.getElementById("specialist").value || primaryPhysician?.DoctorID,
-          OfficeID: document.getElementById("office").value,
-          DateTime: selectedTime,
-          Reason: reason,
-          status: 'Scheduled'
-        })
-      });
+      let response;
+      if (selectedAppointment) {
+        response = await fetch(`${API}/api/appointments/${selectedAppointment.AppointmentID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(appointmentData),
+        });
+      } else {
+
+        response = await fetch(`${API}/api/appointments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(appointmentData),
+        });
+      }
   
       if (!response.ok) {
         const errorData = await response.json();
@@ -180,8 +198,10 @@ const PatientDashboard = () => {
       }
   
       setIsAppointmentModalOpen(false);
+      setSelectedAppointment(null);
+  
       const updatedAppointments = await fetch(`${API}/api/appointments/patient/${currentPatientID}/upcoming`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const appointmentsData = await updatedAppointments.json();
       setUpcomingAppointments(appointmentsData);
@@ -190,6 +210,9 @@ const PatientDashboard = () => {
       alert("Failed to schedule appointment");
     }
   };
+  
+  
+  
   const handleCancelAppointment = async (appointmentId) => {
     if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
   
@@ -363,6 +386,19 @@ const PatientDashboard = () => {
                     x
                   </button>
                 </div>
+
+                <div className="reschedule-appt-btn-wrapper">
+  <button
+    className="reschedule-appt-btn"
+    onClick={() => {
+      setIsAppointmentModalOpen(true);
+      setSelectedAppointment(appt);
+    }}
+  >
+    Reschedule
+  </button>
+</div>
+
               </div>
             ))}
           </div>
@@ -465,33 +501,35 @@ const PatientDashboard = () => {
                       ))}
                     </select>
 
-                    <label>Date</label>
                     <input
-                      type="date"
-                      id="date"
-                      min={new Date().toISOString().split("T")[0]}
-                      onChange={(e) => handleDateSelection(e.target.value)}
-                    />
+  type="date"
+  id="date"
+  min={new Date().toISOString().split("T")[0]}
+  value={selectedAppointment ? selectedAppointment.DateTime.split("T")[0] : selectedDate}
+  onChange={(e) => handleDateSelection(e.target.value)}
+/>
+
                 {selectedDate && (
                   <>
-                    <label>Time</label>
-                    <select id="time">
-                      <option value="">Select a time</option>
-                      {availableTimeSlots.map((slot, idx) => (
-                        <option key={idx} value={slot}>
-                          {new Date(slot).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </option>
-                      ))}
-                    </select>
-                    <label>Clinic</label>
-                    <select id="office">
-                      <option value="">Choose a clinic</option>
-                      {filteredOffices.map((office) => (
-                        <option key={office.OfficeID} value={office.OfficeID}>
-                          {office.OfficeName} - {office.Address}
-                        </option>
-                      ))}
-                    </select>
+                    <select id="time" defaultValue={selectedAppointment?.DateTime || ""}>
+  <option value="">Select a time</option>
+  {availableTimeSlots.map((slot, idx) => (
+    <option key={idx} value={slot}>
+      {new Date(slot).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+    </option>
+  ))}
+</select>
+<label>Clinic</label>
+<select id="office" defaultValue={selectedAppointment?.OfficeID || ""}>
+  <option value="">Choose a clinic</option>
+  {filteredOffices.map((office) => (
+    <option key={office.OfficeID} value={office.OfficeID}>
+      {office.OfficeName} - {office.Address}
+    </option>
+  ))}
+</select>
+
+
                   </>
                 )}
                 <label>Reason</label>

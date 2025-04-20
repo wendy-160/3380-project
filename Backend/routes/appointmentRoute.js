@@ -50,6 +50,35 @@ export async function handleAppointmentRoutes(req, res) {
     }
   }
 
+  const matchUpdateAppointment = pathname.match(/^\/api\/appointments\/(\d+)$/);
+if (method === 'PUT' && matchUpdateAppointment) {
+  const appointmentID = matchUpdateAppointment[1];
+  let body = '';
+
+  req.on('data', chunk => {
+    body += chunk;
+  });
+
+  req.on('end', async () => {
+    try {
+      const data = JSON.parse(body);
+      const { DateTime, Reason, OfficeID } = data;
+
+      const [result] = await db.execute(
+        'UPDATE appointment SET DateTime = ?, Reason = ?, OfficeID = ?, Status = ? WHERE AppointmentID = ?',
+        [DateTime, Reason, OfficeID, 'Rescheduled', appointmentID]
+      );
+
+      return sendJson(res, 200, { message: 'Appointment updated successfully' });
+    } catch (err) {
+      console.error('Error updating appointment:', err);
+      return sendJson(res, 500, { message: 'Failed to update appointment' });
+    }
+  });
+
+  return;
+}
+
   const matchDoctorDateAppointments = pathname.match(/^\/api\/appointments\/doctor\/(\d+)\/date\/([\d-]+)$/);
   if (method === 'GET' && matchDoctorDateAppointments) {
     const doctorID = matchDoctorDateAppointments[1];
@@ -121,21 +150,6 @@ export async function handleAppointmentRoutes(req, res) {
     }
   }
 
-  if (method === 'POST' && pathname === '/api/appointments') {
-    try {
-      const { PatientID, DoctorID, OfficeID, DateTime, Reason, status } = req.body;
-
-      const [result] = await db.execute(`
-        INSERT INTO appointment (PatientID, DoctorID, OfficeID, DateTime, Reason, Status)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `, [PatientID, DoctorID, OfficeID, DateTime, Reason, status]);
-
-      return sendJson(res, 201, { AppointmentID: result.insertId });
-    } catch (err) {
-      console.error("Create appointment error:", err);
-      return sendJson(res, 500, { message: "Could not create appointment" });
-    }
-  }
   const matchDeleteAppointment = pathname.match(/^\/api\/appointments\/(\d+)$/);
   if (method === 'DELETE' && matchDeleteAppointment) {
     const appointmentID = matchDeleteAppointment[1];
