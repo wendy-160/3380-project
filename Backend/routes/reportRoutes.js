@@ -45,7 +45,10 @@ export async function handleReportRoutes(req, res) {
     }
   }
 
+  
   if (method === 'GET' && pathname === '/api/reports/patient-frequency') {
+    const minVisits = parseInt(searchParams.get('minVisits') || '0', 10);
+    const maxVisits = parseInt(searchParams.get('maxVisits') || '9999', 10);
     try {
       const [rows] = await db.query(`
         SELECT 
@@ -58,7 +61,7 @@ export async function handleReportRoutes(req, res) {
         GROUP BY a.PatientID
         HAVING VisitCount >= ? AND VisitCount <= ?
         ORDER BY VisitCount DESC
-      `, [startDate, endDate]);
+      `, [startDate, endDate, minVisits, maxVisits]);
       return sendJson(res, 200, rows);
     } catch (err) {
       console.error('Error generating patient frequency report:', err);
