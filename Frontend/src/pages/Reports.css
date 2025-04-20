@@ -34,22 +34,21 @@
 }
 
 .report-filters {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 6px;
-  margin-bottom: 25px;
-  border: 1px solid #eaeaea;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  align-items: end; 
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .report-filters label {
   display: flex;
   flex-direction: column;
   font-weight: 500;
-  margin-bottom: 0;
+  margin-bottom: 10px;
 
 }
 
@@ -61,20 +60,26 @@
   font-size: 14px;
 }
 
-.report-filters button {
-  background-color: #4a9e5f;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-  height: 42px;
+.button-cell {
+  position: relative;
+  justify-content: flex-end;
+}
+
+.button-cell::before {
+  content: '';
+  display: block;
+  height: 28px; 
+  visibility: hidden;
+}
+
+.button-cell button {
+  background-color: #3fad59;
+  height: 42px; 
+  width: 100%;
 }
 
 .report-filters button:hover {
-  background-color: #6cc983;
+  background-color: #62c96f;
 }
 
 .report-filters button:disabled {
@@ -198,9 +203,7 @@
   border-radius: 0 4px 4px 0;
 }
 
-.clinic-profitability-report,
-.patient-frequency-report,
-.doctor-efficiency-report {
+.clinic-profitability-report, .patient-frequency-report, .doctor-efficiency-report {
   background-color: white;
   border: 1px solid #eaeaea;
   border-radius: 6px;
@@ -208,9 +211,7 @@
   margin-bottom: 30px;
 }
 
-.clinic-profitability-report h2,
-.patient-frequency-report h2,
-.doctor-efficiency-report h2 {
+.clinic-profitability-report h2, .patient-frequency-report h2, .doctor-efficiency-report h2 {
   padding: 15px 20px;
   margin: 0;
   background-color: #f8f9fa;
@@ -219,9 +220,7 @@
   font-size: 18px;
 }
 
-.clinic-profitability-report table,
-.patient-frequency-report table,
-.doctor-efficiency-report table {
+.clinic-profitability-report table, .patient-frequency-report table, .doctor-efficiency-report table {
   width: 100%;
   border-collapse: collapse;
 }
@@ -237,23 +236,17 @@
   border-bottom: 1px solid #eaeaea;
 }
 
-.clinic-profitability-report th,
-.patient-frequency-report th,
-.doctor-efficiency-report th {
+.clinic-profitability-report th, .patient-frequency-report th, .doctor-efficiency-report th {
   background-color: #f8f9fa;
   font-weight: 600;
   color: #495057;
 }
 
-.clinic-profitability-report tbody tr:nth-child(even),
-.patient-frequency-report tbody tr:nth-child(even),
-.doctor-efficiency-report tbody tr:nth-child(even) {
+.clinic-profitability-report tbody tr:nth-child(even), .patient-frequency-report tbody tr:nth-child(even), .doctor-efficiency-report tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-.clinic-profitability-report tbody tr:hover,
-.patient-frequency-report tbody tr:hover,
-.doctor-efficiency-report tbody tr:hover {
+.clinic-profitability-report tbody tr:hover, .patient-frequency-report tbody tr:hover, .doctor-efficiency-report tbody tr:hover {
   background-color: #f2f2f2;
 }
 
@@ -287,10 +280,10 @@
   box-sizing: border-box;
   }
   
-  .report-filters .button-cell {
+  .report-filters {
     display: flex;
-  align-items: end;
-  justify-content: flex-start;
+    align-items: end;
+    justify-content: flex-start;
   }
 
   .report-filters button {
