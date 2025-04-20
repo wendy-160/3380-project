@@ -30,7 +30,7 @@ const AdminBilling = () => {
   const fetchBillings = async () => {
     try {
       const token = localStorage.getItem('token');
-      let url = '/api/admin/billings';
+      let url = `${API}/api/admin/billings`;
       
       const queryParams = new URLSearchParams();
       if (filters.status) queryParams.append('status', filters.status);
@@ -58,7 +58,7 @@ const AdminBilling = () => {
   const fetchPatients = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/patients', {
+      const response = await fetch(`${API}/api/admin/patients`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -71,7 +71,7 @@ const AdminBilling = () => {
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/appointments', {
+      const response = await fetch(`${API}/api/admin/appointments`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -84,7 +84,7 @@ const AdminBilling = () => {
   const fetchPrescriptions = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/prescriptions', {
+      const response = await fetch(`{$API}/api/admin/prescriptions`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -97,7 +97,7 @@ const AdminBilling = () => {
   const fetchTests = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/tests', {
+      const response = await fetch(`${API}/api/admin/tests`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -159,7 +159,7 @@ const AdminBilling = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/billings', {
+      const response = await fetch(`${API}/api/admin/billings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
