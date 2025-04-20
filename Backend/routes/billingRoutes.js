@@ -1,7 +1,21 @@
 import db from '../db.js';
 import { URL } from 'url';
-const API = process.env.REACT_APP_API_URL;
 
+async function getRawJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    let raw = '';
+    req.on('data', chunk => raw += chunk);
+    req.on('end', () => {
+      try {
+        const parsed = JSON.parse(raw);
+        resolve(parsed);
+      } catch (err) {
+        reject(err);
+      }
+    });
+    req.on('error', reject);
+  });
+}
 
 export async function handleBillingRoutes(req, res) {
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
@@ -39,52 +53,37 @@ export async function handleBillingRoutes(req, res) {
   const updateStatusMatch = pathname.match(/^\/api\/billing\/(\d+)\/status$/);
 if (method === 'PUT' && updateStatusMatch) {
   const billID = updateStatusMatch[1];
-  let rawBody = '';
 
-  req.on('data', chunk => rawBody += chunk);
-  req.on('end', async () => {
-    try {
-      console.log(" Raw body received:", rawBody);
-      const parsed = JSON.parse(rawBody);
-      const { status, paymentDate, paymentMethod } = parsed;
+  try {
+    const body = await getRawJsonBody(req);
+    const { status, paymentDate, paymentMethod } = body;
 
-      console.log(" Parsed Data:");
-      console.log("   Status:", status);
-      console.log("   Payment Date:", paymentDate);
-      console.log("   Payment Method:", paymentMethod);
-      console.log("   BillingID:", billID);
+    console.log(" Parsed billing update:", { status, paymentDate, paymentMethod, billID });
 
-      const [result] = await db.query(
-        `UPDATE billing
-         SET PaymentStatus = ?, PaymentDate = ?, PaymentMethod = ?
-         WHERE BillingID = ?`,
-        [status, paymentDate, paymentMethod, billID]
-      );
+    const [result] = await db.query(
+      `UPDATE billing
+       SET PaymentStatus = ?, PaymentDate = ?, PaymentMethod = ?
+       WHERE BillingID = ?`,
+      [status, paymentDate, paymentMethod, billID]
+    );
 
-      console.log(" SQL Update Result:", result);
-      console.log("   affectedRows:", result.affectedRows);
+    console.log(" Billing updated:", result);
 
-      if (result.affectedRows === 0) {
-        console.warn(" No rows were updated. Possible invalid BillingID.");
-        return sendJson(res, 404, { message: "Billing record not found." });
-      }
-
-      return sendJson(res, 200, {
-        message: " Payment updated successfully",
-        updatedBillID: billID,
-        newStatus: status,
-        method: paymentMethod,
-        date: paymentDate
-      });
-    } catch (err) {
-      console.error(" Error updating billing:", err);
-      return sendJson(res, 500, { error: err.message || "Unknown error" });
+    if (result.affectedRows === 0) {
+      return sendJson(res, 404, { message: 'Billing ID not found' });
     }
-  });
 
-  return;
+    return sendJson(res, 200, {
+      message: " Payment updated successfully",
+      BillingID: billID,
+      newStatus: status
+    });
+
+  } catch (err) {
+    console.error(" Error in PUT /status:", err);
+    return sendJson(res, 500, { error: err.message });
+  }
 }
-
 
   if (method === 'GET' && pathname === '/api/billing/patients') {
     try {
