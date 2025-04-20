@@ -4,6 +4,7 @@ import './DoctorDashboard.css';
 const API = process.env.REACT_APP_API_URL;
 
 const DoctorDashboard = () => {
+  const doctorId = localStorage.getItem("DoctorID");
   const [todaysAppointments, setTodaysAppointments] = useState([]);
   const [pendingReferrals, setPendingReferrals] = useState([]);
   const [specialists, setSpecialists] = useState([]);

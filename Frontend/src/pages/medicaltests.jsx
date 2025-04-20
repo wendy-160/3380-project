@@ -189,7 +189,7 @@ const [testNotes, setTestNotes] = useState('');
                   {test.Results && <p><strong>Results:</strong> {test.Results}</p>}
                   {test.Notes && <p><strong>Notes:</strong> {test.Notes}</p>}
                 </div>
-                {(test.status === 'Scheduled' || test.status === 'Completed' || test.status === 'Results Available') && (
+                {(test.status === 'Scheduled' || test.status === 'Completed' || test.status === 'Results Available' || test.status === 'Ordered') && (
                   <button
                     className="update-results-btn"
                     onClick={() => {

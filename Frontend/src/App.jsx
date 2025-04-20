@@ -82,7 +82,15 @@ export default function App() {
           <Route path="/locations" element={<Locations />} />
           <Route path="/MedicalRecord" element={<MedicalRecordPage/>} />
           <Route path="/tests" element={<DoctorRoute element={<MedicalTests />} />} />
-          <Route path="/schedule" element={<DoctorRoute element={<Schedule/>}/>}/>
+          <Route
+  path="/schedule"
+  element={
+    <DoctorRoute
+      element={<Schedule doctorId={localStorage.getItem("DoctorID")} />}
+    />
+  }
+/>
+
           <Route path="/prescriptions" element={<DoctorRoute element={<Prescriptions />} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

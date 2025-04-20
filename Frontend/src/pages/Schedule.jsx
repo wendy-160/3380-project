@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Schedule.css';
+const API = process.env.REACT_APP_API_URL;
 
 const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
 const getStartDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
@@ -23,7 +24,7 @@ const Schedule = ({ doctorId }) => {
     const startDay = getStartDayOfMonth(year, month);
   
     useEffect(() => {
-        fetch(`/api/schedule/availability/${doctorId}`)
+        fetch(`${API}/api/schedule/availability/${doctorId}`)
         .then(res => res.json())
         .then(data => {
           setAvailability(data);
@@ -32,10 +33,24 @@ const Schedule = ({ doctorId }) => {
     }, [doctorId]);
   
     useEffect(() => {
-      fetch(`/api/appointments/doctor/${doctorId}`)
+      if (!doctorId) return;
+    
+      fetch(`${API}/api/appointments/doctor/${doctorId}`)
         .then(res => res.json())
-        .then(data => setAppointments(data));
+        .then(data => {
+          if (Array.isArray(data)) {
+            setAppointments(data);
+          } else {
+            console.error("Expected array but got:", data);
+            setAppointments([]);
+          }
+        })
+        .catch(err => {
+          console.error("Failed to fetch appointments:", err);
+          setAppointments([]);
+        });
     }, [doctorId]);
+    
   
     const handleChange = (field, value) => {
       setAvailability(prev =>
@@ -47,7 +62,7 @@ const Schedule = ({ doctorId }) => {
   
     const handleSave = async () => {
       const current = availability.find(a => a.OfficeID === selectedOffice);
-      const res = await fetch(`/api/schedule/availability/${doctorId}/${selectedOffice}`, {
+      const res = await fetch(`${API}/api/schedule/availability/${doctorId}/${selectedOffice}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
