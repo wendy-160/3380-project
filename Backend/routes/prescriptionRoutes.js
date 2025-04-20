@@ -34,7 +34,16 @@ export async function handlePrescriptionRoutes(req, res) {
     const patientID = matchActive[1];
     try {
       const [rows] = await db.query(
-        `SELECT * FROM prescription WHERE PatientID = ? AND status = 'Active'`,
+        `SELECT 
+          p.*,
+          d.FirstName AS DoctorFirstName,
+          d.LastName AS DoctorLastName
+        FROM 
+          prescription p
+        JOIN 
+          doctor d ON p.DoctorID = d.DoctorID
+        WHERE 
+          p.PatientID = ? AND p.status = 'Active'`,
         [patientID]
       );
       return sendJson(res, 200, rows);
