@@ -37,29 +37,44 @@ export async function handleBillingRoutes(req, res) {
   }
 
   const updateStatusMatch = pathname.match(/^\/api\/billing\/(\d+)\/status$/);
-  if (method === 'PUT' && updateStatusMatch) {
-    const billID = updateStatusMatch[1];
-    let body = '';
+if (method === 'PUT' && updateStatusMatch) {
+  const billID = updateStatusMatch[1];
+  let body = '';
 
-    req.on('data', chunk => body += chunk);
-    req.on('end', async () => {
-      try {
-        const { status, paymentDate, paymentMethod } = JSON.parse(body);
+  req.on('data', chunk => body += chunk);
+  req.on('end', async () => {
+    try {
+      const parsed = JSON.parse(body);
+      const { status, paymentDate, paymentMethod } = parsed;
 
-        await db.query(
-          'UPDATE billing SET PaymentStatus = ?, PaymentDate = ?, PaymentMethod = ? WHERE BillingID = ?',
-          [status, paymentDate, paymentMethod, billID]
-        );
+      console.log("🔁 Incoming Payment Update Request");
+      console.log("➡️ Bill ID:", billID);
+      console.log("➡️ New Status:", status);
+      console.log("➡️ Payment Date:", paymentDate);
+      console.log("➡️ Payment Method:", paymentMethod);
 
-        return sendJson(res, 200, { message: 'Payment updated successfully' });
-      } catch (err) {
-        console.error("Billing update error:", err);
-        return sendJson(res, 500, { error: err.message });
-      }
-    });
+      const [result] = await db.query(
+        'UPDATE billing SET PaymentStatus = ?, PaymentDate = ?, PaymentMethod = ? WHERE BillingID = ?',
+        [status, paymentDate, paymentMethod, billID]
+      );
 
-    return;
-  }
+      console.log("✅ Database Update Success:", result);
+
+      return sendJson(res, 200, {
+        message: 'Payment updated successfully',
+        updatedBillID: billID,
+        newStatus: status,
+        paymentMethod,
+        paymentDate
+      });
+    } catch (err) {
+      console.error("❌ Payment Update Error:", err);
+      return sendJson(res, 500, { error: 'Failed to update billing status', details: err.message });
+    }
+  });
+
+  return;
+}
 
   if (method === 'GET' && pathname === '/api/billing/patients') {
     try {
