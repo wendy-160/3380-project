@@ -395,20 +395,16 @@ export async function handleAdminRoutes(req, res) {
     req.on('end', async () => {
       try {
         const body = JSON.parse(rawBody);
-        const { FirstName, LastName, Email, Specialization, PhoneNumber } = body;
-  
-        if (!FirstName || !LastName || !Email || !Specialization) {
-          return sendJson(res, 400, { message: 'Missing required fields' });
-        }
-  
-        // Generate a temporary password (or you could collect it via form)
-        const defaultPassword = 'password123';
-        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-  
-        // Insert into login table
+        const { FirstName, LastName, Email, Specialization, PhoneNumber, Username, Password } = body;
+
+if (!FirstName || !LastName || !Email || !Username || !Password || !Specialization) {
+  return sendJson(res, 400, { message: 'Missing required fields' });
+}
+        const hashedPassword = await bcrypt.hash(Password, 10);
+
         const [loginResult] = await db.query(
-          'INSERT INTO login (email, password, role) VALUES (?, ?, ?)',
-          [Email, hashedPassword, 'Doctor']
+          'INSERT INTO login (username, email, password, role) VALUES (?, ?, ?, ?)',
+          [Username, Email, hashedPassword, 'Doctor']
         );
         const userID = loginResult.insertId;
   

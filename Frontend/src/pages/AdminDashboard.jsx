@@ -19,11 +19,13 @@ const AdminDashboard = () => {
   const [showDoctorModal, setShowDoctorModal] = useState(false);
 
   const [newDoctor, setNewDoctor] = useState({
-    FirstName: '',
-    LastName: '',
-    Email: '',
-    Specialization: '',
-    PhoneNumber: ''
+  FirstName: '',
+  LastName: '',
+  Email: '',
+  Username: '',
+  Password: '',
+  Specialization: '',
+  PhoneNumber: ''
   });
   
 
@@ -248,13 +250,14 @@ const AdminDashboard = () => {
       <form
   onSubmit={(e) => {
     e.preventDefault();
-    // You can move this out to its own function if needed
     axios.post(`${API}/api/admin/users/doctor`, {
       FirstName: newDoctor.FirstName,
-      LastName: newDoctor.LastName,
-      Email: newDoctor.Email,
-      Specialization: newDoctor.Specialization,
-      PhoneNumber: newDoctor.PhoneNumber
+  LastName: newDoctor.LastName,
+  Email: newDoctor.Email,
+  Username: newDoctor.Username,
+  Password: newDoctor.Password,
+  Specialization: newDoctor.Specialization,
+  PhoneNumber: newDoctor.PhoneNumber
     }).then(() => {
       setShowDoctorModal(false);
       window.location.reload();
@@ -286,6 +289,21 @@ const AdminDashboard = () => {
     value={newDoctor.Email}
     onChange={(e) => setNewDoctor({ ...newDoctor, Email: e.target.value })}
   />
+  <label>Username</label>
+<input
+  type="text"
+  required
+  value={newDoctor.Username}
+  onChange={(e) => setNewDoctor({ ...newDoctor, Username: e.target.value })}
+/>
+
+<label>Password</label>
+<input
+  type="password"
+  required
+  value={newDoctor.Password}
+  onChange={(e) => setNewDoctor({ ...newDoctor, Password: e.target.value })}
+/>
 
   <label>Specialization</label>
   <input
