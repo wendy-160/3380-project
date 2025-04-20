@@ -17,9 +17,12 @@ const Reports = () => {
   const [selectedOffice, setSelectedOffice] = useState('');
   const [aggregation, setAggregation] = useState('Monthly');
   const [startDate, setStartDate] = useState('2024-01-01');
-  const [endDate, setEndDate] = useState('2025-4-20');
+  const [endDate, setEndDate] = useState('2025-04-20');
   const [referralStatus, setReferralStatus] = useState('Approved');
   const [specialization, setSpecialization] = useState('');
+  const [minVisits, setMinVisits] = useState('');
+  const [maxVisits, setMaxVisits] = useState('');
+  
 
   const isAdmin = user?.Role === 'Admin';
 
@@ -61,7 +64,12 @@ const Reports = () => {
         });
       } else if (reportType === 'patient_frequency') {
         response = await axios.get(`${API}/api/reports/patient-frequency`, {
-          params: { startDate, endDate }
+          params: {
+            startDate,
+            endDate,
+            minVisits: minVisits || 0,
+            maxVisits: maxVisits || 9999
+          }
         });
       } else if (reportType === 'doctor_efficiency') {
         response = await axios.get(`${API}/api/reports/doctor-efficiency`, {
@@ -139,6 +147,31 @@ const Reports = () => {
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
+              {reportType === 'patient_frequency' && (
+                <>
+                  <div className="filter-field">
+                    <label htmlFor="minVisits">Min Visits:</label>
+                    <input
+                      type="number"
+                      id="minVisits"
+                      min="0"
+                      value={minVisits}
+                      onChange={(e) => setMinVisits(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="filter-field">
+                    <label htmlFor="maxVisits">Max Visits:</label>
+                    <input
+                      type="number"
+                      id="maxVisits"
+                      min="0"
+                      value={maxVisits}
+                      onChange={(e) => setMaxVisits(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
               <div className="button-cell">
                 <button onClick={generateReport} disabled={loading}>
                   {loading ? 'Generating...' : 'Generate Report'}
@@ -215,6 +248,7 @@ const PatientFrequencyReport = ({ data }) => (
         <tr>
           <th>Patient</th>
           <th>Visit Count</th>
+          <th>Last Visit Date</th>
         </tr>
       </thead>
       <tbody>
@@ -222,6 +256,7 @@ const PatientFrequencyReport = ({ data }) => (
           <tr key={index}>
             <td>{row.PatientName}</td>
             <td>{row.VisitCount}</td>
+            <td>{new Date(row.LastVisitDate).toLocaleDateString()}</td>
           </tr>
         ))}
       </tbody>
@@ -254,5 +289,7 @@ const DoctorEfficiencyReport = ({ data }) => (
     </table>
   </div>
 );
+
+
 
 export default Reports;
