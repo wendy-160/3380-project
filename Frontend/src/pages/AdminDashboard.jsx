@@ -17,6 +17,10 @@ const AdminDashboard = () => {
   const [editedUser, setEditedUser] = useState({ FirstName: '', LastName: '' , Email: ''});
   const [clinicFilter, setClinicFilter] = useState('');
   const [showDoctorModal, setShowDoctorModal] = useState(false);
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState('');
+  const [selectedDoctor, setSelectedDoctor] = useState('');
+
 
   const [newDoctor, setNewDoctor] = useState({
   FirstName: '',
@@ -35,6 +39,9 @@ const AdminDashboard = () => {
         const apptRes = await axios.get(`${API}/api/admin/appointments/full`);
         const usersRes = await axios.get(`${API}/api/admin/users`);
         const res = await axios.get(`${API}/api/admin/clinics`);
+        const patientRes = await axios.get(`${API}/api/admin/patients`);
+        
+        setPatients(patientRes.data);
         setClinics(res.data);
         setAppointments(apptRes.data);
         setUsers(usersRes.data);
@@ -103,6 +110,26 @@ const AdminDashboard = () => {
   const uniqueRoles = [...new Set(users.map(u => u.role))];
   const uniqueStatuses = [...new Set(appointments.map(a => a.Status))];
   const uniqueClinics = [...new Set(appointments.map(a => a.OfficeName))];
+
+  const handleReassign = async () => {
+    if (!selectedPatient || !selectedDoctor) {
+      alert('Please select both a patient and a doctor.');
+      return;
+    }
+  
+    try {
+      await axios.put(`${API}/api/admin/reassign-doctor`, {
+        PatientID: selectedPatient,
+        DoctorID: selectedDoctor
+      });
+      alert('Patient reassigned successfully');
+      setSelectedPatient('');
+      setSelectedDoctor('');
+    } catch (err) {
+      console.error('Failed to reassign patient:', err);
+      alert('Failed to reassign patient');
+    }
+  };
 
   if (loading) return <div>Loading admin dashboard...</div>;
 
@@ -330,6 +357,32 @@ const AdminDashboard = () => {
     </div>
   </div>
 )}
+
+<div className="dashboard-section">
+  <h2>Reassign Patient to Another Doctor</h2>
+  <label>Select Patient:</label>
+  <select value={selectedPatient} onChange={(e) => setSelectedPatient(e.target.value)}>
+    <option value="">-- Select Patient --</option>
+    {patients.map((p) => (
+      <option key={p.PatientID} value={p.PatientID}>
+        {p.FirstName} {p.LastName}
+      </option>
+    ))}
+  </select>
+
+  <label>Select New Doctor:</label>
+  <select value={selectedDoctor} onChange={(e) => setSelectedDoctor(e.target.value)}>
+    <option value="">-- Select Doctor --</option>
+    {users.filter(u => u.role === 'Doctor').map((d) => (
+      <option key={d.DoctorID} value={d.DoctorID}>
+        {d.DoctorFirstName} {d.DoctorLastName}
+      </option>
+    ))}
+  </select>
+
+  <button onClick={handleReassign}>Reassign</button>
+</div>
+
     </div>
   );
 };

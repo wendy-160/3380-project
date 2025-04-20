@@ -421,6 +421,48 @@ export async function handleAdminRoutes(req, res) {
       res.end(JSON.stringify({ message: 'Failed to create billing record' }));
     }
   }
+
+  if (method === 'PUT' && pathname === '/api/admin/reassign-doctor') {
+    let rawBody = '';
+    req.on('data', chunk => rawBody += chunk);
+    req.on('end', async () => {
+      try {
+        const { PatientID, DoctorID } = JSON.parse(rawBody);
+  
+        // First set all assignments for the patient to non-primary
+        await db.query(`
+          UPDATE patient_doctor_assignment
+          SET PrimaryPhysicianFlag = 0
+          WHERE PatientID = ?
+        `, [PatientID]);
+  
+        // Then insert or update the assignment with new doctor as primary
+        const [existing] = await db.query(`
+          SELECT * FROM patient_doctor_assignment
+          WHERE PatientID = ? AND DoctorID = ?
+        `, [PatientID, DoctorID]);
+  
+        if (existing.length > 0) {
+          await db.query(`
+            UPDATE patient_doctor_assignment
+            SET PrimaryPhysicianFlag = 1, AssignmentDate = CURDATE()
+            WHERE PatientID = ? AND DoctorID = ?
+          `, [PatientID, DoctorID]);
+        } else {
+          await db.query(`
+            INSERT INTO patient_doctor_assignment (PatientID, DoctorID, AssignmentDate, PrimaryPhysicianFlag)
+            VALUES (?, ?, CURDATE(), 1)
+          `, [PatientID, DoctorID]);
+        }
+  
+        return sendJson(res, 200, { message: 'Patient reassigned to new doctor successfully' });
+      } catch (err) {
+        console.error('Error in doctor reassignment:', err);
+        return sendJson(res, 500, { message: 'Failed to reassign patient' });
+      }
+    });
+    return;
+  }  
   
   res.writeHead(404);
   res.end(JSON.stringify({ message: 'Admin route not found' }));
