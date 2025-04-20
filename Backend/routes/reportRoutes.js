@@ -50,11 +50,13 @@ export async function handleReportRoutes(req, res) {
       const [rows] = await db.query(`
         SELECT 
           CONCAT(p.FirstName, ' ', p.LastName) AS PatientName,
-          COUNT(a.AppointmentID) AS VisitCount
+          COUNT(a.AppointmentID) AS VisitCount,
+          MAX(a.DateTime) AS LastVisitDate
         FROM appointment a
         JOIN patient p ON a.PatientID = p.PatientID
         WHERE a.DateTime BETWEEN ? AND ?
         GROUP BY a.PatientID
+        HAVING VisitCount >= ? AND VisitCount <= ?
         ORDER BY VisitCount DESC
       `, [startDate, endDate]);
       return sendJson(res, 200, rows);
