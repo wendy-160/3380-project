@@ -290,6 +290,4 @@ const DoctorEfficiencyReport = ({ data }) => (
   </div>
 );
 
-
-
 export default Reports;
