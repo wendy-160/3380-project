@@ -14,78 +14,69 @@ const MedicalTests = () => {
   const [appointments, setAppointments] = useState([]);
   const [offices, setOffices] = useState([]);
   const [updateForm, setUpdateForm] = useState({ results: '', notes: '' });
+  const [testName, setTestName] = useState('');
+const [selectedOfficeId, setSelectedOfficeId] = useState('');
+const [selectedDate, setSelectedDate] = useState('');
+const [testNotes, setTestNotes] = useState('');
+
 
   useEffect(() => {
-
-    // Get the current doctor's ID from localStorage
-    const currentUser = JSON.parse(localStorage.getItem('user')) || {};
-    const doctorID = currentUser.DoctorID;
-
-    // First, fetch all tests
-    fetch("${API}/api/tests")
-      .then((res) => res.json())
-      .then(async (data) => {
-        // If we have tests, fetch patient details for each test
-        if (Array.isArray(data) && data.length > 0) {
-          // Create a map to store patient information
+    const fetchData = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('user')) || {};
+        const doctorId = localStorage.getItem('DoctorID');
+        const appointmentsRes = await fetch(`${API}/api/appointments?doctorId=${doctorId}`);
+        const appointmentsData = await appointmentsRes.json();
+        setAppointments(appointmentsData);
+        
+        const testsRes = await fetch(`${API}/api/tests`);
+        const testsData = await testsRes.json();
+  
+        if (Array.isArray(testsData) && testsData.length > 0) {
           const patientMap = new Map();
-          
-          // Process each test to add patient information
-          const testsWithPatients = await Promise.all(data.map(async (test) => {
-            // If we already have this patient's info, use it from our map
+          const testsWithPatients = await Promise.all(testsData.map(async (test) => {
             if (patientMap.has(test.PatientID)) {
               return {
                 ...test,
                 PatientName: patientMap.get(test.PatientID)
               };
             }
-            
-            // Otherwise, fetch the patient information
+  
             try {
               const patientRes = await fetch(`${API}/api/patients/${test.PatientID}`);
               const patientData = await patientRes.json();
-              
-              // Create a full name from patient data
               const patientName = patientData ? `${patientData.FirstName} ${patientData.LastName}` : 'Unknown Patient';
-              
-              // Store in our map for future use
               patientMap.set(test.PatientID, patientName);
-              
-              // Return the test with patient name
-              return {
-                ...test,
-                PatientName: patientName
-              };
+              return { ...test, PatientName: patientName };
             } catch (err) {
               console.error(`Error fetching patient ${test.PatientID}:`, err);
-              return {
-                ...test,
-                PatientName: 'Unknown Patient'
-              };
+              return { ...test, PatientName: 'Unknown Patient' };
             }
           }));
-          
+  
           setTests(testsWithPatients);
         } else {
-          setTests(data);
+          setTests(testsData);
         }
+  
+        const patientsRes = await fetch(`${API}/api/patients`);
+        const patientsData = await patientsRes.json();
+        setPatients(patientsData);
+  
+        const officesRes = await fetch(`${API}/api/offices`);
+        const officesData = await officesRes.json();
+        setOffices(officesData);
+  
+      } catch (error) {
+        console.error("Error fetching tests or supporting data:", error);
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching tests:", error);
-        setLoading(false);
-      });
-    fetchTests();
-    fetch(`${API}/api/patients`)
-      .then(res => res.json())
-      .then(setPatients);
-    fetch(`${API}/api/appointments`)
-      .then(res => res.json())
-      .then(setAppointments);
-    fetch(`${API}/api/offices`)
-      .then(res => res.json())
-      .then(setOffices);
+      }
+    };
+  
+    fetchData();
   }, []);
+
 
   const fetchTests = () => {
     setLoading(true);
@@ -97,22 +88,45 @@ const MedicalTests = () => {
       });
   };
 
-  const orderTest = async () => {
-    await fetch(`${API}/api/tests`, {
+  const handleOrderTest = async (e) => {
+    e.preventDefault();
+    const doctorId = localStorage.getItem("DoctorID");
+  
+    try {
+      const response = await fetch(`${API}/api/tests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ test_type: testType, patient_id: patientId })
+        body: JSON.stringify({
+          patient_id: patientId,
+          doctor_id: doctorId,
+          office_id: selectedOfficeId,
+          test_name: testName,
+          test_type: testType,
+          test_date: selectedDate,
+          notes: testNotes
+        })
       });
-        setTestType('');
-        setPatientId('');
-        setIsOrderModalOpen(false);
-        fetchTests();
-  };
-
-  const handleOrderTest = (e) => {
-    e.preventDefault();
-    orderTest();
-  };
+  
+      if (!response.ok) {
+        const err = await response.json();
+        console.error("Failed to order test:", err.message);
+        alert(err.message);
+        return;
+      }
+  
+      setIsOrderModalOpen(false);
+      setTestType('');
+      setTestName('');
+      setSelectedOfficeId('');
+      setSelectedDate('');
+      setTestNotes('');
+      setPatientId('');
+      fetchTests();
+    } catch (err) {
+      console.error("Network error ordering test:", err);
+      alert("Network error");
+    }
+  };  
 
   const handleUpdateResults = async (e) => {
     e.preventDefault();
@@ -201,21 +215,55 @@ const MedicalTests = () => {
               <button className="close-modal-btn" onClick={() => setIsOrderModalOpen(false)}>x</button>
             </div>
             <form onSubmit={handleOrderTest} className="test-form">
-              <div className="form-group">
-                <label>Patient</label>
-                <select required onChange={(e) => handlePatientSelect(e.target.value)}>
-                  <option value="">Select a patient</option>
-                  {patients.map(p => <option key={p.PatientID} value={p.PatientID}>{p.FirstName} {p.LastName}</option>)}
-              </select>
-              </div>
-              <div className="form-group">
-                <label>Test Type</label>
-                <input type="text" required value={testType} onChange={(e) => setTestType(e.target.value)} />
-              </div>
-              <div className="form-actions">
-                <button type="submit" className="submit-btn">Order Test</button>
-              </div>
-            </form>
+  <div className="form-group">
+    <label>Patient</label>
+    <select required value={patientId} onChange={(e) => setPatientId(e.target.value)}>
+      <option value="">Select a patient</option>
+      {patients.map(p => (
+        <option key={p.PatientID} value={p.PatientID}>
+          {p.FirstName} {p.LastName}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  <div className="form-group">
+    <label>Office</label>
+    <select required value={selectedOfficeId} onChange={(e) => setSelectedOfficeId(e.target.value)}>
+      <option value="">Select a clinic</option>
+      {offices.map(o => (
+        <option key={o.OfficeID} value={o.OfficeID}>
+          {o.OfficeName} - {o.Address}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  <div className="form-group">
+    <label>Test Name</label>
+    <input type="text" required value={testName} onChange={(e) => setTestName(e.target.value)} />
+  </div>
+
+  <div className="form-group">
+    <label>Test Type</label>
+    <input type="text" required value={testType} onChange={(e) => setTestType(e.target.value)} />
+  </div>
+
+  <div className="form-group">
+    <label>Date</label>
+    <input type="date" required value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
+  </div>
+
+  <div className="form-group">
+    <label>Notes</label>
+    <textarea value={testNotes} onChange={(e) => setTestNotes(e.target.value)} rows="3" />
+  </div>
+
+  <div className="form-actions">
+    <button type="submit" className="submit-btn">Order Test</button>
+  </div>
+</form>
+
           </div>
         </div>
       )}

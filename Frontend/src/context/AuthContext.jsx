@@ -49,6 +49,14 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("authToken", token);
+
+      if (DoctorID) {
+        localStorage.setItem("DoctorID", DoctorID);
+      }
+      if (PatientID) {
+        localStorage.setItem("PatientID", PatientID);
+      }
+      
       setUser(userData);
     } catch (error) {
       console.error("Login failed", error);

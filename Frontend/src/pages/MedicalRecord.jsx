@@ -49,14 +49,13 @@ const MedicalRecordsPage = () => {
       patientId: patient.PatientID,
       doctorId: parseInt(newRecord.doctorId),
       visitDate: new Date().toISOString().split('T')[0],
-      reason: newRecord.reason,
       diagnosis: newRecord.diagnosis,
       treatmentPlan: newRecord.treatmentPlan,
       notes: newRecord.notes,
     };
 
     try {
-      const res = await fetch('/api/medical-records', {
+      const res = await fetch(`${API}/api/medical-records`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
