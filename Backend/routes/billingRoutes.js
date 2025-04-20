@@ -39,48 +39,52 @@ export async function handleBillingRoutes(req, res) {
   const updateStatusMatch = pathname.match(/^\/api\/billing\/(\d+)\/status$/);
 if (method === 'PUT' && updateStatusMatch) {
   const billID = updateStatusMatch[1];
-  let body = '';
+  let rawBody = '';
 
-  req.on('data', chunk => body += chunk);
+  req.on('data', chunk => rawBody += chunk);
   req.on('end', async () => {
     try {
-      const parsed = JSON.parse(body);
+      console.log(" Raw body received:", rawBody);
+      const parsed = JSON.parse(rawBody);
       const { status, paymentDate, paymentMethod } = parsed;
 
-      console.log("🔁 Incoming Payment Update Request");
-      console.log("➡️ Bill ID:", billID);
-      console.log("➡️ New Status:", status);
-      console.log("➡️ Payment Date:", paymentDate);
-      console.log("➡️ Payment Method:", paymentMethod);
+      console.log(" Parsed Data:");
+      console.log("   Status:", status);
+      console.log("   Payment Date:", paymentDate);
+      console.log("   Payment Method:", paymentMethod);
+      console.log("   BillingID:", billID);
 
       const [result] = await db.query(
-        'UPDATE billing SET PaymentStatus = ?, PaymentDate = ?, PaymentMethod = ? WHERE BillingID = ?',
+        `UPDATE billing
+         SET PaymentStatus = ?, PaymentDate = ?, PaymentMethod = ?
+         WHERE BillingID = ?`,
         [status, paymentDate, paymentMethod, billID]
       );
 
-      console.log("✅ Database Update Success:", result);
-      console.log("🔍 Affected Rows:", result.affectedRows);
+      console.log(" SQL Update Result:", result);
+      console.log("   affectedRows:", result.affectedRows);
 
       if (result.affectedRows === 0) {
-        console.warn(" No rows were updated. BillingID might be invalid.");
-        return sendJson(res, 404, { message: 'Billing record not found or already up to date' });
-      }      
+        console.warn(" No rows were updated. Possible invalid BillingID.");
+        return sendJson(res, 404, { message: "Billing record not found." });
+      }
 
       return sendJson(res, 200, {
-        message: 'Payment updated successfully',
+        message: " Payment updated successfully",
         updatedBillID: billID,
         newStatus: status,
-        paymentMethod,
-        paymentDate
+        method: paymentMethod,
+        date: paymentDate
       });
     } catch (err) {
-      console.error("❌ Payment Update Error:", err);
-      return sendJson(res, 500, { error: 'Failed to update billing status', details: err.message });
+      console.error(" Error updating billing:", err);
+      return sendJson(res, 500, { error: err.message || "Unknown error" });
     }
   });
 
   return;
 }
+
 
   if (method === 'GET' && pathname === '/api/billing/patients') {
     try {
