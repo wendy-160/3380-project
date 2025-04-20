@@ -1,204 +1,199 @@
 import React, { useState, useEffect } from 'react';
-import './PatientDashboard.css';
-const API = process.env.REACT_APP_API_URL;
+ import './PatientDashboard.css';
+ const API = process.env.REACT_APP_API_URL;
+ 
+ const PatientDashboard = () => {
+   const [profile, setProfile] = useState(null);
+   const [primaryPhysician, setPrimaryPhysician] = useState(null);
+   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+   const [prescriptions, setPrescriptions] = useState([]);
+   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+   const [selectedDate, setSelectedDate] = useState('');
+   const [doctorOffices, setDoctorOffices] = useState([]);
+   const [filteredOffices, setFilteredOffices] = useState([]);
+   const [isEditingProfile, setIsEditingProfile] = useState(false);
+   const [updatedEmail, setUpdatedEmail] = useState('');
+   const [updatedAddress, setUpdatedAddress] = useState('');
+   const [referredSpecialists, setReferredSpecialists] = useState([]);
+   const [completedAppointments, setCompletedAppointments] = useState([]);
+   const [testResults, setTestResults] = useState([]);
+   const [medicalRecords, setMedicalRecords] = useState([]);
+   const [selectedAppointment, setSelectedAppointment] = useState(null);
+   const [updatedFirstName, setUpdatedFirstName] = useState('');
+ const [updatedLastName, setUpdatedLastName] = useState('');
+ const [updatedPhone, setUpdatedPhone] = useState('');
+ const [updatedCity, setUpdatedCity] = useState('');
+ const [updatedState, setUpdatedState] = useState('');
+ const [updatedZip, setUpdatedZip] = useState('');
+ 
+ 
+   const API = process.env.REACT_APP_API_URL
+ 
+ 
+   const currentPatientID = JSON.parse(localStorage.getItem('user'))?.PatientID;
+ 
+   useEffect(() => {
+     const fetchPatientData = async () => {
+       try {
+         const token = localStorage.getItem('authToken');
+ 
+         const profileRes = await fetch(`${API}/api/patients/${currentPatientID}`, {
+           headers: { Authorization: `Bearer ${token}` },
+         });
+         const profileData = await profileRes.json();
+         setProfile(profileData);
+ 
+         const doctorRes = await fetch(`${API}/api/patients/${currentPatientID}/primary-physician`, {
+           headers: { Authorization: `Bearer ${token}` },
+         });
+ 
+         if (doctorRes.ok) {
+           const doctorData = await doctorRes.json();
+           setPrimaryPhysician(doctorData);
+ 
+           const officesRes = await fetch(`${API}/api/doctors/${doctorData.DoctorID}/offices`, {
+             headers: { Authorization: `Bearer ${token}` }
+           });
+           if (officesRes.ok) {
+             const officeData = await officesRes.json();
+             setDoctorOffices(officeData);
+           }
+         }
+         const referralRes = await fetch(`${API}/api/referrals/patient/${currentPatientID}/approved`, {
+           headers: { Authorization: `Bearer ${token}` }
+         });
+         if (referralRes.ok) {
+           const specialists = await referralRes.json();
+           setReferredSpecialists(specialists);
+         }        
+ 
+         const appointmentRes = await fetch(`${API}/api/appointments/patient/${currentPatientID}/upcoming`, {
+           headers: { Authorization: `Bearer ${token}` },
+         });
+         const appointments = await appointmentRes.json();
+         setUpcomingAppointments(Array.isArray(appointments) ? appointments : []);
+ 
+ 
+         const prescriptionRes = await fetch(`${API}/api/prescriptions/patient/${currentPatientID}/active`, {
+           headers: { Authorization: `Bearer ${token}` },
+         });
+         setPrescriptions(await prescriptionRes.json());
+ 
+         const completedRes = await fetch(`${API}/api/appointments/patient/${currentPatientID}/completed`, {
+           headers: { Authorization: `Bearer ${token}` },
+         });
+         setCompletedAppointments(await completedRes.json());
+ 
+           const recordsRes = await fetch(`${API}/api/medical-records/patient/${currentPatientID}`, {
+             headers: { Authorization: `Bearer ${token}` }
+           });
+           const records = await recordsRes.json();
+           setMedicalRecords(Array.isArray(records) ? records : []);
+ 
+         const testRes = await fetch(`${API}/api/tests/patient/${currentPatientID}`, {
+           headers: { Authorization: `Bearer ${token}` },
+         });
+         setTestResults(await testRes.json());
+ 
+       } catch (err) {
+         console.error("Error fetching patient data:", err);
+       }
+     };
+ 
+ 
+     if (currentPatientID) fetchPatientData();
+   }, [currentPatientID]);
+ 
+   const handleSpecialistChange = async (e) => {
+     const doctorId = e.target.value;
+     if (!doctorId) return;
+ 
+     const selectedDate = document.getElementById("date")?.value;
+     if (!selectedDate) return;
+ 
+     try {
+       const token = localStorage.getItem('authToken');
+ 
+       const [slotsRes, officeRes] = await Promise.all([
+         fetch(`${API}/api/appointments/available/${doctorId}/${selectedDate}`),
+         fetch(`${API}/api/doctors/${doctorId}/offices`, {
+           headers: { Authorization: `Bearer ${token}` }
+         })
+       ]);
+ 
+       const slots = await slotsRes.json();
+       const officeData = await officeRes.json();
+ 
+       setAvailableTimeSlots(slots);
+       setFilteredOffices(officeData);
+     } catch (err) {
+       console.error("Error fetching specialist info:", err);
+     }
+   };
+   const handleDateSelection = async (date) => {
+     setSelectedDate(date);
+     const selectedDoctorId = document.getElementById("specialist")?.value || primaryPhysician?.DoctorID;
+     if (!selectedDoctorId) return;
+ 
+     const selectedDay = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
+ 
+     try {
+       const [officeRes, slotRes] = await Promise.all([
+         fetch(`${API}/api/doctors/${selectedDoctorId}/offices`),
+         fetch(`${API}/api/appointments/available/${selectedDoctorId}/${date}`)
+       ]);
+       const officeData = await officeRes.json();
+       const slotData = await slotRes.json();
+ 
+       setFilteredOffices(
+         officeData.filter(office =>
+           office.WorkDays?.split(',').map(day => day.trim()).includes(selectedDay)
+         )
+       );
+       setAvailableTimeSlots(slotData);
+     } catch (err) {
+       console.error("Error fetching office/timeslot data:", err);
+     }
+   };
+ 
+   const handleCreateAppointment = async () => {
+     const selectedTime = document.getElementById("time")?.value;
+     const reason = document.getElementById("reason")?.value;
+     const officeId = document.getElementById("office")?.value;
+ 
+     if (!selectedTime || !reason || !officeId) {
+       return alert("Time, reason, and clinic selection are required.");
+     }
+ 
+     const token = localStorage.getItem('authToken');
+     const appointmentData = {
+       PatientID: currentPatientID,
+       DoctorID: document.getElementById("specialist").value || primaryPhysician?.DoctorID,
+       OfficeID: officeId,
+       DateTime: selectedTime,
+       Reason: reason,
+       status: 'Scheduled'
+     };
+ 
+     try {
+       const response = await fetch(`${API}/api/appointments`, {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+           Authorization: `Bearer ${token}`,
+         },
+         body: JSON.stringify(appointmentData),
+       });
 
-const PatientDashboard = () => {
-  const [profile, setProfile] = useState(null);
-  const [primaryPhysician, setPrimaryPhysician] = useState(null);
-  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
-  const [prescriptions, setPrescriptions] = useState([]);
-  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
-  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [doctorOffices, setDoctorOffices] = useState([]);
-  const [filteredOffices, setFilteredOffices] = useState([]);
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [updatedEmail, setUpdatedEmail] = useState('');
-  const [updatedAddress, setUpdatedAddress] = useState('');
-  const [referredSpecialists, setReferredSpecialists] = useState([]);
-  const [completedAppointments, setCompletedAppointments] = useState([]);
-  const [testResults, setTestResults] = useState([]);
-  const [medicalRecords, setMedicalRecords] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [updatedFirstName, setUpdatedFirstName] = useState('');
-const [updatedLastName, setUpdatedLastName] = useState('');
-const [updatedPhone, setUpdatedPhone] = useState('');
-const [updatedCity, setUpdatedCity] = useState('');
-const [updatedState, setUpdatedState] = useState('');
-const [updatedZip, setUpdatedZip] = useState('');
-
-
-  const API = process.env.REACT_APP_API_URL
-
-
-  const currentPatientID = JSON.parse(localStorage.getItem('user'))?.PatientID;
-
-  useEffect(() => {
-    const fetchPatientData = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-
-        const profileRes = await fetch(`${API}/api/patients/${currentPatientID}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const profileData = await profileRes.json();
-        setProfile(profileData);
-
-        const doctorRes = await fetch(`${API}/api/patients/${currentPatientID}/primary-physician`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        
-        if (doctorRes.ok) {
-          const doctorData = await doctorRes.json();
-          setPrimaryPhysician(doctorData);
-
-          const officesRes = await fetch(`${API}/api/doctors/${doctorData.DoctorID}/offices`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (officesRes.ok) {
-            const officeData = await officesRes.json();
-            setDoctorOffices(officeData);
-          }
-        }
-        const referralRes = await fetch(`${API}/api/referrals/patient/${currentPatientID}/approved`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (referralRes.ok) {
-          const specialists = await referralRes.json();
-          setReferredSpecialists(specialists);
-        }        
-        
-        const appointmentRes = await fetch(`${API}/api/appointments/patient/${currentPatientID}/upcoming`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const appointments = await appointmentRes.json();
-        setUpcomingAppointments(Array.isArray(appointments) ? appointments : []);
-        
-
-        const prescriptionRes = await fetch(`${API}/api/prescriptions/patient/${currentPatientID}/active`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setPrescriptions(await prescriptionRes.json());
-
-        const completedRes = await fetch(`${API}/api/appointments/patient/${currentPatientID}/completed`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCompletedAppointments(await completedRes.json());
-
-          const recordsRes = await fetch(`${API}/api/medical-records/patient/${currentPatientID}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const records = await recordsRes.json();
-          setMedicalRecords(Array.isArray(records) ? records : []);
-        
-        const testRes = await fetch(`${API}/api/tests/patient/${currentPatientID}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setTestResults(await testRes.json());
-        
-      } catch (err) {
-        console.error("Error fetching patient data:", err);
-      }
-    };
-
-
-    if (currentPatientID) fetchPatientData();
-  }, [currentPatientID]);
-
-  const handleSpecialistChange = async (e) => {
-    const doctorId = e.target.value;
-    if (!doctorId) return;
-  
-    const selectedDate = document.getElementById("date")?.value;
-    if (!selectedDate) return;
-  
-    try {
-      const token = localStorage.getItem('authToken');
-  
-      const [slotsRes, officeRes] = await Promise.all([
-        fetch(`${API}/api/appointments/available/${doctorId}/${selectedDate}`),
-        fetch(`${API}/api/doctors/${doctorId}/offices`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-      ]);
-  
-      const slots = await slotsRes.json();
-      const officeData = await officeRes.json();
-  
-      setAvailableTimeSlots(slots);
-      setFilteredOffices(officeData);
-    } catch (err) {
-      console.error("Error fetching specialist info:", err);
-    }
-  };
-  const handleDateSelection = async (date) => {
-    setSelectedDate(date);
-    const selectedDoctorId = document.getElementById("specialist")?.value || primaryPhysician?.DoctorID;
-    if (!selectedDoctorId) return;
-  
-    const selectedDay = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
-  
-    try {
-      const [officeRes, slotRes] = await Promise.all([
-        fetch(`${API}/api/doctors/${selectedDoctorId}/offices`),
-        fetch(`${API}/api/appointments/available/${selectedDoctorId}/${date}`)
-      ]);
-      const officeData = await officeRes.json();
-      const slotData = await slotRes.json();
-  
-      setFilteredOffices(
-        officeData.filter(office =>
-          office.WorkDays?.split(',').map(day => day.trim()).includes(selectedDay)
-        )
-      );
-      setAvailableTimeSlots(slotData);
-    } catch (err) {
-      console.error("Error fetching office/timeslot data:", err);
-    }
-  };
-
-  const handleCreateAppointment = async () => {
-    const selectedTime = document.getElementById("time")?.value;
-    const reason = document.getElementById("reason")?.value;
-    const officeId = document.getElementById("office")?.value;
-  
-    if (!selectedTime || !reason || !officeId) {
-      return alert("Time, reason, and clinic selection are required.");
-    }
-  
-    const token = localStorage.getItem('authToken');
-    const appointmentData = {
-      PatientID: currentPatientID,
-      DoctorID: document.getElementById("specialist").value || primaryPhysician?.DoctorID,
-      OfficeID: officeId,
-      DateTime: selectedTime,
-      Reason: reason,
-      status: 'Scheduled'
-    };
-  
-    try {
-      const method = selectedAppointment ? 'PUT' : 'POST';
-const endpoint = selectedAppointment
-  ? `${API}/api/appointments/${selectedAppointment.AppointmentID}`
-  : `${API}/api/appointments`;
-
-const response = await fetch(endpoint, {
-  method,
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  },
-  body: JSON.stringify(appointmentData),
-});
-  
-      if (!response.ok) {
+       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Unknown error");
       }
-  
+
       setIsAppointmentModalOpen(false);
       setSelectedAppointment(null);
-  
+
       const updatedAppointments = await fetch(`${API}/api/appointments/patient/${currentPatientID}/upcoming`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -209,34 +204,34 @@ const response = await fetch(endpoint, {
       alert("Failed to schedule appointment");
     }
   };
-  
-  
-  
-  
-  
+
+
+
+
+
   const handleCancelAppointment = async (appointmentId) => {
     if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
-  
+
     try {
       const token = localStorage.getItem('authToken');
-  
+
       const response = await fetch(`${API}/api/appointments/${appointmentId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
         }
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to cancel appointment');
       }
-      
+
       const updatedAppointments = await fetch(`${API}/api/appointments/patient/${currentPatientID}/upcoming`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const appointmentsData = await updatedAppointments.json();
       setUpcomingAppointments(appointmentsData);
-  
+
     } catch (error) {
       console.error('Cancel appointment error:', error);
       alert("Unable to cancel appointment");
@@ -245,7 +240,7 @@ const response = await fetch(endpoint, {
   console.log("currentPatientID:", currentPatientID);
   const handleSaveProfile = async () => {
     const token = localStorage.getItem("authToken");
-  
+
     try {
       const response = await fetch(`${API}/api/patients/${currentPatientID}`, {
         method: 'PUT',
@@ -264,13 +259,13 @@ const response = await fetch(endpoint, {
           zipCode: updatedZip
         }),
       });
-  
+
       const result = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(result.message || "Update failed");
       }
-  
+
       setProfile(result);
       setIsEditingProfile(false);
       // sync updated values
@@ -282,14 +277,14 @@ const response = await fetch(endpoint, {
       setUpdatedCity(result.City);
       setUpdatedState(result.State);
       setUpdatedZip(result.ZipCode);
-  
+
     } catch (err) {
       console.error("Failed to update profile:", err.message);
       alert("Could not update profile info");
     }
   };
-  
-  
+
+
 
   const formatDateTime = (dt) =>
     new Date(dt).toLocaleString([], { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -446,7 +441,7 @@ const response = await fetch(endpoint, {
   </div>
 )}
 
-        
+
         {/* Test Results */}
         {completedAppointments.length > 0 && (
   <div className="dashboard-card test-results-section">
