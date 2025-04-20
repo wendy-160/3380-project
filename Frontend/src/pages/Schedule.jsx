@@ -133,7 +133,7 @@ const Schedule = ({ doctorId }) => {
                 >
                   {availability.map((a) => (
                     <option key={a.OfficeID} value={a.OfficeID}>
-                        {a.OfficeName ? `${a.OfficeName} (${a.Address})` : `Office #${a.OfficeID}`}
+                      {a.OfficeName ? a.OfficeName : `Office #${a.OfficeID}`}
                     </option>
                   ))}
                 </select>
@@ -168,25 +168,74 @@ const Schedule = ({ doctorId }) => {
           </div>
         )}
         {showDayModal && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <h3>Appointments for Selected Day</h3>
-              {selectedDayAppointments.length === 0 ? (
-                <p>No appointments for this day.</p>
-              ) : (
-                <ul>
-                  {selectedDayAppointments.map((appt, index) => (
-                    <li key={index}>
-                      {appt.PatientFirstName} {appt.PatientLastName} —{' '}
-                      {new Date(appt.DateTime).toLocaleTimeString([], timeFormat)} — {appt.OfficeName || `Office #${appt.OfficeID}`}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <button onClick={() => setShowDayModal(false)}>Close</button>
+        <div className="modal-overlay">
+          <div className="modal-content day-modal">
+            <div className="modal-header">
+              <h3>Appointments for {selectedDayAppointments.length > 0 ? 
+                new Date(selectedDayAppointments[0].DateTime).toLocaleDateString([], {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                }) : 'Selected Day'}
+              </h3>
+              <button className="close-button" onClick={() => setShowDayModal(false)}>×</button>
+            </div>
+            
+            {selectedDayAppointments.length === 0 ? (
+              <div className="no-appointments">
+                <p>No appointments scheduled for this day.</p>
+              </div>
+            ) : (
+              <div className="appointments-list">
+                {selectedDayAppointments.map((appt, index) => (
+                  <div key={index} className={`appointment-card ${appt.Status === 'Completed' ? 'completed' : ''}`}>
+                    <div className="appointment-time">
+                      {new Date(appt.DateTime).toLocaleTimeString([], timeFormat)}
+                    </div>
+                    <div className="appointment-details">
+                      <div className="patient-name">{appt.PatientFirstName} {appt.PatientLastName}</div>
+                      <div className="appointment-location">{appt.OfficeName || `Office #${appt.OfficeID}`}</div>
+                      <div className="appointment-status">{appt.Status || 'Scheduled'}</div>
+                    </div>
+                    {appt.Status !== 'Completed' && (
+                      <button
+                        className="complete-button"
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(`${API}/api/appointments/${appt.AppointmentID}/complete`, {
+                              method: 'PUT'
+                            });
+                            const data = await res.json();
+                            console.log(data.message);
+
+                            const updatedRes = await fetch(`${API}/api/appointments/doctor/${doctorId}`);
+                            const updatedData = await updatedRes.json();
+                            setAppointments(updatedData);
+
+                            const dateKey = new Date(appt.DateTime).toISOString().split('T')[0];
+                            const updatedDay = updatedData.filter(a =>
+                              new Date(a.DateTime).toISOString().split('T')[0] === dateKey
+                            );
+                            setSelectedDayAppointments(updatedDay);
+
+                          } catch (err) {
+                            console.error('Error marking complete:', err);
+                          }
+                        }}
+                      >
+                        Mark Completed
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="modal-footer">
             </div>
           </div>
-        )}
+        </div>
+      )}
         <div className="calendar-section">
           <h2>
             {today.toLocaleString('default', { month: 'long' })} {year}
@@ -200,7 +249,7 @@ const Schedule = ({ doctorId }) => {
               <option value="all">All Offices</option>
               {availability.map((o) => (
                 <option key={o.OfficeID} value={o.OfficeID}>
-                  {o.OfficeName ? o.OfficeName : `Office #${o.OfficeID}`}
+                  Office #{o.OfficeID}
                 </option>
               ))}
             </select>
