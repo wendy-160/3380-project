@@ -61,12 +61,18 @@ if (method === 'PUT' && matchUpdateAppointment) {
 
   req.on('end', async () => {
     try {
-      const data = JSON.parse(body);
+      const data = body ? JSON.parse(body) : req.body || {};
       const { DateTime, Reason, OfficeID } = data;
 
+      if (!DateTime || !Reason || !OfficeID) {
+        return sendJson(res, 400, { message: 'Missing required fields for update' });
+      }
+
       const [result] = await db.execute(
-        'UPDATE appointment SET DateTime = ?, Reason = ?, OfficeID = ?, Status = ? WHERE AppointmentID = ?',
-        [DateTime, Reason, OfficeID, 'Rescheduled', appointmentID]
+        `UPDATE appointment
+         SET DateTime = ?, Reason = ?, OfficeID = ?, Status = 'Rescheduled'
+         WHERE AppointmentID = ?`,
+        [DateTime, Reason, OfficeID, appointmentID]
       );
 
       return sendJson(res, 200, { message: 'Appointment updated successfully' });
@@ -78,6 +84,7 @@ if (method === 'PUT' && matchUpdateAppointment) {
 
   return;
 }
+
 
   const matchDoctorDateAppointments = pathname.match(/^\/api\/appointments\/doctor\/(\d+)\/date\/([\d-]+)$/);
   if (method === 'GET' && matchDoctorDateAppointments) {
