@@ -249,7 +249,7 @@ const Schedule = ({ doctorId }) => {
               <option value="all">All Offices</option>
               {availability.map((o) => (
                 <option key={o.OfficeID} value={o.OfficeID}>
-                  Office #{o.OfficeID}
+                  {o.OfficeName}
                 </option>
               ))}
             </select>
