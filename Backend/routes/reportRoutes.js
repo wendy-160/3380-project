@@ -13,21 +13,31 @@ export async function handleReportRoutes(req, res) {
 
   const searchParams = parsedUrl.searchParams;
   const startDate = searchParams.get('startDate') || '2024-01-01';
-  const endDate = searchParams.get('endDate') || '2024-12-31';
+  const endDate = searchParams.get('endDate') || '2025-12-31';
+  const officeID = searchParams.get('OfficeID');
 
   if (method === 'GET' && pathname === '/api/reports/clinic-profitability') {
     try {
       const [rows] = await db.query(`
         SELECT 
-    o.OfficeName,
-    COALESCE(SUM(b.Amount), 0) AS TotalRevenue,
-    COUNT(DISTINCT a.AppointmentID) AS AppointmentCount
-  FROM billing b
-  LEFT JOIN appointment a ON b.AppointmentID = a.AppointmentID
-  LEFT JOIN office o ON a.OfficeID = o.OfficeID
-  WHERE b.BillingDate BETWEEN ? AND ?
-  GROUP BY o.OfficeName
-      `, [startDate, endDate]);
+        o.OfficeName,
+        o.OfficeID,
+        COALESCE(SUM(b.Amount), 0) AS TotalRevenue,
+
+        SUM(CASE WHEN b.AppointmentID IS NOT NULL THEN b.Amount ELSE 0 END) AS AppointmentRevenue,
+        SUM(CASE WHEN b.PrescriptionID IS NOT NULL THEN b.Amount ELSE 0 END) AS PrescriptionRevenue,
+        SUM(CASE WHEN b.TestID IS NOT NULL THEN b.Amount ELSE 0 END) AS TestRevenue,
+
+        COUNT(DISTINCT a.AppointmentID) AS AppointmentCount,
+        ROUND(SUM(b.Amount) / NULLIF(COUNT(DISTINCT a.AppointmentID), 0), 2) AS AvgBillingPerAppointment
+
+      FROM billing b
+      LEFT JOIN appointment a ON b.AppointmentID = a.AppointmentID
+      LEFT JOIN office o ON a.OfficeID = o.OfficeID
+      WHERE b.BillingDate BETWEEN ? AND ?
+        ${officeID ? 'AND o.OfficeID = ?' : ''}  -- filter if officeId is present
+      GROUP BY o.OfficeID
+      `, [startDate, endDate, officeID]);
       return sendJson(res, 200, rows);
     } catch (err) {
       console.error('Error generating clinic profitability report:', err);
