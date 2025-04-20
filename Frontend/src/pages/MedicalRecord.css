@@ -68,7 +68,7 @@
   font-weight: 600;
 }
 .modal-add-record {
-
+  background-color: white;
   max-width: 700px; 
   max-height: 90vh;
   overflow-y: auto;
