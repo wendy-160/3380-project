@@ -178,7 +178,7 @@ const Schedule = ({ doctorId }) => {
                   {selectedDayAppointments.map((appt, index) => (
                     <li key={index}>
                       {appt.PatientFirstName} {appt.PatientLastName} —{' '}
-                      {new Date(appt.DateTime).toLocaleTimeString([], timeFormat)} — — {appt.OfficeName || `Office #${appt.OfficeID}`}
+                      {new Date(appt.DateTime).toLocaleTimeString([], timeFormat)} — {appt.OfficeName || `Office #${appt.OfficeID}`}
                     </li>
                   ))}
                 </ul>
