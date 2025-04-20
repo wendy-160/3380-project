@@ -447,21 +447,20 @@ const [updatedZip, setUpdatedZip] = useState('');
   <div className="dashboard-card test-results-section">
     <div className="card-header"><h2>Test Results</h2></div>
     {testResults && testResults.length > 0 ? testResults.map(test => (
-      <div key={test.TestID} className="test-result-item">
-        <h3>{test.TestName}</h3>
-        <p><strong>Ordered by:</strong> Dr. {test.DoctorFirstName} {test.DoctorLastName}</p>
-        <p><strong>Status:</strong> {test.status}</p>
-        <p><strong>Result:</strong> {test.results || "Pending"}</p>
-        <p><strong>Notes:</strong> {test.notes}</p>
-        <p><strong>Date Ordered:</strong> 
-  {test.TestDate && !isNaN(new Date(test.TestDate)) 
-    ? new Date(test.TestDate).toLocaleDateString() 
-    : "N/A"}
-</p>
-      </div>
-    )) : (
-      <p>No test results yet.</p>
-    )}
+  <div key={test.TestID} className="test-result-item">
+    <h3>{test.TestName}</h3>
+    <p><strong>Ordered by:</strong> Dr. {test.DoctorFirstName} {test.DoctorLastName}</p>
+    <p><strong>Type:</strong> {test.TestType}</p>
+    <p><strong>Status:</strong> {test.status}</p>
+    <p><strong>Result:</strong> {test.Results || "Pending"}</p>
+    <p><strong>Notes:</strong> {test.Notes || "None"}</p>
+    <p><strong>Test Date:</strong> {test.TestDate ? new Date(test.TestDate).toLocaleDateString() : "N/A"}</p>
+    <p><strong>Result Date:</strong> {test.ResultDate ? new Date(test.ResultDate).toLocaleDateString() : "N/A"}</p>
+  </div>
+)) : (
+  <p>No test results yet.</p>
+)}
+
   </div>
 )}
 
@@ -484,18 +483,22 @@ const [updatedZip, setUpdatedZip] = useState('');
   <div className="dashboard-card medical-records-section">
     <div className="card-header"><h2>Medical Records</h2></div>
     {medicalRecords.length > 0 ? (
-      medicalRecords.map(record => (
-        <div key={record.RecordID} className="medical-record-item">
-          <p><strong>Visit Date:</strong> {new Date(record.VisitDate).toLocaleDateString()}</p>
-          <p><strong>Doctor:</strong> Dr. {record.DoctorFirstName} {record.DoctorLastName}</p>
-          <p><strong>Diagnosis:</strong> {record.Diagnosis}</p>
-          <p><strong>Treatment Plan:</strong> {record.TreatmentPlan}</p>
-          <p><strong>Notes:</strong> {record.Notes}</p>
-        </div>
-      ))
-    ) : (
-      <p>No medical records available.</p>
-    )}
+  <div className="records-list">
+    {medicalRecords.map(record => (
+      <div key={record.RecordID} className="medical-record-item">
+        <h3>Visit Summary</h3>
+        <p><strong>Visit Date:</strong> {new Date(record.VisitDate).toLocaleDateString()}</p>
+        <p><strong>Doctor:</strong> Dr. {record.DoctorFirstName} {record.DoctorLastName}</p>
+        <p><strong>Diagnosis:</strong> {record.Diagnosis}</p>
+        <p><strong>Treatment Plan:</strong> {record.TreatmentPlan}</p>
+        <p><strong>Notes:</strong> {record.Notes}</p>
+      </div>
+    ))}
+  </div>
+) : (
+  <p>No medical records available.</p>
+)}
+
   </div>
 )}
 
