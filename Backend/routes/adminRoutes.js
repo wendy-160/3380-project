@@ -397,7 +397,7 @@ export async function handleAdminRoutes(req, res) {
         const body = JSON.parse(rawBody);
         const { FirstName, LastName, Email, Specialization, PhoneNumber, Username, Password } = body;
 
-if (!FirstName || !LastName || !Email || !Username || !Password || !Specialization) {
+if (!FirstName || !LastName || !Email || !Username || !Password || !Specialization {
   return sendJson(res, 400, { message: 'Missing required fields' });
 }
         const hashedPassword = await bcrypt.hash(Password, 10);
