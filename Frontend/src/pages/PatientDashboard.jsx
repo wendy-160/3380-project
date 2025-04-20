@@ -385,7 +385,7 @@ const PatientDashboard = () => {
               <h3>{test.TestName}</h3>
               <p><strong>Ordered by:</strong> Dr. {test.DoctorFirstName} {test.DoctorLastName}</p>
               <p><strong>Status:</strong> {test.status}</p>
-              <p><strong>Result:</strong> {test.result || "Pending"}</p>
+              <p><strong>Result:</strong> {test.results || "Pending"}</p>
               <p><strong>Notes:</strong> {test.notes}</p>
               <p><strong>Date Ordered:</strong> {new Date(test.OrderDate).toLocaleDateString()}</p>
             </div>
