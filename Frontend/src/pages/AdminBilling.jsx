@@ -84,7 +84,7 @@ const AdminBilling = () => {
   const fetchPrescriptions = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`{$API}/api/admin/prescriptions`, {
+      const response = await fetch(`${API}/api/admin/prescriptions`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
