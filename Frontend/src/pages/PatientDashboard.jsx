@@ -20,6 +20,13 @@ const PatientDashboard = () => {
   const [testResults, setTestResults] = useState([]);
   const [medicalRecords, setMedicalRecords] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [updatedFirstName, setUpdatedFirstName] = useState('');
+const [updatedLastName, setUpdatedLastName] = useState('');
+const [updatedPhone, setUpdatedPhone] = useState('');
+const [updatedCity, setUpdatedCity] = useState('');
+const [updatedState, setUpdatedState] = useState('');
+const [updatedZip, setUpdatedZip] = useState('');
+
 
   const API = process.env.REACT_APP_API_URL
 
@@ -233,14 +240,8 @@ const PatientDashboard = () => {
   console.log("currentPatientID:", currentPatientID);
   const handleSaveProfile = async () => {
     const token = localStorage.getItem("authToken");
-    console.log("Read token from localStorage:", token);
-
-    if (!token) {
-      alert("No auth token found. Please log in again.");
-      return;
-    }
+  
     try {
-      console.log("Making PUT request to:", `${API}/api/patients/${currentPatientID}`);
       const response = await fetch(`${API}/api/patients/${currentPatientID}`, {
         method: 'PUT',
         headers: {
@@ -248,15 +249,18 @@ const PatientDashboard = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          firstName: updatedFirstName,
+          lastName: updatedLastName,
+          phoneNumber: updatedPhone,
           email: updatedEmail,
           address: updatedAddress,
+          city: updatedCity,
+          state: updatedState,
+          zipCode: updatedZip
         }),
       });
   
-      console.log("PUT request sent. Status:", response.status);
-  
       const result = await response.json();
-      console.log("Server response:", result);
   
       if (!response.ok) {
         throw new Error(result.message || "Update failed");
@@ -264,15 +268,22 @@ const PatientDashboard = () => {
   
       setProfile(result);
       setIsEditingProfile(false);
+      // sync updated values
+      setUpdatedFirstName(result.FirstName);
+      setUpdatedLastName(result.LastName);
+      setUpdatedPhone(result.PhoneNumber);
       setUpdatedEmail(result.Email);
       setUpdatedAddress(result.Address);
+      setUpdatedCity(result.City);
+      setUpdatedState(result.State);
+      setUpdatedZip(result.ZipCode);
   
-      console.log("Profile updated.");
     } catch (err) {
       console.error("Failed to update profile:", err.message);
       alert("Could not update profile info");
     }
   };
+  
   
 
   const formatDateTime = (dt) =>
@@ -295,9 +306,16 @@ const PatientDashboard = () => {
               <button 
               onClick={() => {
                 setIsEditingProfile(true);
+                setUpdatedFirstName(profile.FirstName || '');
+                setUpdatedLastName(profile.LastName || '');
+                setUpdatedPhone(profile.PhoneNumber || '');
                 setUpdatedEmail(profile.email || '');
                 setUpdatedAddress(profile.Address || '');
-              }} className="edit-profile-btn">
+                setUpdatedCity(profile.City || '');
+                setUpdatedState(profile.State || '');
+                setUpdatedZip(profile.ZipCode || '');
+              }}
+               className="edit-profile-btn">
                 Edit Profile
               </button>
             </div>
@@ -314,28 +332,37 @@ const PatientDashboard = () => {
             </div>
 
             <div className="modal-body">
-              <form onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }}>
-                <label>Email</label>
-                <input
-                  type="email"
-                  value={updatedEmail}
-                  onChange={(e) => setUpdatedEmail(e.target.value)}
-                />
+            <form onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }}>
+  <label>First Name</label>
+  <input type="text" value={updatedFirstName} onChange={(e) => setUpdatedFirstName(e.target.value)} />
 
-                <label>Address</label>
-                <input
-                  type="text"
-                  value={updatedAddress}
-                  onChange={(e) => setUpdatedAddress(e.target.value)}
-                />
+  <label>Last Name</label>
+  <input type="text" value={updatedLastName} onChange={(e) => setUpdatedLastName(e.target.value)} />
 
-                <div className="form-actions">
-                  <button type="submit" className="submit-btn">Save</button>
-                  <button type="button" className="cancel-btn" onClick={() => setIsEditingProfile(false)}>
-                    Cancel
-                  </button>
-                </div>
-              </form>
+  <label>Phone</label>
+  <input type="text" value={updatedPhone} onChange={(e) => setUpdatedPhone(e.target.value)} />
+
+  <label>Email</label>
+  <input type="email" value={updatedEmail} onChange={(e) => setUpdatedEmail(e.target.value)} />
+
+  <label>Address</label>
+  <input type="text" value={updatedAddress} onChange={(e) => setUpdatedAddress(e.target.value)} />
+
+  <label>City</label>
+  <input type="text" value={updatedCity} onChange={(e) => setUpdatedCity(e.target.value)} />
+
+  <label>State</label>
+  <input type="text" value={updatedState} onChange={(e) => setUpdatedState(e.target.value)} />
+
+  <label>Zip Code</label>
+  <input type="text" value={updatedZip} onChange={(e) => setUpdatedZip(e.target.value)} />
+
+  <div className="form-actions">
+    <button type="submit" className="submit-btn">Save</button>
+    <button type="button" className="cancel-btn" onClick={() => setIsEditingProfile(false)}>Cancel</button>
+  </div>
+</form>
+
             </div>
           </div>
         </div>

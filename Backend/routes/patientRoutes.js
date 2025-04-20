@@ -14,7 +14,6 @@ export async function handlePatientRoutes(req, res) {
 
   console.log(`Incoming request: ${method} ${pathname}`);
 
-  // GET all patients
   if (method === 'GET' && pathname === '/api/patients') {
     try {
       const [rows] = await db.query('SELECT * FROM patient');
@@ -73,10 +72,6 @@ export async function handlePatientRoutes(req, res) {
     }
   }
   
-  
-  
-
-  // GET by PatientID
   const matchById = pathname.match(/^\/api\/patients\/(\d+)$/);
   if (method === 'GET' && matchById) {
     const patientId = matchById[1];
@@ -99,7 +94,6 @@ export async function handlePatientRoutes(req, res) {
     }
   }
 
-  // GET primary physician for patient
   const matchPrimaryDoctor = pathname.match(/^\/api\/patients\/(\d+)\/primary-physician$/);
   if (method === 'GET' && matchPrimaryDoctor) {
     const patientId = matchPrimaryDoctor[1];
@@ -122,7 +116,6 @@ export async function handlePatientRoutes(req, res) {
     }
   }
 
-  // GET patients assigned to a doctor
   const matchByDoctor = pathname.match(/^\/api\/patients\/doctor\/(\d+)$/);
   if (method === 'GET' && matchByDoctor) {
     const doctorId = matchByDoctor[1];
@@ -141,7 +134,6 @@ export async function handlePatientRoutes(req, res) {
     }
   }
 
-  // PUT update patient (email, address)
   if (method === 'PUT' && matchById) {
     const patientId = matchById[1];
     let body = req.body;
@@ -168,7 +160,16 @@ export async function handlePatientRoutes(req, res) {
 }
 
 async function handleUpdatePatient(patientId, data, res) {
-  const { email, address } = data;
+  const {
+    firstName,
+    lastName,
+    phoneNumber,
+    email,
+    address,
+    city,
+    state,
+    zipCode
+  } = data;
 
   try {
     const [userResult] = await db.query(
@@ -182,12 +183,11 @@ async function handleUpdatePatient(patientId, data, res) {
 
     const userId = userResult[0].UserID;
 
-    if (address !== undefined && address !== '') {
-      await db.query(
-        'UPDATE patient SET Address = ? WHERE PatientID = ?',
-        [address, patientId]
-      );
-    }
+    await db.query(`
+      UPDATE patient
+      SET FirstName = ?, LastName = ?, PhoneNumber = ?, Address = ?, City = ?, State = ?, ZipCode = ?
+      WHERE PatientID = ?
+    `, [firstName, lastName, phoneNumber, address, city, state, zipCode, patientId]);
 
     if (email !== undefined && email !== '') {
       await db.query(
