@@ -56,7 +56,6 @@ const PatientBilling = () => {
         },
         body: JSON.stringify({
           status: updatedStatus,
-          amount: selectedBill.Amount, 
           paymentMethod: paymentMethod || 'Credit Card',
           paymentDate: new Date().toISOString().split('T')[0]
         })
@@ -79,6 +78,7 @@ const PatientBilling = () => {
       setError('Payment processing failed. Please try again later.');
     }
   };
+  
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
