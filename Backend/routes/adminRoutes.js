@@ -1,5 +1,6 @@
 import db from '../db.js';
 import { URL } from 'url';
+import bcrypt from 'bcrypt';
 const API = process.env.REACT_APP_API_URL;
 
 
@@ -386,6 +387,44 @@ export async function handleAdminRoutes(req, res) {
       console.error('SQL error during billing update:', err);
       return sendJson(res, 500, { message: 'Failed to update billing record' });
     }
+  }
+
+  if (method === 'POST' && pathname === '/api/admin/users/doctor') {
+    let rawBody = '';
+    req.on('data', chunk => rawBody += chunk);
+    req.on('end', async () => {
+      try {
+        const body = JSON.parse(rawBody);
+        const { FirstName, LastName, Email, Specialization, PhoneNumber } = body;
+  
+        if (!FirstName || !LastName || !Email || !Specialization) {
+          return sendJson(res, 400, { message: 'Missing required fields' });
+        }
+  
+        // Generate a temporary password (or you could collect it via form)
+        const defaultPassword = 'password123';
+        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+  
+        // Insert into login table
+        const [loginResult] = await db.query(
+          'INSERT INTO login (email, password, role) VALUES (?, ?, ?)',
+          [Email, hashedPassword, 'Doctor']
+        );
+        const userID = loginResult.insertId;
+  
+        // Insert into doctor table
+        await db.query(
+          'INSERT INTO doctor (UserID, FirstName, LastName, Specialization, PhoneNumber) VALUES (?, ?, ?, ?, ?)',
+          [userID, FirstName, LastName, Specialization, PhoneNumber || null]
+        );
+  
+        return sendJson(res, 201, { message: 'Doctor account created successfully', UserID: userID });
+      } catch (err) {
+        console.error('Error creating doctor account:', err);
+        return sendJson(res, 500, { message: 'Failed to create doctor account' });
+      }
+    });
+    return;
   }
   
   res.writeHead(404);

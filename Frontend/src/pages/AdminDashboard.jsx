@@ -5,6 +5,7 @@ import AddDoctorForm from '../components/AddDoctorForm.jsx';
 const API = process.env.REACT_APP_API_URL;
 
 
+
 const AdminDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [clinics, setClinics] = useState([]);
@@ -16,6 +17,15 @@ const AdminDashboard = () => {
   const [editedUser, setEditedUser] = useState({ FirstName: '', LastName: '' , Email: ''});
   const [clinicFilter, setClinicFilter] = useState('');
   const [showDoctorModal, setShowDoctorModal] = useState(false);
+
+  const [newDoctor, setNewDoctor] = useState({
+    FirstName: '',
+    LastName: '',
+    Email: '',
+    Specialization: '',
+    PhoneNumber: ''
+  });
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -221,18 +231,87 @@ const AdminDashboard = () => {
         </tbody>
         </table>
       </div>
-      <button onClick={() => setShowDoctorModal(true)}>Add Doctor</button>
-      {showDoctorModal && (
-      <div className="modal-backdrop">
-        <div className="modal-content">
-          <h3>Add New Doctor</h3>
-          <AddDoctorForm
-            onClose={() => setShowDoctorModal(false)}
-            onDoctorAdded={() => window.location.reload()} 
-          />
-        </div>
+      <div className="add-doctor-button-wrapper">
+  <button onClick={() => setShowDoctorModal(true)} className="schedule-appointment-btn">
+    Add Doctor
+  </button>
+</div>
+
+{showDoctorModal && (
+  <div className="modal-overlay">
+    <div className="appointment-modal">
+      <div className="modal-header">
+        <h2>Add New Doctor</h2>
+        <button className="close-modal-btn" onClick={() => setShowDoctorModal(false)}>x</button>
       </div>
-    )}
+      <div className="modal-body">
+      <form
+  onSubmit={(e) => {
+    e.preventDefault();
+    // You can move this out to its own function if needed
+    axios.post(`${API}/api/admin/users/doctor`, {
+      FirstName: newDoctor.FirstName,
+      LastName: newDoctor.LastName,
+      Email: newDoctor.Email,
+      Specialization: newDoctor.Specialization,
+      PhoneNumber: newDoctor.PhoneNumber
+    }).then(() => {
+      setShowDoctorModal(false);
+      window.location.reload();
+    }).catch(err => {
+      console.error("Failed to add doctor:", err);
+    });
+  }}
+>
+  <label>First Name</label>
+  <input
+    type="text"
+    required
+    value={newDoctor.FirstName}
+    onChange={(e) => setNewDoctor({ ...newDoctor, FirstName: e.target.value })}
+  />
+
+  <label>Last Name</label>
+  <input
+    type="text"
+    required
+    value={newDoctor.LastName}
+    onChange={(e) => setNewDoctor({ ...newDoctor, LastName: e.target.value })}
+  />
+
+  <label>Email</label>
+  <input
+    type="email"
+    required
+    value={newDoctor.Email}
+    onChange={(e) => setNewDoctor({ ...newDoctor, Email: e.target.value })}
+  />
+
+  <label>Specialization</label>
+  <input
+    type="text"
+    required
+    value={newDoctor.Specialization}
+    onChange={(e) => setNewDoctor({ ...newDoctor, Specialization: e.target.value })}
+  />
+
+  <label>Phone Number</label>
+  <input
+    type="text"
+    required
+    value={newDoctor.PhoneNumber}
+    onChange={(e) => setNewDoctor({ ...newDoctor, PhoneNumber: e.target.value })}
+  />
+
+  <div className="modal-actions">
+    <button className="submit-btn" type="submit">Submit</button>
+    <button className="cancel-btn" type="button" onClick={() => setShowDoctorModal(false)}>Cancel</button>
+  </div>
+</form>
+</div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
