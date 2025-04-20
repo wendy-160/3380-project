@@ -74,14 +74,14 @@ const server = http.createServer(async (req, res) => {
       }
 
       console.log(`Parsed body for ${method} ${pathname}:`, req.body);
-      routeRequest(req, res, pathname, method);
+      routeRequest(req, res, pathname, method, parsedUrl);
     });
   } else {
-    routeRequest(req, res, pathname, method);
+    routeRequest(req, res, pathname, method, parsedUrl);
   }
 });
 
-function routeRequest(req, res, pathname, method) {
+function routeRequest(req, res, pathname, method, parsedUrl) {
   console.log(`Incoming request: ${method} ${pathname}`);
 
   if ((pathname === '/' || pathname === '') && method === 'GET') {
