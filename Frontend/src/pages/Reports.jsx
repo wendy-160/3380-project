@@ -110,9 +110,9 @@ const Reports = () => {
 
           {['clinic_profitability', 'patient_frequency', 'doctor_efficiency'].includes(reportType) && (
             <div className="report-filters">
-              <label>
-                Office:
-                <select value={selectedOffice} onChange={(e) => setSelectedOffice(e.target.value)}>
+              <div className="filter-field">
+                <label htmlFor="office">Office:</label>
+                <select id="office" value={selectedOffice} onChange={(e) => setSelectedOffice(e.target.value)}>
                   <option value="">All</option>
                   {offices.map((office) => (
                     <option key={office.OfficeID} value={office.OfficeID}>
@@ -120,22 +120,31 @@ const Reports = () => {
                     </option>
                   ))}
                 </select>
-              </label>
-              <label>
-                Start Date:
-                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-              </label>
-              <label>
-                End Date:
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-              </label>
-            <div className="button-cell">
-              <button onClick={generateReport} disabled={loading}>
-                {loading ? 'Generating...' : 'Generate Report'}
-              </button>
+              </div>
+              <div className="filter-field">
+                <label htmlFor="startDate">Start Date:</label>
+                <input
+                  id="startDate"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div className="filter-field">
+                <label htmlFor="endDate">End Date:</label>
+                <input
+                  id="endDate"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+              <div className="button-cell">
+                <button onClick={generateReport} disabled={loading}>
+                  {loading ? 'Generating...' : 'Generate Report'}
+                </button>
+              </div>
             </div>
-          </div>
-
           )}
 
 
