@@ -19,14 +19,14 @@ export async function handleReportRoutes(req, res) {
     try {
       const [rows] = await db.query(`
         SELECT 
-          o.OfficeName,
-          COALESCE(SUM(b.Amount), 0) AS TotalRevenue,
-          COUNT(DISTINCT a.AppointmentID) AS AppointmentCount
-        FROM billing b
-        LEFT JOIN appointment a ON b.AppointmentID = a.AppointmentID
-        LEFT JOIN office o ON a.OfficeID = o.OfficeID
-        WHERE b.BillingDate BETWEEN ? AND ?
-        GROUP BY o.OfficeName
+    o.OfficeName,
+    COALESCE(SUM(b.Amount), 0) AS TotalRevenue,
+    COUNT(DISTINCT a.AppointmentID) AS AppointmentCount
+  FROM billing b
+  LEFT JOIN appointment a ON b.AppointmentID = a.AppointmentID
+  LEFT JOIN office o ON a.OfficeID = o.OfficeID
+  WHERE b.BillingDate BETWEEN ? AND ?
+  GROUP BY o.OfficeName
       `, [startDate, endDate]);
       return sendJson(res, 200, rows);
     } catch (err) {
