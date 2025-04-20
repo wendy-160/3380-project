@@ -39,7 +39,7 @@ const Register = () => {
   
     try {
       const res = await axios.post(
-        "${API}/api/auth/register",
+        `${API}/api/auth/register`,
         {
           username: form.username,
           email: form.email,
