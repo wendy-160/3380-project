@@ -154,79 +154,50 @@ const PatientDashboard = () => {
     const selectedTime = document.getElementById("time")?.value;
     const reason = document.getElementById("reason")?.value;
     const officeId = document.getElementById("office")?.value;
-    const selectedDoctorId = document.getElementById("specialist")?.value || primaryPhysician?.DoctorID;
   
     if (!selectedTime || !reason || !officeId) {
       return alert("Time, reason, and clinic selection are required.");
     }
   
     const token = localStorage.getItem('authToken');
-  
     const appointmentData = {
       PatientID: currentPatientID,
-      DoctorID: selectedDoctorId,
+      DoctorID: document.getElementById("specialist").value || primaryPhysician?.DoctorID,
       OfficeID: officeId,
       DateTime: selectedTime,
       Reason: reason,
-      status: selectedAppointment ? 'Rescheduled' : 'Scheduled'
+      status: 'Scheduled'
     };
   
-    console.log("Selected appointment:", selectedAppointment);
-    console.log("Sending data:", appointmentData);
-  
     try {
-      let response;
-  
-      if (selectedAppointment) {
-        const updateUrl = `${API}/api/appointments/${selectedAppointment.AppointmentID}`;
-        console.log("Sending PUT to:", updateUrl);
-  
-        response = await fetch(updateUrl, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(appointmentData),
-        });
-      } else {
-        const createUrl = `${API}/api/appointments`;
-        console.log("Sending POST to:", createUrl);
-  
-        response = await fetch(createUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(appointmentData),
-        });
-      }
+      const response = await fetch(`${API}/api/appointments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(appointmentData),
+      });
   
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Server error:", errorData);
         throw new Error(errorData.message || "Unknown error");
       }
   
       setIsAppointmentModalOpen(false);
       setSelectedAppointment(null);
-      setSelectedDate('');
-      setAvailableTimeSlots([]);
-      setFilteredOffices([]);
   
       const updatedAppointments = await fetch(`${API}/api/appointments/patient/${currentPatientID}/upcoming`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const appointmentsData = await updatedAppointments.json();
       setUpcomingAppointments(appointmentsData);
-  
-      console.log("✅ Appointment created or updated successfully.");
     } catch (error) {
-      console.error('❌ Failed to schedule appointment:', error);
+      console.error('Failed to schedule:', error);
       alert("Failed to schedule appointment");
     }
   };
+  
   
   
   
