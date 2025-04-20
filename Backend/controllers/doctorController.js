@@ -82,7 +82,7 @@ export async function getPrimaryPhysician(req, res, patientId) {
 export async function getDoctorOffices(req, res, doctorId) {
   
   try {
-    console.log("➡️ doctorId received:", doctorId);
+    console.log("doctorId received:", doctorId);
     const [rows] = await db.query(`
       SELECT o.OfficeID, o.OfficeName, o.Address, o.City, o.State, o.ZipCode,
              dof.WorkDays, dof.WorkHours
@@ -90,7 +90,7 @@ export async function getDoctorOffices(req, res, doctorId) {
       JOIN office o ON dof.OfficeID = o.OfficeID
       WHERE dof.DoctorID = ?
     `, [doctorId]);
-    console.log('✅ Query result from DB:', rows);
+    console.log('Query result from DB:', rows);
 
     if (rows.length === 0) {
       res.writeHead(404, { 'Content-Type': 'application/json' });

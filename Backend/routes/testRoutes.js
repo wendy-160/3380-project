@@ -12,7 +12,6 @@ export async function handleTestRoutes(req, res) {
     res.end(JSON.stringify(data));
   };
   
-  //so test results pop up on patient dashboard
   const matchTests = pathname.match(/^\/api\/tests\/patient\/(\d+)\/?$/);
   if (method === 'GET' && matchTests) {
     const patientID = matchTests[1];

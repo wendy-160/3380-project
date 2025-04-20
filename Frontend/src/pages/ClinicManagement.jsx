@@ -149,7 +149,6 @@ const ClinicManagement = () => {
             
             setSuccessMessage('Clinic deleted successfully!');
             
-            // Refresh clinic list
             await fetchClinics();
         } catch (err) {
             console.error('Error deleting clinic:', err);

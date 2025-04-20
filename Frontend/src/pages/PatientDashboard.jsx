@@ -268,7 +268,6 @@ import React, { useState, useEffect } from 'react';
 
       setProfile(result);
       setIsEditingProfile(false);
-      // sync updated values
       setUpdatedFirstName(result.FirstName);
       setUpdatedLastName(result.LastName);
       setUpdatedPhone(result.PhoneNumber);

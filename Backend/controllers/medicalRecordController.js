@@ -46,7 +46,6 @@ export async function handleCreateMedicalRecord(req, res, body) {
   }
 }
 
-// Search Medical Records
 export async function handleSearchMedicalRecords(req, res, query) {
   try {
     const { name, date } = query;

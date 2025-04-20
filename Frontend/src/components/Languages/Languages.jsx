@@ -4,7 +4,6 @@ import doc from '../../assets/doc.png';
 import './Languages.css';
 
 const Languages = () => {
-    // Array of languages to display as tags
     const languagesList = [
         'Arabic', 'Spanish', 'Mandarin', 'Korean', 
         'Vietnamese', 'American Sign Language', 'French',

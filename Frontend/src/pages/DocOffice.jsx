@@ -11,7 +11,6 @@ const DoctorClinicAssignment = () => {
     const [successMessage, setSuccessMessage] = useState(null);
     const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
     
-    // State for new assignment
     const [newAssignment, setNewAssignment] = useState({
         DoctorID: '',
         OfficeID: '',
@@ -19,7 +18,6 @@ const DoctorClinicAssignment = () => {
         WorkHours: ''
     });
     
-    // Filter states
     const [selectedClinic, setSelectedClinic] = useState('all');
     const [selectedDoctor, setSelectedDoctor] = useState('all');
 
@@ -33,7 +31,6 @@ const DoctorClinicAssignment = () => {
         });
     }, []);
 
-    // Fetch all clinics
     const fetchClinics = async () => {
         try {
             const response = await fetch(`${API}/api/offices`);
@@ -55,7 +52,6 @@ const DoctorClinicAssignment = () => {
         }
     };
 
-    // Fetch all doctors
     const fetchDoctors = async () => {
         try {
             const response = await fetch(`${API}/api/doctors`);
@@ -77,7 +73,6 @@ const DoctorClinicAssignment = () => {
         }
     };
 
-    // Fetch all doctor-clinic assignments
     const fetchAssignments = async () => {
         try {
             const response = await fetch(`${API}/api/doctor-offices`);
@@ -118,7 +113,6 @@ const DoctorClinicAssignment = () => {
         });
     };
 
-    // Create a new doctor-clinic assignment
     const handleCreateAssignment = async (e) => {
         e.preventDefault();
         console.log("Form submission triggered");
@@ -144,7 +138,6 @@ const DoctorClinicAssignment = () => {
                 body: JSON.stringify(formattedAssignment)
             });
             
-            // Check if the response is successful (includes 204 No Content)
             if (response.ok) {
                 console.log(`Assignment created successfully (Status: ${response.status})`);
                 setSuccessMessage('Doctor assigned to clinic successfully!');
@@ -158,7 +151,6 @@ const DoctorClinicAssignment = () => {
                 return;
             }
             
-            // If we get here, there was an error
             let errorMessage;
             try {
                 const errorData = await response.json();
@@ -206,7 +198,6 @@ const DoctorClinicAssignment = () => {
             
             setSuccessMessage('Doctor removed from clinic successfully!');
             
-            // Refresh assignments data
             await fetchAssignments();
         } catch (err) {
             console.error('Error deleting assignment:', err);
@@ -243,7 +234,6 @@ const DoctorClinicAssignment = () => {
         }
     });
 
-    // Group assignments by doctor for the second view
     const assignmentsByDoctor = {};
     doctors.forEach(doctor => {
         const doctorAssignments = filteredAssignments.filter(a => a.DoctorID === doctor.DoctorID);

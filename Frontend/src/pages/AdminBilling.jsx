@@ -54,7 +54,6 @@ const AdminBilling = () => {
     }
   };
 
-  // New functions to fetch related data
   const fetchPatients = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -140,7 +139,6 @@ const AdminBilling = () => {
     }
   };
 
-  // New function to handle bill creation
   const handleCreateBill = async (e) => {
     e.preventDefault();
     const form = e.target;

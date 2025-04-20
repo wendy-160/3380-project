@@ -106,7 +106,7 @@ export async function createDoctorOffice(req, res) {
     res.writeHead(201, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ message: 'Doctor assigned to office', id: result.insertId }));
   } catch (err) {
-    console.error('❌ Error in createDoctorOffice:', err);
+    console.error('Error in createDoctorOffice:', err);
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: err.message }));
   }

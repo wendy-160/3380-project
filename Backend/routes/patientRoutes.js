@@ -64,10 +64,10 @@ export async function handlePatientRoutes(req, res) {
   
     try {
       const [results] = await db.query(query, params);
-      console.log('✅ Final search results:', results);
+      console.log('Final search results:', results);
       return sendJson(res, 200, results);
     } catch (err) {
-      console.error('❌ SQL Error during search:', err.message);
+      console.error('SQL Error during search:', err.message);
       return sendJson(res, 500, { message: 'Failed to search patients' });
     }
   }

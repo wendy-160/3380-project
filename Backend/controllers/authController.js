@@ -93,7 +93,7 @@ async function register(req, res) {
 
 async function login(req, res) {
   try {
-    console.log("🔐 Login route hit");
+    console.log("Login route hit");
 
     if (!req.body) {
       console.error("No request body received");
@@ -106,23 +106,23 @@ async function login(req, res) {
       console.error("Missing email or password");
       return sendJson(res, 400, { message: "Email and password are required" });
     }
-    console.log("🔎 Checking login table for email:", email);
+    console.log("Checking login table for email:", email);
     const [results] = await db.query("SELECT * FROM login WHERE email = ?", [email]);
-    console.log("📦 Query result:", results);
+    console.log("Query result:", results);
 
     if (results.length === 0) {
       return sendJson(res, 401, { message: "User not found" });
     }
 
     const user = results[0];
-    console.log("🧍 User row from DB:", user);
+    console.log("User row from DB:", user);
 
     if (!user?.password) {
       console.error("No password field on user object");
       return sendJson(res, 500, { message: "User record corrupted: password missing" });
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log("🔐 Password valid:", isPasswordValid);
+    console.log("Password valid:", isPasswordValid);
   
 
     if (!isPasswordValid) {

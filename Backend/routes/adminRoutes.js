@@ -429,14 +429,12 @@ export async function handleAdminRoutes(req, res) {
       try {
         const { PatientID, DoctorID } = JSON.parse(rawBody);
   
-        // First set all assignments for the patient to non-primary
         await db.query(`
           UPDATE patient_doctor_assignment
           SET PrimaryPhysicianFlag = 0
           WHERE PatientID = ?
         `, [PatientID]);
   
-        // Then insert or update the assignment with new doctor as primary
         const [existing] = await db.query(`
           SELECT * FROM patient_doctor_assignment
           WHERE PatientID = ? AND DoctorID = ?
