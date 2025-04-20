@@ -59,6 +59,12 @@ if (method === 'PUT' && updateStatusMatch) {
       );
 
       console.log("✅ Database Update Success:", result);
+      console.log("🔍 Affected Rows:", result.affectedRows);
+
+      if (result.affectedRows === 0) {
+        console.warn(" No rows were updated. BillingID might be invalid.");
+        return sendJson(res, 404, { message: 'Billing record not found or already up to date' });
+      }      
 
       return sendJson(res, 200, {
         message: 'Payment updated successfully',
