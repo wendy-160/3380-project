@@ -57,7 +57,7 @@ const Reports = () => {
       let response;
       if (reportType === 'clinic_profitability') {
         response = await axios.get(`${API}/api/reports/clinic-profitability`, {
-          params: { startDate, endDate }
+          params: { startDate, endDate, officeId: selectedOffice || '' }
         });
       } else if (reportType === 'patient_frequency') {
         response = await axios.get(`${API}/api/reports/patient-frequency`, {
@@ -97,35 +97,46 @@ const Reports = () => {
       ) : (
         <>
           <div className="report-selection">
-  <button className={reportType === 'clinic_profitability' ? 'active' : ''} onClick={() => setReportType('clinic_profitability')}>
-    Clinic Profitability Report
-  </button>
-  <button className={reportType === 'patient_frequency' ? 'active' : ''} onClick={() => setReportType('patient_frequency')}>
-    Patient Visit Frequency
-  </button>
-  <button className={reportType === 'doctor_efficiency' ? 'active' : ''} onClick={() => setReportType('doctor_efficiency')}>
-    Doctor Efficiency Report
-  </button>
-</div>
+            <button className={reportType === 'clinic_profitability' ? 'active' : ''} onClick={() => setReportType('clinic_profitability')}>
+              Clinic Profitability Report
+            </button>
+            <button className={reportType === 'patient_frequency' ? 'active' : ''} onClick={() => setReportType('patient_frequency')}>
+              Patient Visit Frequency
+            </button>
+            <button className={reportType === 'doctor_efficiency' ? 'active' : ''} onClick={() => setReportType('doctor_efficiency')}>
+              Doctor Efficiency Report
+            </button>
+          </div>
 
-{['clinic_profitability', 'patient_frequency', 'doctor_efficiency'].includes(reportType) && (
-  <div className="report-filters">
-  <label>
-    Start Date:
-    <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-  </label>
-  <label>
-    End Date:
-    <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-  </label>
-  <div className="button-cell">
-    <button onClick={generateReport} disabled={loading}>
-      {loading ? 'Generating...' : 'Generate Report'}
-    </button>
-  </div>
-</div>
+          {['clinic_profitability', 'patient_frequency', 'doctor_efficiency'].includes(reportType) && (
+            <div className="report-filters">
+              <label>
+                Office:
+                <select value={selectedOffice} onChange={(e) => setSelectedOffice(e.target.value)}>
+                  <option value="">All</option>
+                  {offices.map((office) => (
+                    <option key={office.OfficeID} value={office.OfficeID}>
+                      {office.OfficeName}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Start Date:
+                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              </label>
+              <label>
+                End Date:
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              </label>
+            <div className="button-cell">
+              <button onClick={generateReport} disabled={loading}>
+                {loading ? 'Generating...' : 'Generate Report'}
+              </button>
+            </div>
+          </div>
 
-)}
+          )}
 
 
           <div className="report-results">
@@ -134,16 +145,17 @@ const Reports = () => {
             ) : reportData ? (
               <>
                 {reportType === 'clinic_profitability' && (
-  <ClinicProfitabilityReport data={reportData} />
-)}
-{reportType === 'patient_frequency' && (
-  <PatientFrequencyReport data={reportData} />
-)}
-{reportType === 'doctor_efficiency' && (
-  <DoctorEfficiencyReport data={reportData} />
-)}
+                  
+                  <ClinicProfitabilityReport data={reportData} />
+                )}
+                {reportType === 'patient_frequency' && (
+                  <PatientFrequencyReport data={reportData} />
+                )}
+                {reportType === 'doctor_efficiency' && (
+                  <DoctorEfficiencyReport data={reportData} />
+                )}
 
-              </>
+                </>
             ) : (
               reportType 
             )}
@@ -162,7 +174,11 @@ const ClinicProfitabilityReport = ({ data }) => (
         <tr>
           <th>Office</th>
           <th>Total Revenue ($)</th>
+          <th>Appointments ($)</th>
+          <th>Prescriptions ($)</th>
+          <th>Tests ($)</th>
           <th>Appointment Count</th>
+          <th>Avg Billing Per Appointment ($)</th>
         </tr>
       </thead>
       <tbody>
@@ -170,7 +186,11 @@ const ClinicProfitabilityReport = ({ data }) => (
           <tr key={index}>
             <td>{row.OfficeName}</td>
             <td>{parseFloat(row.TotalRevenue).toFixed(2)}</td>
+            <td>{parseFloat(row.AppointmentRevenue).toFixed(2)}</td>
+            <td>{parseFloat(row.PrescriptionRevenue).toFixed(2)}</td>
+            <td>{parseFloat(row.TestRevenue).toFixed(2)}</td>
             <td>{row.AppointmentCount}</td>
+            <td>{parseFloat(row.AvgBillingPerAppointment).toFixed(2)}</td>
           </tr>
         ))}
       </tbody>
@@ -225,7 +245,5 @@ const DoctorEfficiencyReport = ({ data }) => (
     </table>
   </div>
 );
-
-
 
 export default Reports;
