@@ -15,6 +15,8 @@ export async function handleReportRoutes(req, res) {
   const startDate = searchParams.get('startDate') || '2024-01-01';
   const endDate = searchParams.get('endDate') || '2025-12-31';
   const officeID = searchParams.get('OfficeID');
+  const minVisits = parseInt(searchParams.get('minVisits') || '0', 10);
+  const maxVisits = parseInt(searchParams.get('maxVisits') || '9999', 10);
 
   if (method === 'GET' && pathname === '/api/reports/clinic-profitability') {
     try {
@@ -47,8 +49,6 @@ export async function handleReportRoutes(req, res) {
 
   
   if (method === 'GET' && pathname === '/api/reports/patient-frequency') {
-    const minVisits = parseInt(searchParams.get('minVisits') || '0', 10);
-    const maxVisits = parseInt(searchParams.get('maxVisits') || '9999', 10);
     try {
       const [rows] = await db.query(`
         SELECT 
