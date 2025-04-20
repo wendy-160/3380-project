@@ -36,33 +36,29 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.post(`${API}/api/auth/login`, credentials, {
         withCredentials: true,
       });
-
+  
       const { role, email, token, DoctorID, PatientID } = res.data;
       const normalizedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
-
+  
       const userData = {
         Role: normalizedRole,
         Email: email,
         DoctorID: DoctorID || null,
         PatientID: PatientID || null
       };
-
+  
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("authToken", token);
-
-      if (DoctorID) {
-        localStorage.setItem("DoctorID", DoctorID);
-      }
-      if (PatientID) {
-        localStorage.setItem("PatientID", PatientID);
-      }
-      
+      if (DoctorID) localStorage.setItem("DoctorID", DoctorID);
+      if (PatientID) localStorage.setItem("PatientID", PatientID);
+  
       setUser(userData);
     } catch (error) {
       console.error("Login failed", error);
       throw error;
     }
   };
+  
 
   const logout = async () => {
     try {
