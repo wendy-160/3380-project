@@ -98,59 +98,29 @@ export async function handleAdminRoutes(req, res) {
     return;
   }
   
-  
-
   if (method === 'POST' && pathname === '/api/admin/billings') {
-    let rawBody = '';
+    let body = req.body;
   
-    req.on('data', chunk => rawBody += chunk);
-    req.on('end', () => {
-      try {
-        const body = JSON.parse(rawBody);
-        console.log('Parsed body for POST /api/admin/billings:', body);
-  
-        const {
-          PatientID, AppointmentID, PrescriptionID, TestID,
-          Amount, PaymentStatus, BillingDate,
-          PaymentMethod, PaymentDate, Notes
-        } = body;
-  
-        db.query(`
-          INSERT INTO billing 
-          (PatientID, AppointmentID, PrescriptionID, TestID, Amount, PaymentStatus, BillingDate, PaymentMethod, PaymentDate, Notes)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [
-          parseInt(PatientID),
-          parseInt(AppointmentID || '') || null,
-          PrescriptionID ? parseInt(PrescriptionID) : null,
-          TestID ? parseInt(TestID) : null,
-          parseFloat(Amount),
-          PaymentStatus,
-          BillingDate,
-          PaymentMethod || null,
-          PaymentDate || null,
-          Notes || null
-        ])
-          .then(([result]) => {
-            console.log('Billing record created:', result);
-            res.writeHead(201, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Billing record created', BillingID: result.insertId }));
-          })
-          .catch(err => {
-            console.error('DB insert error:', err);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Failed to create billing record' }));
-          });
-  
-      } catch (err) {
-        console.error('SQL Insert Error Details:', err.sqlMessage || err.message);
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'Invalid JSON' }));
-      }
-    });
+    if (!body) {
+      let raw = '';
+      req.on('data', chunk => raw += chunk);
+      req.on('end', () => {
+        try {
+          body = JSON.parse(raw);
+          return insertBilling(body, res);
+        } catch (err) {
+          console.error('Failed to parse billing body:', err);
+          res.writeHead(400);
+          return res.end(JSON.stringify({ message: 'Invalid JSON format' }));
+        }
+      });
+    } else {
+      return insertBilling(body, res);
+    }
   
     return;
   }
+  
   
   
   if (method === 'GET' && pathname === '/api/admin/patients') {
@@ -418,6 +388,40 @@ export async function handleAdminRoutes(req, res) {
     }
   }
   
+  async function insertBilling(body, res) {
+    try {
+      const {
+        PatientID, AppointmentID, PrescriptionID, TestID,
+        Amount, PaymentStatus, BillingDate,
+        PaymentMethod, PaymentDate, Notes
+      } = body;
+  
+      const [result] = await db.query(`
+        INSERT INTO billing 
+        (PatientID, AppointmentID, PrescriptionID, TestID, Amount, PaymentStatus, BillingDate, PaymentMethod, PaymentDate, Notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        parseInt(PatientID),
+        AppointmentID ? parseInt(AppointmentID) : null,
+        PrescriptionID ? parseInt(PrescriptionID) : null,
+        TestID ? parseInt(TestID) : null,
+        parseFloat(Amount),
+        PaymentStatus,
+        BillingDate,
+        PaymentMethod || null,
+        PaymentDate || null,
+        Notes || null
+      ]);
+  
+      console.log('Billing record created:', result);
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ message: 'Billing record created', BillingID: result.insertId }));
+    } catch (err) {
+      console.error('Billing insert error:', err);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ message: 'Failed to create billing record' }));
+    }
+  }
   
   res.writeHead(404);
   res.end(JSON.stringify({ message: 'Admin route not found' }));
