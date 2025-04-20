@@ -178,7 +178,7 @@ const Schedule = ({ doctorId }) => {
                   {selectedDayAppointments.map((appt, index) => (
                     <li key={index}>
                       {appt.PatientFirstName} {appt.PatientLastName} —{' '}
-                      {new Date(appt.DateTime).toLocaleTimeString([], timeFormat)} — Office #{appt.OfficeID}
+                      {new Date(appt.DateTime).toLocaleTimeString([], timeFormat)} — {appt.OfficeName || `Office #${appt.OfficeID}`}
                     </li>
                   ))}
                 </ul>
@@ -200,7 +200,7 @@ const Schedule = ({ doctorId }) => {
               <option value="all">All Offices</option>
               {availability.map((o) => (
                 <option key={o.OfficeID} value={o.OfficeID}>
-                  Office #{o.OfficeID}
+                  {o.OfficeName ? o.OfficeName : `Office #${o.OfficeID}`}
                 </option>
               ))}
             </select>
@@ -226,7 +226,7 @@ const Schedule = ({ doctorId }) => {
                           <div key={i} className="calendar-appt">
                             {appt.PatientFirstName} {appt.PatientLastName} <br />
                             {new Date(appt.DateTime).toLocaleTimeString([], timeFormat)} <br />
-                            Office #{appt.OfficeID}
+                            {appt.OfficeName}
                           </div>
                         ))}
                       </>
