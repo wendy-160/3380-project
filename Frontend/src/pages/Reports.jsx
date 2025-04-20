@@ -17,7 +17,7 @@ const Reports = () => {
   const [selectedOffice, setSelectedOffice] = useState('');
   const [aggregation, setAggregation] = useState('Monthly');
   const [startDate, setStartDate] = useState('2024-01-01');
-  const [endDate, setEndDate] = useState('2024-4-20');
+  const [endDate, setEndDate] = useState('2025-4-20');
   const [referralStatus, setReferralStatus] = useState('Approved');
   const [specialization, setSpecialization] = useState('');
 
