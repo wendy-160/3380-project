@@ -80,8 +80,9 @@ export async function getPrimaryPhysician(req, res, patientId) {
   }
 }
 export async function getDoctorOffices(req, res, doctorId) {
-  console.log('🔍 Fetching offices for DoctorID:', doctorId, typeof doctorId);
+  
   try {
+    console.log("➡️ doctorId received:", doctorId);
     const [rows] = await db.query(`
       SELECT o.OfficeID, o.OfficeName, o.Address, o.City, o.State, o.ZipCode,
              dof.WorkDays, dof.WorkHours

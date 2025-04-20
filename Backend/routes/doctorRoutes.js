@@ -37,7 +37,7 @@ export function handleDoctorRoutes(req, res) {
   const officeMatch = url.match(/^\/api\/doctors\/(\d+)\/offices$/);
   if (officeMatch && method === 'GET') {
     const doctorId = officeMatch[1];
-    return getDoctorOffices({ ...req, params: { doctorId } }, res);
+    return getDoctorOffices(req, res, doctorId);
   }
 
   res.writeHead(404, { 'Content-Type': 'application/json' });
