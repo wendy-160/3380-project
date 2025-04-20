@@ -83,10 +83,10 @@ export async function handleBillingRoutes(req, res) {
         [status, paymentDate, paymentMethod, billID]
       );
   
-      console.log(`✅ Updated billing record ${billID}`, result);
+      console.log(` Updated billing record ${billID}`, result);
       return sendJson(res, 200, { message: 'Payment updated successfully' });
     } catch (err) {
-      console.error("❌ Billing update failed:", err.message);
+      console.error(" Billing update failed:", err.message);
       return sendJson(res, 500, { message: 'Database update failed', error: err.message });
     }
   }
