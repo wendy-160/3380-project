@@ -15,7 +15,7 @@ export async function handlePatientDoctorRoutes(req, res) {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', async () => {
-      const { PatientID, newDoctorID, isPrimary } = JSON.parse(body);
+      const { PatientID, DoctorID, isPrimary } = JSON.parse(body);
 
       try {
         await db.query(
@@ -25,7 +25,7 @@ export async function handlePatientDoctorRoutes(req, res) {
 
         await db.query(
           `INSERT INTO patient_doctor_assignment (PatientID, DoctorID, AssignmentDate, PrimaryPhysicianFlag) VALUES (?, ?, CURDATE(), ?)`,
-          [PatientID, newDoctorID, isPrimary ? 1 : 0]
+          [PatientID, DoctorID, isPrimary ? 1 : 0]
         );
 
         sendJson(200, { message: 'Patient reassigned successfully' });

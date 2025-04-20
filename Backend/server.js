@@ -143,7 +143,6 @@ function routeRequest(req, res, pathname, method, parsedUrl) {
   else if (pathname.startsWith('/api/patient-doctor')) {
     return handlePatientDoctorRoutes(req, res);
   }
-  
     else if (
     pathname.startsWith('/api/admin') || 
     pathname === '/api/users' || 
