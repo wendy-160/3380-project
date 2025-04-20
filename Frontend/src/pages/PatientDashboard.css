@@ -175,30 +175,29 @@
     margin-top: 0.5rem;
   }
   
-  /* Prescriptions Section */
   .prescriptions-list {
     margin-top: 1rem;
   }
   
-  .prescription-item {
+    .prescription-item, .test-result-item {
     border: 1px solid #eee;
     border-radius: 8px;
     padding: 16px 20px;
     margin-bottom: 1rem;
     background-color: #f9fafd;
   }
-  .prescription-item p{
+  .prescription-item, .test-result-item p{
     color:#000550;
     font-size: 0.9rem;
     line-height: 1.4;
   }
-  .prescription-item h3{
+  .prescription-item, .test-result-item h3{
     color:#000550;
     margin: 0 0 10px 0;
     margin: 6px 0;
   }
   
-  .prescription-item:hover {
+  .prescription-item:hover, .test-result-item:hover{
     background-color: #f2f5ff;
   }
   
