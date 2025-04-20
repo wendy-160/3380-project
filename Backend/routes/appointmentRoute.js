@@ -185,48 +185,62 @@ if (method === 'PUT' && matchUpdateAppointment) {
   }
 
   const matchCompletedAppointments = pathname.match(/^\/api\/appointments\/patient\/(\d+)\/completed$/);
-if (method === 'GET' && matchCompletedAppointments) {
-  const patientID = matchCompletedAppointments[1];
-  try {
-    const [rows] = await db.execute(`
-      SELECT a.*, d.FirstName AS DoctorFirstName, d.LastName AS DoctorLastName
-      FROM appointment a
-      JOIN doctor d ON a.DoctorID = d.DoctorID
-      WHERE a.PatientID = ? AND a.Status = 'Completed'
-      ORDER BY a.DateTime DESC
-    `, [patientID]);
-
-    return sendJson(res, 200, Array.isArray(rows) ? rows : []);
-  } catch (err) {
-    console.error("Error fetching completed appointments:", err);
-    return sendJson(res, 500, { message: "Error fetching completed appointments" });
+  if (method === 'GET' && matchCompletedAppointments) {
+    const patientID = matchCompletedAppointments[1];
+    try {
+      const [rows] = await db.execute(`
+        SELECT a.*, d.FirstName AS DoctorFirstName, d.LastName AS DoctorLastName
+        FROM appointment a
+        JOIN doctor d ON a.DoctorID = d.DoctorID
+        WHERE a.PatientID = ? AND a.Status = 'Completed'
+        ORDER BY a.DateTime DESC
+      `, [patientID]);
+  
+      return sendJson(res, 200, Array.isArray(rows) ? rows : []);
+    } catch (err) {
+      console.error("Error fetching completed appointments:", err);
+      return sendJson(res, 500, { message: "Error fetching completed appointments" });
+    }
   }
-}
-
-const matchDoctorAppointments = pathname.match(/^\/api\/appointments\/doctor\/(\d+)$/);
-if (method === 'GET' && matchDoctorAppointments) {
-  const doctorId = matchDoctorAppointments[1];
-  try {
-    const [rows] = await db.query(`
-      SELECT a.*, p.FirstName AS PatientFirstName, p.LastName AS PatientLastName, o.OfficeName
-      FROM appointment a
-      JOIN patient p ON a.PatientID = p.PatientID
-      JOIN office o ON a.OfficeID = o.OfficeID
-      WHERE a.DoctorID = ?
-      ORDER BY a.DateTime DESC
-    `, [doctorId]);
-
-    return sendJson(res, 200, rows);
-  } catch (err) {
-    console.error('Error fetching doctor appointments:', err);
-    return sendJson(res, 500, { message: 'Error fetching appointments' });
+  const matchComplete = pathname.match(/^\/api\/appointments\/(\d+)\/complete$/);
+  if (method === 'PUT' && matchComplete) {
+    const appointmentId = matchComplete[1];
+    try {
+      await db.query(
+        `UPDATE appointment SET status = 'Completed' WHERE AppointmentID = ?`,
+        [appointmentId]
+      );
+      return sendJson(res, 200, { message: 'Appointment marked as completed.' });
+    } catch (err) {
+      console.error('Error marking appointment completed:', err);
+      return sendJson(res, 500, { message: 'Error updating appointment' });
+    }
   }
-}
 
-  sendJson(res, 404, { message: 'Appointment route not found.' });
-}
-
-function sendJson(res, statusCode, data) {
-  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify(data));
-}
+  const matchDoctorAppointments = pathname.match(/^\/api\/appointments\/doctor\/(\d+)$/);
+  if (method === 'GET' && matchDoctorAppointments) {
+    const doctorId = matchDoctorAppointments[1];
+    try {
+      const [rows] = await db.query(`
+        SELECT a.*, p.FirstName AS PatientFirstName, p.LastName AS PatientLastName, o.OfficeName
+        FROM appointment a
+        JOIN patient p ON a.PatientID = p.PatientID
+        JOIN office o ON a.OfficeID = o.OfficeID
+        WHERE a.DoctorID = ?
+        ORDER BY a.DateTime DESC
+      `, [doctorId]);
+  
+      return sendJson(res, 200, rows);
+    } catch (err) {
+      console.error('Error fetching doctor appointments:', err);
+      return sendJson(res, 500, { message: 'Error fetching appointments' });
+    }
+  }
+  
+    sendJson(res, 404, { message: 'Appointment route not found.' });
+  }
+  
+  function sendJson(res, statusCode, data) {
+    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(data));
+  }
