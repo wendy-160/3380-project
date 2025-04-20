@@ -402,13 +402,15 @@ if (!FirstName || !LastName || !Email || !Username || !Password || !Specializati
 }
         const hashedPassword = await bcrypt.hash(Password, 10);
 
-        const [loginResult] = await db.query(
-          'INSERT INTO login (username, email, password, role) VALUES (?, ?, ?, ?)',
-          [Username, Email, hashedPassword, 'Doctor']
-        );
+        console.log("Inserting into login:", { Username, Email, hashedPassword });
+const [loginResult] = await db.query(
+  'INSERT INTO login (username, email, password, role) VALUES (?, ?, ?, ?)',
+  [Username, Email, hashedPassword, 'Doctor']
+);
+console.log("Login insert result:", loginResult);
+
         const userID = loginResult.insertId;
   
-        // Insert into doctor table
         await db.query(
           'INSERT INTO doctor (UserID, FirstName, LastName, Specialization, PhoneNumber) VALUES (?, ?, ?, ?, ?)',
           [userID, FirstName, LastName, Specialization, PhoneNumber || null]
