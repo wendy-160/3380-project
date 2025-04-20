@@ -15,12 +15,7 @@ export async function handleAuthRoutes(req, res) {
 
   if (method === 'POST' && pathname === '/api/auth/login') {
     return login(req, res);
-  }
-
-  if (method === 'POST' && pathname === '/api/auth/logout') {
-    return sendJson(res, 200, { message: 'Logged out successfully' });
-  }
-  
+  }  
 
   if (method === 'GET' && pathname === '/api/auth/me') {
     const email = req.headers['x-user-email'];
@@ -39,6 +34,10 @@ export async function handleAuthRoutes(req, res) {
     } catch (err) {
       return sendJson(res, 500, { message: 'Server error' });
     }
+  }
+
+  if (method === 'POST' && pathname === '/api/auth/logout') {
+    return sendJson(res, 200, { message: 'Logged out successfully' });
   }
 
   return sendJson(res, 404, { message: 'Auth route not found' });
