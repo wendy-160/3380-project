@@ -393,6 +393,7 @@ const PatientDashboard = () => {
     onClick={() => {
       setIsAppointmentModalOpen(true);
       setSelectedAppointment(appt);
+      setSelectedDate(appt.DateTime.split("T")[0]);
     }}
   >
     Reschedule
@@ -505,7 +506,7 @@ const PatientDashboard = () => {
   type="date"
   id="date"
   min={new Date().toISOString().split("T")[0]}
-  value={selectedAppointment ? selectedAppointment.DateTime.split("T")[0] : selectedDate}
+  value={selectedDate}
   onChange={(e) => handleDateSelection(e.target.value)}
 />
 
