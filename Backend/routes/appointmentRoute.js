@@ -61,8 +61,8 @@ if (method === 'PUT' && matchUpdateAppointment) {
 
   req.on('end', async () => {
     try {
-      const data = body ? JSON.parse(body) : req.body || {};
-      const { DateTime, Reason, OfficeID } = data;
+      const parsed = body ? JSON.parse(body) : {};
+      const { DateTime, Reason, OfficeID } = parsed;
 
       if (!DateTime || !Reason || !OfficeID) {
         return sendJson(res, 400, { message: 'Missing required fields for update' });
@@ -84,7 +84,6 @@ if (method === 'PUT' && matchUpdateAppointment) {
 
   return;
 }
-
 
   const matchDoctorDateAppointments = pathname.match(/^\/api\/appointments\/doctor\/(\d+)\/date\/([\d-]+)$/);
   if (method === 'GET' && matchDoctorDateAppointments) {
