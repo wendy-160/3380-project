@@ -1,0 +1,140 @@
+.doctor-schedule-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: sans-serif;
+    color: #333;
+}
+  
+.doctor-schedule-page h1 {
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.availability-editor-section {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.modal-overlay {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+  
+.modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    padding: 2rem;
+}
+
+.modal-content h3 {
+    color: #00063f;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+}
+  
+.modal-content label {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    width: 100%;
+    text-align: center;
+}
+  
+.modal-content select, .modal-content input {
+    margin: 0.5rem auto;
+    padding: 0.7rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    width: 80%;
+    max-width: 300px;
+}  
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+
+.calendar-section {
+    margin-top: 2rem;
+}
+  
+.calendar-section label {
+    display: block;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+  
+.calendar-section select {
+    margin-left: 0.5rem;
+    padding: 0.4rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+  
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+  
+.calendar-cell {
+    min-height: 100px;
+    border: 1px solid #eaeaea;
+    padding: 0.5rem;
+    position: relative;
+}
+  
+.calendar-header {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    text-align: center;
+    padding: 0.75rem;
+    min-height: auto;
+}
+  
+.calendar-day {
+    background-color: white;
+    transition: box-shadow 0.2s;
+}
+  
+.calendar-day:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+  
+.calendar-day-number {
+    position: absolute;
+    top: 0.3rem;
+    right: 0.3rem;
+    font-weight: 500;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+  
+.calendar-appt {
+    background-color: #ebf5ff;
+    border-left: 3px solid #3498db;
+    padding: 0.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
