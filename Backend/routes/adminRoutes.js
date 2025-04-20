@@ -1,6 +1,6 @@
 import db from '../db.js';
 import { URL } from 'url';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 const API = process.env.REACT_APP_API_URL;
 
 
