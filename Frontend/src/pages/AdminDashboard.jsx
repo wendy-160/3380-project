@@ -118,9 +118,10 @@ const AdminDashboard = () => {
     }
   
     try {
-      await axios.put(`${API}/api/admin/reassign-doctor`, {
+      await axios.put(`${API}/api/patient-doctor/assign`, {
         PatientID: selectedPatient,
-        DoctorID: selectedDoctor
+        DoctorID: selectedDoctor,
+        isPrimary: true
       });
       alert('Patient reassigned successfully');
       setSelectedPatient('');

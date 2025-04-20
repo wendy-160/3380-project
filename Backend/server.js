@@ -18,6 +18,8 @@ import { handleDoctorOfficeRoutes } from './routes/doctorClinicRoutes.js';
 import { handleAdminRoutes } from './routes/adminRoutes.js';
 import { handleMedicalRecordRoutes } from './routes/medicalRecordRoutes.js';
 import { handleScheduleRoutes } from './routes/scheduleRoutes.js';
+import { handlePatientDoctorRoutes } from './routes/patientDoctorRoutes.js';
+
 const API = process.env.REACT_APP_API_URL;
 
 
@@ -137,7 +139,12 @@ function routeRequest(req, res, pathname, method, parsedUrl) {
   } else if (pathname.startsWith('/api/doctor-offices')) {
     console.log('Routing to doctorOfficeRoutes');
     return handleDoctorOfficeRoutes(req, res);
-  } else if (
+  } 
+  else if (pathname.startsWith('/api/patient-doctor')) {
+    return handlePatientDoctorRoutes(req, res);
+  }
+  
+    else if (
     pathname.startsWith('/api/admin') || 
     pathname === '/api/users' || 
     pathname.match(/^\/api\/users\/\d+$/) ||
