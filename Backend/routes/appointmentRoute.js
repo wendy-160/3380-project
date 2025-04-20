@@ -236,7 +236,33 @@ if (method === 'PUT' && matchUpdateAppointment) {
       return sendJson(res, 500, { message: 'Error fetching appointments' });
     }
   }
+
+  if (method === 'PUT' && pathname.match(/^\/api\/appointments\/\d+$/)) {
+    const appointmentId = pathname.split('/').pop();
+    let rawBody = '';
+    req.on('data', chunk => rawBody += chunk);
+    req.on('end', async () => {
+      try {
+        const { DateTime, Reason, OfficeID, DoctorID } = JSON.parse(rawBody);
   
+        await db.query(
+          `UPDATE appointment
+           SET DateTime = ?, Reason = ?, OfficeID = ?, DoctorID = ?
+           WHERE AppointmentID = ?`,
+          [DateTime, Reason, OfficeID, DoctorID, appointmentId]
+        );
+  
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ message: 'Appointment updated successfully' }));
+      } catch (err) {
+        console.error('Error updating appointment:', err);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ message: 'Failed to update appointment' }));
+      }
+    });
+    return;
+  }
+
     sendJson(res, 404, { message: 'Appointment route not found.' });
   }
   

@@ -177,14 +177,19 @@ const [updatedZip, setUpdatedZip] = useState('');
     };
   
     try {
-      const response = await fetch(`${API}/api/appointments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(appointmentData),
-      });
+      const method = selectedAppointment ? 'PUT' : 'POST';
+const endpoint = selectedAppointment
+  ? `${API}/api/appointments/${selectedAppointment.AppointmentID}`
+  : `${API}/api/appointments`;
+
+const response = await fetch(endpoint, {
+  method,
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify(appointmentData),
+});
   
       if (!response.ok) {
         const errorData = await response.json();
