@@ -115,7 +115,8 @@ const AdminBilling = () => {
       PaymentStatus: form.status.value,
       PaymentMethod: form.paymentMethod.value,
       PaymentDate: form.paymentDate.value,
-      Notes: form.notes.value
+      Notes: form.notes.value,
+      Amount: parseFloat(form.amount.value)
     };
 
     try {
@@ -513,6 +514,21 @@ const AdminBilling = () => {
                 <p><strong>Patient:</strong> {selectedBill.PatientName}</p>
                 <p><strong>Amount:</strong> {formatCurrency(selectedBill.Amount)}</p>
               </div>
+
+              <div className="form-group">
+  <label htmlFor="amount">Amount ($)</label>
+  <input
+    type="number"
+    id="amount"
+    name="amount"
+    step="0.01"
+    min="0"
+    required
+    defaultValue={selectedBill.Amount}
+    className="form-control"
+  />
+</div>
+
 
               <div className="form-group">
                 <label htmlFor="status">Payment Status</label>

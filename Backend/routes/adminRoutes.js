@@ -335,15 +335,14 @@ export async function handleAdminRoutes(req, res) {
   }
 
   async function handleBillingUpdate(billId, data, res) {
-    const { PaymentStatus, PaymentMethod, PaymentDate, Notes } = data;
-    console.log("Updating billing record:", { PaymentStatus, PaymentMethod, PaymentDate, Notes });
-  
+    const { PaymentStatus, PaymentMethod, PaymentDate, Notes, Amount } = data;
+
     try {
       const [result] = await db.query(`
         UPDATE billing
-        SET PaymentStatus = ?, PaymentMethod = ?, PaymentDate = ?, Notes = ?
+        SET PaymentStatus = ?, PaymentMethod = ?, PaymentDate = ?, Notes = ?, Amount = ?
         WHERE BillingID = ?
-      `, [PaymentStatus, PaymentMethod, PaymentDate || null, Notes || null, billId]);
+      `, [PaymentStatus, PaymentMethod, PaymentDate || null, Notes || null, Amount, billId]);
   
       if (result.affectedRows === 0) {
         console.warn("Billing record not found or not updated.");
