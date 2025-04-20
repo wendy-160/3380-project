@@ -13,6 +13,7 @@ import Locations from './components/Locations.jsx';
 import MedicalRecordPage from './pages/MedicalRecord.jsx';
 import ClinicManagement from './pages/ClinicManagement.jsx';
 import DoctorClinicAssignment from './pages/DocOffice.jsx';
+import Schedule from './pages/Schedule.jsx';
 import Home from './Home.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import './App.css';
@@ -38,6 +39,7 @@ const Navbar = () => {
             {user.Role === "Doctor" && <Link to="/MedicalRecord">MedicalRecord</Link>}
             {user.Role === "Admin" && <Link to="/clinic-management">Clinic Management</Link>}
             {user.Role === "Admin" && <Link to="/doctor-office">Doctor-Clinic</Link>}
+            {user.Role === "Doctor" && <Link to="/schedule">Schedule</Link>}
             <button onClick={() => { logout(); window.location.href = "/"; }} className="nav-button">Logout</button>
           </>
         )}
@@ -80,6 +82,7 @@ export default function App() {
           <Route path="/locations" element={<Locations />} />
           <Route path="/MedicalRecord" element={<MedicalRecordPage/>} />
           <Route path="/tests" element={<DoctorRoute element={<MedicalTests />} />} />
+          <Route path="/schedule" element={<DoctorRoute element={<Schedule/>}/>}/>
           <Route path="/prescriptions" element={<DoctorRoute element={<Prescriptions />} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
