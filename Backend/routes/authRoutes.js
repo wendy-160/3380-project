@@ -4,8 +4,7 @@ import { URL } from 'url';
 const API = process.env.REACT_APP_API_URL;
 
 
-export async function handleAuthRoutes(req, res) {
-  const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+export async function handleAuthRoutes(req, res, parsedUrl) {
   const pathname = parsedUrl.pathname;
   const method = req.method;
 

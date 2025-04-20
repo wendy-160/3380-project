@@ -97,7 +97,7 @@ function routeRequest(req, res, pathname, method) {
     return handleAdminRoutes(req, res);
   } else if (pathname.startsWith('/api/auth')) {
     console.log('Routing to authRoutes');
-    return handleAuthRoutes(req, res);
+    return handleAuthRoutes(req, res, parsedUrl);
   } else if (pathname.startsWith('/api/billing')) {
     console.log('Routing to billingRoutes');
     return handleBillingRoutes(req, res);
