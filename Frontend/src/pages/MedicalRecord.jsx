@@ -12,7 +12,6 @@ const MedicalRecordsPage = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [newRecord, setNewRecord] = useState({
-    doctorId: '',
     reason: '',
     diagnosis: '',
     treatmentPlan: '',
@@ -44,31 +43,32 @@ const MedicalRecordsPage = () => {
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     const patient = searchResults[0];
-
+  
+    const doctorId = localStorage.getItem('DoctorID');
+  
     const payload = {
       patientId: patient.PatientID,
-      doctorId: parseInt(newRecord.doctorId),
+      doctorId: parseInt(doctorId),
       visitDate: new Date().toISOString().split('T')[0],
       diagnosis: newRecord.diagnosis,
       treatmentPlan: newRecord.treatmentPlan,
       notes: newRecord.notes,
     };
-
+  
     try {
       const res = await fetch(`${API}/api/medical-records`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-
+  
       const result = await res.json();
       if (res.ok) {
-        await handleSearch(); 
-        setNewRecord({ doctorId: '', reason: '', diagnosis: '', treatmentPlan: '', notes: '' });
+        await handleSearch();
+        setNewRecord({ reason: '', diagnosis: '', treatmentPlan: '', notes: '' });
         setShowForm(false);
         setSuccessMessage('Record successfully created.');
         setTimeout(() => setSuccessMessage(''), 3000);
-
       } else {
         console.error('Error creating record:', result);
       }
@@ -76,6 +76,7 @@ const MedicalRecordsPage = () => {
       console.error('Network error:', err);
     }
   };
+  
 
   return (
     <div className="medical-records-container">
@@ -148,15 +149,6 @@ const MedicalRecordsPage = () => {
           <div className="modal-add-record">
             <h3>New Medical Record</h3>
             <form onSubmit={handleCreateSubmit}>
-              <label>
-                Doctor ID
-                <input
-                  type="number"
-                  value={newRecord.doctorId}
-                  onChange={(e) => setNewRecord({ ...newRecord, doctorId: e.target.value })}
-                  required
-                />
-              </label>
               <label>
                 Reason for Visit
                 <input
