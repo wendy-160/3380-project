@@ -8,6 +8,7 @@ const MedicalRecordsPage = () => {
   const [searchPhone, setSearchPhone] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const [showForm, setShowForm] = useState(false);
   const [newRecord, setNewRecord] = useState({
@@ -18,28 +19,27 @@ const MedicalRecordsPage = () => {
     notes: '',
   });
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  const handleSearch = async (e = null) => {
+    if (e) e.preventDefault();
     setIsSearching(true);
     setSearchResults([]);
-
+  
     try {
       const res = await fetch(
         `${API}/api/patients/search?name=${encodeURIComponent(searchTerm)}&dob=${encodeURIComponent(searchDOB)}&phone=${encodeURIComponent(searchPhone)}`,
         {
           credentials: 'include',
         }
-      
       );
       const data = await res.json();
-      console.log('Search results:', data);
       setSearchResults(data);
     } catch (err) {
       console.error('Error searching patients:', err);
     }
-
+  
     setIsSearching(false);
   };
+  
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
@@ -63,9 +63,12 @@ const MedicalRecordsPage = () => {
 
       const result = await res.json();
       if (res.ok) {
-        setSearchResults(prev => [payload, ...prev]); // Prepend
+        await handleSearch(); 
         setNewRecord({ doctorId: '', reason: '', diagnosis: '', treatmentPlan: '', notes: '' });
         setShowForm(false);
+        setSuccessMessage('Record successfully created.');
+        setTimeout(() => setSuccessMessage(''), 3000);
+
       } else {
         console.error('Error creating record:', result);
       }
@@ -77,6 +80,12 @@ const MedicalRecordsPage = () => {
   return (
     <div className="medical-records-container">
       <h1>Patient Medical Records</h1>
+
+      {successMessage && (
+  <div className="success-message" style={{ color: 'green', marginTop: '1rem' }}>
+    {successMessage}
+  </div>
+)}
 
       <form onSubmit={handleSearch} className="search-form">
         <input
