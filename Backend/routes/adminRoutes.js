@@ -390,40 +390,34 @@ export async function handleAdminRoutes(req, res) {
   }
 
   if (method === 'POST' && pathname === '/api/admin/users/doctor') {
-    let rawBody = '';
-    req.on('data', chunk => rawBody += chunk);
-    req.on('end', async () => {
-      try {
-        const body = JSON.parse(rawBody);
-        const { FirstName, LastName, Email, Specialization, PhoneNumber, Username, Password } = body;
-
-if (!FirstName || !LastName || !Email || !Username || !Password || !Specialization) {
-  return sendJson(res, 400, { message: 'Missing required fields' });
-}
-        const hashedPassword = await bcrypt.hash(Password, 10);
-
-        console.log("Inserting into login:", { Username, Email, hashedPassword });
-const [loginResult] = await db.query(
-  'INSERT INTO login (username, email, password, role) VALUES (?, ?, ?, ?)',
-  [Username, Email, hashedPassword, 'Doctor']
-);
-console.log("Login insert result:", loginResult);
-
-        const userID = loginResult.insertId;
+    try {
+      const { FirstName, LastName, Email, Username, Password, Specialization, PhoneNumber } = req.body;
   
-        await db.query(
-          'INSERT INTO doctor (UserID, FirstName, LastName, Specialization, PhoneNumber) VALUES (?, ?, ?, ?, ?)',
-          [userID, FirstName, LastName, Specialization, PhoneNumber || null]
-        );
-  
-        return sendJson(res, 201, { message: 'Doctor account created successfully', UserID: userID });
-      } catch (err) {
-        console.error('Error creating doctor account:', err);
-        return sendJson(res, 500, { message: 'Failed to create doctor account' });
+      if (!FirstName || !LastName || !Email || !Username || !Password || !Specialization) {
+        return sendJson(res, 400, { message: 'Missing required fields' });
       }
-    });
-    return;
+  
+      const hashedPassword = await bcrypt.hash(Password, 10);
+  
+      const [loginResult] = await db.query(
+        'INSERT INTO login (username, email, password, role) VALUES (?, ?, ?, ?)',
+        [Username, Email, hashedPassword, 'Doctor']
+      );
+  
+      const userID = loginResult.insertId;
+  
+      await db.query(
+        'INSERT INTO doctor (UserID, FirstName, LastName, Specialization, PhoneNumber) VALUES (?, ?, ?, ?, ?)',
+        [userID, FirstName, LastName, Specialization, PhoneNumber || null]
+      );
+  
+      return sendJson(res, 201, { message: 'Doctor account created successfully', UserID: userID });
+    } catch (err) {
+      console.error('Error creating doctor account:', err);
+      return sendJson(res, 500, { message: 'Failed to create doctor account' });
+    }
   }
+  
   
   res.writeHead(404);
   res.end(JSON.stringify({ message: 'Admin route not found' }));
