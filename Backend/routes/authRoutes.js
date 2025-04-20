@@ -17,6 +17,11 @@ export async function handleAuthRoutes(req, res) {
     return login(req, res);
   }
 
+  if (method === 'POST' && pathname === '/api/auth/logout') {
+    return sendJson(res, 200, { message: 'Logged out successfully' });
+  }
+  
+
   if (method === 'GET' && pathname === '/api/auth/me') {
     const email = req.headers['x-user-email'];
 
