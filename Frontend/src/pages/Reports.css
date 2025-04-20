@@ -34,45 +34,33 @@
 }
 
 .report-filters {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  background-color: #f9f9f9;
+  background-color: #f8f9fa;
   padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  margin-bottom: 25px;
+  border: 1px solid #eaeaea;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  align-items: end; 
 }
 
-.filter-field {
+.report-filters label {
   display: flex;
   flex-direction: column;
-  min-width: 200px;
-  flex: 1;
-}
-
-.filter-field label {
   font-weight: 500;
-  margin-bottom: 8px;
-  color: #555;
-  font-size: 0.9rem;
+  margin-bottom: 0;
+
 }
 
-.filter-field select,
-.filter-field input[type="date"] {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  background-color: white;
-  height: 42px;
+.report-filters select {
   width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
-.filter-field select {
-  appearance: none;
-  padding-right: 36px;
-}
 .report-filters button {
   background-color: #4a9e5f;
   color: white;
@@ -108,61 +96,6 @@
   border-radius: 4px;
   font-weight: 500;
 }
-
-.doctor-performance-report,
-.clinic-utilization-report {
-  background-color: white;
-  border: 1px solid #eaeaea;
-  border-radius: 6px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  margin-bottom: 30px;
-}
-
-.doctor-performance-report h2,
-.clinic-utilization-report h2 {
-  padding: 15px 20px;
-  margin: 0;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #eaeaea;
-  color: #2c3e50;
-  font-size: 18px;
-}
-
-.doctor-performance-report table,
-.clinic-utilization-report table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.doctor-performance-report th,
-.doctor-performance-report td,
-.clinic-utilization-report th,
-.clinic-utilization-report td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #eaeaea;
-}
-
-.doctor-performance-report th,
-.clinic-utilization-report th {
-  background-color: #f8f9fa;
-  font-weight: 600;
-  color: #495057;
-}
-
-.doctor-performance-report tbody tr:last-child td,
-.clinic-utilization-report tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.clinic-utilization-report tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.clinic-utilization-report tbody tr:hover {
-  background-color: #f2f2f2;
-}
-
 .report-summary {
   margin: 0;
   padding: 20px;
@@ -265,6 +198,71 @@
   border-radius: 0 4px 4px 0;
 }
 
+.clinic-profitability-report,
+.patient-frequency-report,
+.doctor-efficiency-report {
+  background-color: white;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.clinic-profitability-report h2,
+.patient-frequency-report h2,
+.doctor-efficiency-report h2 {
+  padding: 15px 20px;
+  margin: 0;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eaeaea;
+  color: #2c3e50;
+  font-size: 18px;
+}
+
+.clinic-profitability-report table,
+.patient-frequency-report table,
+.doctor-efficiency-report table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.clinic-profitability-report th,
+.clinic-profitability-report td,
+.patient-frequency-report th,
+.patient-frequency-report td,
+.doctor-efficiency-report th,
+.doctor-efficiency-report td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.clinic-profitability-report th,
+.patient-frequency-report th,
+.doctor-efficiency-report th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.clinic-profitability-report tbody tr:nth-child(even),
+.patient-frequency-report tbody tr:nth-child(even),
+.doctor-efficiency-report tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.clinic-profitability-report tbody tr:hover,
+.patient-frequency-report tbody tr:hover,
+.doctor-efficiency-report tbody tr:hover {
+  background-color: #f2f2f2;
+}
+
+.report-filters .button-wrapper {
+  display: flex;
+  align-items: end;
+  height: 100%;
+}
+
 @media (max-width: 768px) {
   .report-selection {
     flex-direction: column;
@@ -279,13 +277,25 @@
     grid-template-columns: 1fr;
   }
 
-  .doctor-performance-report,
-  .clinic-utilization-report {
-    overflow-x: auto;
+  .report-filters input[type="date"] {
+    width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  height: 42px;
+  box-sizing: border-box;
+  }
+  
+  .report-filters .button-cell {
+    display: flex;
+  align-items: end;
+  justify-content: flex-start;
   }
 
-  .doctor-performance-report table,
-  .clinic-utilization-report table {
-    min-width: 650px;
+  .report-filters button {
+    height: 42px;
+    width: 100%;
   }
+
 }
