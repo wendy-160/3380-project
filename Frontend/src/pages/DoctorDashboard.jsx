@@ -179,9 +179,10 @@ const DoctorDashboard = () => {
                     <h3 className="patient-name">{ref.PatientName}</h3>
                     <p className="referral-info"><span className="label">To:</span> Dr. {ref.SpecialistName} ({ref.Specialty})</p>
                     <p className="referral-reason"><span className="label">Reason:</span> {ref.Reason}</p>
+                    {/*
                     <p className={`appointment-status ${appt.status?.toLowerCase()}`}>
                       Status: {appt.status || 'Scheduled'}
-                    </p>
+                    </p>*/}
                   </div>
                   <div className="referral-actions">
                     <button className="approve-btn" onClick={() => handleApproveReferral(ref.ReferralId)}>Accept</button>
