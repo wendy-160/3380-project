@@ -189,16 +189,16 @@ const Schedule = ({ doctorId }) => {
             ) : (
               <div className="appointments-list">
                 {selectedDayAppointments.map((appt, index) => (
-                  <div key={index} className={`appointment-card ${appt.Status === 'Completed' ? 'completed' : ''}`}>
+                  <div key={index} className={`appointment-card ${appt.status === 'Completed' ? 'completed' : ''}`}>
                     <div className="appointment-time">
                       {new Date(appt.DateTime).toLocaleTimeString([], timeFormat)}
                     </div>
                     <div className="appointment-details">
                       <div className="patient-name">{appt.PatientFirstName} {appt.PatientLastName}</div>
                       <div className="appointment-location">{appt.OfficeName || `Office #${appt.OfficeID}`}</div>
-                      <div className="appointment-status">{appt.Status || 'Scheduled'}</div>
+                      <div className="appointment-status">{appt.status || 'Scheduled'}</div>
                     </div>
-                    {appt.Status !== 'Completed' && (
+                    {appt.status !== 'Completed' && (
                       <button
                         className="complete-button"
                         onClick={async () => {
