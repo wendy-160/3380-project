@@ -226,7 +226,7 @@ const Schedule = ({ doctorId }) => {
                           <div key={i} className="calendar-appt">
                             {appt.PatientFirstName} {appt.PatientLastName} <br />
                             {new Date(appt.DateTime).toLocaleTimeString([], timeFormat)} <br />
-                            Office #{appt.OfficeID}
+                            {appt.OfficeName}
                           </div>
                         ))}
                       </>
