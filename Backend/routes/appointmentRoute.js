@@ -203,6 +203,25 @@ if (method === 'GET' && matchCompletedAppointments) {
   }
 }
 
+const matchDoctorAppointments = pathname.match(/^\/api\/appointments\/doctor\/(\d+)$/);
+if (method === 'GET' && matchDoctorAppointments) {
+  const doctorId = matchDoctorAppointments[1];
+  try {
+    const [rows] = await db.query(`
+      SELECT a.*, p.FirstName AS PatientFirstName, p.LastName AS PatientLastName
+      FROM appointment a
+      JOIN patient p ON a.PatientID = p.PatientID
+      WHERE a.DoctorID = ?
+      ORDER BY a.DateTime DESC
+    `, [doctorId]);
+
+    return sendJson(res, 200, rows);
+  } catch (err) {
+    console.error('Error fetching doctor appointments:', err);
+    return sendJson(res, 500, { message: 'Error fetching appointments' });
+  }
+}
+
   sendJson(res, 404, { message: 'Appointment route not found.' });
 }
 
