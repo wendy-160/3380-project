@@ -18,6 +18,7 @@ const PatientDashboard = () => {
   const [referredSpecialists, setReferredSpecialists] = useState([]);
   const [completedAppointments, setCompletedAppointments] = useState([]);
   const [testResults, setTestResults] = useState([]);
+  const API = process.env.REACT_APP_API_URL
 
 
   const currentPatientID = JSON.parse(localStorage.getItem('user'))?.PatientID;
@@ -149,7 +150,7 @@ const PatientDashboard = () => {
     try {
       const token = localStorage.getItem('authToken');
   
-      const response = await fetch('/api/appointments', {
+      const response = await fetch(`${API}/api/appointments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
