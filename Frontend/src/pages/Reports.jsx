@@ -217,15 +217,15 @@ const DoctorEfficiencyReport = ({ data }) => (
           <tr key={index}>
             <td>{row.DoctorName}</td>
             <td>{row.TotalAppointments}</td>
-            <td>{row.AvgPrescriptions ? row.AvgPrescriptions.toFixed(2) : '0.00'}</td>
-<td>{row.AvgTests ? row.AvgTests.toFixed(2) : '0.00'}</td>
-
+            <td>{parseFloat(row.AvgPrescriptions).toFixed(2)}</td>
+            <td>{parseFloat(row.AvgTests).toFixed(2)}</td>
           </tr>
         ))}
       </tbody>
     </table>
   </div>
 );
+
 
 
 export default Reports;
