@@ -40,7 +40,8 @@ const Navbar = () => {
             {user.Role === "Admin" && <Link to="/clinic-management">Clinic Management</Link>}
             {user.Role === "Admin" && <Link to="/doctor-office">Doctor-Clinic</Link>}
             {user.Role === "Doctor" && <Link to="/schedule">Schedule</Link>}
-            <button onClick={() => { logout(); window.location.href = "/"; }} className="nav-button">Logout</button>
+            <button onClick={() => { logout(); navigate('/');
+ }} className="nav-button">Logout</button>
           </>
         )}
       </div>
