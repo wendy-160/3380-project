@@ -208,9 +208,10 @@ if (method === 'GET' && matchDoctorAppointments) {
   const doctorId = matchDoctorAppointments[1];
   try {
     const [rows] = await db.query(`
-      SELECT a.*, p.FirstName AS PatientFirstName, p.LastName AS PatientLastName
+      SELECT a.*, p.FirstName AS PatientFirstName, p.LastName AS PatientLastName, o.OfficeName
       FROM appointment a
       JOIN patient p ON a.PatientID = p.PatientID
+      JOIN office o ON a.OfficeID = o.OfficeID
       WHERE a.DoctorID = ?
       ORDER BY a.DateTime DESC
     `, [doctorId]);
