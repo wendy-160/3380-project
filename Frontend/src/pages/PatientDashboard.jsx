@@ -18,6 +18,8 @@ const PatientDashboard = () => {
   const [referredSpecialists, setReferredSpecialists] = useState([]);
   const [completedAppointments, setCompletedAppointments] = useState([]);
   const [testResults, setTestResults] = useState([]);
+  const [medicalRecords, setMedicalRecords] = useState([]);
+
   const API = process.env.REACT_APP_API_URL
 
 
@@ -74,6 +76,12 @@ const PatientDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCompletedAppointments(await completedRes.json());
+
+          const recordsRes = await fetch(`${API}/api/medical-records/patient/${currentPatientID}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const records = await recordsRes.json();
+          setMedicalRecords(Array.isArray(records) ? records : []);
         
         const testRes = await fetch(`${API}/api/tests/patient/${currentPatientID}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -414,6 +422,27 @@ const PatientDashboard = () => {
             <p>No completed visits yet. Book and attend an appointment to begin treatment.</p>
           )}
         </div>
+
+        {completedAppointments.length > 0 && (
+  <div className="dashboard-card medical-records-section">
+    <div className="card-header"><h2>Medical Records</h2></div>
+    {medicalRecords.length > 0 ? (
+      medicalRecords.map(record => (
+        <div key={record.RecordID} className="medical-record-item">
+          <p><strong>Visit Date:</strong> {new Date(record.VisitDate).toLocaleDateString()}</p>
+          <p><strong>Doctor:</strong> Dr. {record.DoctorFirstName} {record.DoctorLastName}</p>
+          <p><strong>Diagnosis:</strong> {record.Diagnosis}</p>
+          <p><strong>Treatment Plan:</strong> {record.TreatmentPlan}</p>
+          <p><strong>Notes:</strong> {record.Notes}</p>
+        </div>
+      ))
+    ) : (
+      <p>No medical records available.</p>
+    )}
+  </div>
+)}
+
+
         </div> {/* END of dashboard-grid */}
 
       {isAppointmentModalOpen && (
