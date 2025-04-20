@@ -20,7 +20,7 @@ export async function handleReportRoutes(req, res) {
       const [rows] = await db.query(`
         SELECT 
           o.OfficeName,
-          SUM(b.Amount) AS TotalRevenue,
+          COALESCE(SUM(b.Amount), 0) AS TotalRevenue,
           COUNT(DISTINCT a.AppointmentID) AS AppointmentCount
         FROM billing b
         LEFT JOIN appointment a ON b.AppointmentID = a.AppointmentID
