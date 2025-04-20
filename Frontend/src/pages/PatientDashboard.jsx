@@ -384,9 +384,9 @@ const PatientDashboard = () => {
             <div key={test.TestID} className="test-result-item">
               <h3>{test.TestName}</h3>
               <p><strong>Ordered by:</strong> Dr. {test.DoctorFirstName} {test.DoctorLastName}</p>
-              <p><strong>Status:</strong> {test.ResultStatus}</p>
-              <p><strong>Result:</strong> {test.Result || "Pending"}</p>
-              <p><strong>Notes:</strong> {test.Notes}</p>
+              <p><strong>Status:</strong> {test.status}</p>
+              <p><strong>Result:</strong> {test.result || "Pending"}</p>
+              <p><strong>Notes:</strong> {test.notes}</p>
               <p><strong>Date Ordered:</strong> {new Date(test.OrderDate).toLocaleDateString()}</p>
             </div>
           )) : (
@@ -394,21 +394,21 @@ const PatientDashboard = () => {
           )}
         </div>
 
-{/* My Visits */}
-<div className="dashboard-card visits-section">
-  <div className="card-header"><h2>My Visits</h2></div>
-  {completedAppointments && completedAppointments.length > 0 ? completedAppointments.map(visit => (
-    <div key={visit.AppointmentID} className="visit-item">
-      <p><strong>Date:</strong> {new Date(visit.DateTime).toLocaleDateString()}</p>
-      <p><strong>Doctor:</strong> Dr. {visit.DoctorFirstName} {visit.DoctorLastName}</p>
-      <p><strong>Reason:</strong> {visit.Reason}</p>
-      <p><strong>Status:</strong> {visit.status}</p>
-    </div>
-  )) : (
-    <p>No completed visits yet. Book and attend an appointment to begin treatment.</p>
-  )}
-</div>
-</div> {/* END of dashboard-grid */}
+        {/* My Visits */}
+        <div className="dashboard-card visits-section">
+          <div className="card-header"><h2>My Visits</h2></div>
+          {completedAppointments && completedAppointments.length > 0 ? completedAppointments.map(visit => (
+            <div key={visit.AppointmentID} className="visit-item">
+              <p><strong>Date:</strong> {new Date(visit.DateTime).toLocaleDateString()}</p>
+              <p><strong>Doctor:</strong> Dr. {visit.DoctorFirstName} {visit.DoctorLastName}</p>
+              <p><strong>Reason:</strong> {visit.Reason}</p>
+              <p><strong>Status:</strong> {visit.status}</p>
+            </div>
+          )) : (
+            <p>No completed visits yet. Book and attend an appointment to begin treatment.</p>
+          )}
+        </div>
+        </div> {/* END of dashboard-grid */}
 
       {isAppointmentModalOpen && (
         <div className="modal-overlay">
