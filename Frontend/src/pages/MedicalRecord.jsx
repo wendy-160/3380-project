@@ -114,7 +114,7 @@ const MedicalRecordsPage = () => {
             Phone: {searchResults[0].PhoneNumber}
           </div>
 
-          <button onClick={() => setShowForm(true)} style={{ margin: '1rem 0' }}>
+          <button className="new-record-btn" onClick={() => setShowForm(true)} style={{ margin: '1rem 0' }}>
             + New Medical Record
           </button>
 
@@ -137,7 +137,7 @@ const MedicalRecordsPage = () => {
 
       {showForm && (
         <div className="modal-overlay">
-          <div className="modal">
+          <div className="modal-add-record">
             <h3>New Medical Record</h3>
             <form onSubmit={handleCreateSubmit}>
               <label>
