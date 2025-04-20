@@ -13,7 +13,7 @@ const PrescriptionForm = () => {
           const parsed = JSON.parse(storedUser);
           return parsed.DoctorID?.toString() || '';
         } catch (err) {
-          console.error('Error parsing localStorage user:', err);
+          console.error('Error parsing localStorage user:', err)
           return '';
         }
       }

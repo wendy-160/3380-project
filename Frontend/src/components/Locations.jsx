@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './Locations.css';
 const API = process.env.REACT_APP_API_URL;
 
@@ -59,18 +59,21 @@ const Locations = () => {
     const filteredClinics = selectedState === 'all' 
         ? clinics 
         : clinics.filter(clinic => clinic.state === selectedState);
-    const clinicsByState = {};
-    if (selectedState === 'all') {
-        states.forEach(state => {
-            const stateClinics = filteredClinics.filter(clinic => clinic.state === state);
-            if (stateClinics.length > 0) {
-                clinicsByState[state] = stateClinics;
+        const clinicsByState = useMemo(() => {
+            const grouped = {};
+            if (selectedState === 'all') {
+                states.forEach(state => {
+                    const stateClinics = filteredClinics.filter(clinic => clinic.state === state);
+                    if (stateClinics.length > 0) {
+                        grouped[state] = stateClinics;
+                    }
+                });
+            } else {
+                grouped[selectedState] = filteredClinics;
             }
-        });
-    } 
-    else {
-        clinicsByState[selectedState] = filteredClinics;
-    }
+            return grouped;
+        }, [filteredClinics, selectedState, states]);
+        
     if (loading) {
         return (
             <div className="container">
