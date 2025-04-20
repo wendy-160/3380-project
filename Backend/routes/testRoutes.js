@@ -19,17 +19,22 @@ export async function handleTestRoutes(req, res) {
     try {
       const [rows] = await db.query(
         `SELECT 
-          t.*,
+          t.TestID,
+          t.TestName,
+          t.TestType,
+          t.TestDate,
+          t.ResultDate,
+          t.Results,
+          t.Notes,
+          t.status,
           d.FirstName AS DoctorFirstName,
           d.LastName AS DoctorLastName
-        FROM 
-          medicaltest t
-        JOIN 
-          doctor d ON t.DoctorID = d.DoctorID
-        WHERE 
-          t.PatientID = ?`,
+        FROM medicaltest t
+        JOIN doctor d ON t.DoctorID = d.DoctorID
+        WHERE t.PatientID = ?`,
         [patientID]
       );
+      
       return sendJson(res, 200, rows);
     } catch (err) {
       console.error("Error fetching test results:", err);

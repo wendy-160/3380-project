@@ -302,7 +302,7 @@ const [updatedZip, setUpdatedZip] = useState('');
               <p>{profile.FirstName} {profile.LastName}</p>
               <p><strong>Phone: </strong> {profile.PhoneNumber}</p>
               <p><strong>Email: </strong>{profile.email}</p>
-              <p><strong>Address: </strong> {profile.Address}, {profile.City}, {profile.State}, {profile.ZipCode}</p>
+              <p><strong>Address: </strong> {profile.Address}, {profile.City}, {profile.State}, {profile.Zipcode}</p>
               <button 
               onClick={() => {
                 setIsEditingProfile(true);
@@ -453,7 +453,11 @@ const [updatedZip, setUpdatedZip] = useState('');
         <p><strong>Status:</strong> {test.status}</p>
         <p><strong>Result:</strong> {test.results || "Pending"}</p>
         <p><strong>Notes:</strong> {test.notes}</p>
-        <p><strong>Date Ordered:</strong> {new Date(test.OrderDate).toLocaleDateString()}</p>
+        <p><strong>Date Ordered:</strong> 
+  {test.TestDate && !isNaN(new Date(test.TestDate)) 
+    ? new Date(test.TestDate).toLocaleDateString() 
+    : "N/A"}
+</p>
       </div>
     )) : (
       <p>No test results yet.</p>
