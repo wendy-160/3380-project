@@ -227,12 +227,13 @@ const ClinicProfitabilityReport = ({ data }) => (
         {data.map((row, index) => (
           <tr key={index}>
             <td>{row.OfficeName}</td>
-            <td>{parseFloat(row.TotalRevenue).toFixed(2)}</td>
-            <td>{parseFloat(row.AppointmentRevenue).toFixed(2)}</td>
-            <td>{parseFloat(row.PrescriptionRevenue).toFixed(2)}</td>
-            <td>{parseFloat(row.TestRevenue).toFixed(2)}</td>
-            <td>{row.AppointmentCount}</td>
-            <td>{parseFloat(row.AvgBillingPerAppointment).toFixed(2)}</td>
+            <td>{row.TotalRevenue ? parseFloat(row.TotalRevenue).toFixed(2) : '0.00'}</td>
+<td>{row.AppointmentRevenue ? parseFloat(row.AppointmentRevenue).toFixed(2) : '0.00'}</td>
+<td>{row.PrescriptionRevenue ? parseFloat(row.PrescriptionRevenue).toFixed(2) : '0.00'}</td>
+<td>{row.TestRevenue ? parseFloat(row.TestRevenue).toFixed(2) : '0.00'}</td>
+<td>{row.AppointmentCount || 0}</td>
+<td>{row.AvgBillingPerAppointment ? parseFloat(row.AvgBillingPerAppointment).toFixed(2) : '0.00'}</td>
+
           </tr>
         ))}
       </tbody>
