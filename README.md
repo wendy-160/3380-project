@@ -95,9 +95,9 @@ The app should now be running
     - Doctors can archive old prescriptions
 - **Triggers**.
 
-  - Add a SQL trigger so a doctor cannot be double booked
-  - Add a trigger that will auto-update the medical record when a test or prescription is added
-  - Add a trigger for updating billing when a prescription or medical test is added
+  - Limit the number of Active Referrals per patient to no more than 3
+  - A referral cannot be used to make an appointment with a Specialist if it is more than 90 days old 
+  - A doctor cannot be booked for more than 10 appointments per day
 
 - **Data queries**.
   - Get patient appointment history
