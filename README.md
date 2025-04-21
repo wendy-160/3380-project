@@ -34,7 +34,7 @@ node server.js #start server
 ```
 # make sure you are in the fronent
 npm install
-npm run dev #start client
+npm start #start client
 ```
 
 The app should now be running
