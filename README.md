@@ -61,55 +61,69 @@ The app should now be running
 
 - **User authentication for different user roles**.
   - Doctors (Some Access):
-    - Home | Dashboard | Appointments | Medical Tests | Prescriptions
-    - Approve/reject/create appointment requests
-    - Edit medical records
-    - Add medical notes and prescriptions
-    - Order tests
+    - Home | Dashboard | Prescriptions | MedicalTests | MedicalRecord | Schedule
+    - Create referrals for specialists
+    - Edit medical records & create new entries
+    - Create prescriptions
+    - Order/update medical tests
+    - Update availability
+    - Mark appointments as completed
+    - (Specialists) Approve and deny referrals 
   - Patients (Limited Access):
-    - Home | Dashboard | Appointments
+    - Home | Dashboard | Billing
     - Dashboard – See upcoming appointments, prescriptions, test results
     - Schedule/cancel appointments
     - View medical history (no edits allowed)
     - Update profile and contact details
-  - Managers/Admins:
-    - Home | Dashboard | Reports | Billing
-    - See system stats (number of patients, doctors, appointments, etc.)
+    - View and pay bills and payment history
+  - Admins:
+    - Home | Dashboard | Reports | Billing | Clinic Management | Doctor-Clinic
+    - View appointment status and information
     - Generate reports
+    - Add doctor
+    - Edit the user's information
+    - Reassign a patient to a different primary physician
+    - Create and update a patient's billing
+    - Add, edit, and remove clinic locations
+    - Add, edit, and remove where doctors work including days and hours
 - **Data entry forms**.
   - Add new data:
     - Patients can register for the first time
-    - Patients can request appointments
+    - Patients can create appointments
     - Doctors can add medical records and prescriptions
     - Admins can add new clinics and doctors
-    - Receptionists can register new patients
     - Doctors can request medical tests for a patient
+    - Admins can create billing
   - Modify existing data:
     - Patients can update their profile and reschedule their appointments
     - Doctors can update patient medical history
     - Admins can modify clinic details
     - Doctors can update or cancel test requests
   - ‘delete’ data:
-    - Patients can deactivate their accounts
-    - Admins can deactivate employee accounts
-    - Doctors can archive old prescriptions
+    - Admins can deactivate user accounts
+    - Admins can delete clinics
+    - Specialists can reject referals 
 - **Triggers**.
-
   - Limit the number of Active Referrals per patient to no more than 3
   - A referral cannot be used to make an appointment with a Specialist if it is more than 90 days old 
   - A doctor cannot be booked for more than 10 appointments per day
 
 - **Data queries**.
-  - Get patient appointment history
-  - Get a list of all doctors and their specialties
-  - Get available time slots for a doctor
-  - Get a list of all clinics in a specific state
-  - Get the medical record for a specific patient
-  - Retrieve all test requests for a specific patient
+  - Doctors retrieving information based on the ID
+  - Doctors retrieving appointment information
+  - Doctors retrieving medical test info
+  - Doctors retrieving medical records
+  - Admins viewing appointment info and status
+  - Admins viewing all users
+  - Admins view billing information
+  - Admins retrieving doctor's work offices and schedules
 - **Data reports**.
-  - Number of appointments per clinic a month
-  - Summary of a patient's treatments and tests
-  - patients per doctor, office schedules
+  - Clinic Profitability Report
+    - show revenue for each clinic
+  - Patient Visit Frequency Report
+    - identify patients who visit frequently and those who stopped
+  - Doctor Efficiency Report
+    - Evaluate doctor productivity
 
 ## Technologies
 
